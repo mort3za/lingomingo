@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { nextTick, watch } from 'vue'
 import { dirOf } from '@/shared/types'
 import type { YoutubeSession } from './session'
 import WordText from './WordText.vue'
 
-const props = defineProps<{
+defineProps<{
   s: YoutubeSession
   selected: { word: string; idx: number } | null
-  /** Shown over the related videos column, not on the video. */
+  /** Shown next to the video, not on it. */
   docked: boolean
 }>()
 const emit = defineEmits<{
@@ -15,15 +14,6 @@ const emit = defineEmits<{
   word: [word: string, el: HTMLElement, idx: number]
   mark: [word: string, idx: number]
 }>()
-
-const rows = new Map<number, HTMLElement>()
-watch(
-  () => props.s.activeIdx.value,
-  async (i) => {
-    await nextTick()
-    rows.get(i)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
-  },
-)
 </script>
 
 <template>
@@ -46,7 +36,6 @@ watch(
       <div
         v-for="(c, i) in s.cues.value"
         :key="i"
-        :ref="(el) => el && rows.set(i, el as HTMLElement)"
         :class="
           'flex cursor-pointer gap-2 rounded px-2 py-1.5 text-sm hover:bg-white/10 ' +
           (i === s.activeIdx.value ? 'bg-accent/40' : 'bg-panel')
