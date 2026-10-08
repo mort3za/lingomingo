@@ -4,12 +4,15 @@
 // 2. YouTube caption URLs return an empty body without a proof-of-origin token (`pot`),
 //    and only the player can make that token. So we watch the player's own caption
 //    requests and give their extra params to the content script.
+import { dropDubbed, type AudioTrack } from '@/shared/captions'
 import type { CaptionTrack } from '@/shared/types'
+import { currentPlayer } from './youtube/page'
 
 interface Player extends HTMLElement {
   getPlayerResponse?: () => {
     videoDetails?: { videoId?: string; title?: string }
     captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: CaptionTrack[] } }
+    streamingData?: { adaptiveFormats?: { audioTrack?: AudioTrack }[] }
   }
   loadModule?: (name: string) => void
   unloadModule?: (name: string) => void
@@ -46,7 +49,7 @@ window.fetch = function (this: unknown, input: RequestInfo | URL, init?: Request
   return fetch.call(this, input, init)
 } as typeof fetch
 
-const player = () => document.getElementById('movie_player') as Player | null
+const player = () => currentPlayer() as Player | null
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 /** Make the player load captions once, so we can copy the params of its request. */
@@ -75,7 +78,10 @@ window.addEventListener('message', async (e) => {
       type: 'tracks',
       videoId: res?.videoDetails?.videoId ?? null,
       title: res?.videoDetails?.title ?? '',
-      tracks: res?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? [],
+      tracks: dropDubbed(
+        res?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? [],
+        (res?.streamingData?.adaptiveFormats ?? []).flatMap((f) => f.audioTrack ?? []),
+      ),
     })
   } else if (d.type === 'get-caption-params') {
     reply({

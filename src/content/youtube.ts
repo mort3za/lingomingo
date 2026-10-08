@@ -1,9 +1,11 @@
 import { mountInShadow } from './mount'
+import { currentPlayer } from './youtube/page'
 import YoutubeOverlay from './youtube/YoutubeOverlay.vue'
 
-// The player element stays alive across YouTube page navigations, so mount once.
+// The player elements stay alive across YouTube page navigations, so mount once. Watch pages
+// and Shorts pages have different players: move our UI into the player of the current page.
 function mountWhenReady() {
-  const player = document.getElementById('movie_player')
+  const player = currentPlayer()
   if (!player) return false
   const host = mountInShadow(YoutubeOverlay, {}, player)
   host.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:60;'
@@ -19,6 +21,10 @@ function mountWhenReady() {
   ]) {
     host.addEventListener(type, (e) => e.stopPropagation())
   }
+  setInterval(() => {
+    const p = currentPlayer()
+    if (p && host.parentElement !== p) p.append(host)
+  }, 500)
   return true
 }
 
