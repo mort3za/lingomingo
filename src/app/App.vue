@@ -1,18 +1,66 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import ShortcutsDialog from './ShortcutsDialog.vue'
 import { ignoreKey } from './shortcuts'
 
+// Icons: SVG path data in the Lucide style (24×24, stroke).
 const mainLinks = [
-  { to: '/media', label: 'Media' },
-  { to: '/review', label: 'Review' },
-  { to: '/saved-items', label: 'Saved' },
+  {
+    to: '/media',
+    label: 'Media',
+    icon: [
+      'M4 7h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z',
+      'm17 2-5 5-5-5',
+    ],
+  },
+  {
+    to: '/review',
+    label: 'Review',
+    icon: ['M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8', 'M3 3v5h5'],
+  },
+  {
+    to: '/saved-items',
+    label: 'Saved',
+    icon: ['m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z'],
+  },
 ]
 const footerLinks = [
-  { to: '/settings', label: 'Settings' },
-  { to: '/credits', label: 'Credits' },
+  {
+    to: '/settings',
+    label: 'Settings',
+    icon: [
+      'M20 7h-9',
+      'M14 17H5',
+      'M14 17a3 3 0 1 0 6 0a3 3 0 1 0-6 0',
+      'M4 7a3 3 0 1 0 6 0a3 3 0 1 0-6 0',
+    ],
+  },
+  {
+    to: '/credits',
+    label: 'Credits',
+    icon: [
+      'M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z',
+    ],
+  },
 ]
+const keyboardIcon = [
+  'M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
+  'M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10',
+]
+const linkClass =
+  'flex items-center gap-3 rounded border-l-2 border-transparent px-3 py-2.5 text-[15px] text-neutral-300 hover:bg-panel hover:text-white'
+const iconAttrs = {
+  class: 'size-5 shrink-0',
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  'stroke-width': 2,
+  'stroke-linecap': 'round',
+  'stroke-linejoin': 'round',
+} as const
+
+const route = useRoute()
 
 const router = useRouter()
 const help = ref(false)
@@ -52,32 +100,35 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown, true))
 
 <template>
   <div class="flex min-h-screen font-sans">
-    <nav class="sticky top-0 flex h-screen w-40 shrink-0 flex-col gap-1 bg-surface p-2">
-      <RouterLink
-        v-for="link in mainLinks"
-        :key="link.to"
-        :to="link.to"
-        class="rounded px-3 py-2 text-sm hover:bg-panel"
-        active-class="bg-panel border-l-2 border-accent"
-      >
-        {{ link.label }}
+    <nav
+      v-if="route.path !== '/setup'"
+      class="sticky top-0 flex h-screen w-56 shrink-0 flex-col gap-1 bg-surface p-3"
+    >
+      <RouterLink to="/media" class="mb-3 flex items-center gap-2 px-3 py-2">
+        <img src="/icons/icon.svg" alt="" class="size-7" />
+        <span class="text-lg font-semibold">LingoMingo</span>
       </RouterLink>
-      <hr class="my-2 border-panel" />
-      <RouterLink
-        v-for="link in footerLinks"
-        :key="link.to"
-        :to="link.to"
-        class="rounded px-3 py-2 text-sm hover:bg-panel"
-        active-class="bg-panel border-l-2 border-accent"
-      >
-        {{ link.label }}
-      </RouterLink>
-      <button
-        class="mt-auto rounded px-3 py-2 text-left text-xs text-neutral-500 hover:bg-panel hover:text-neutral-300"
-        @click="help = true"
-      >
+      <template v-for="(links, i) in [mainLinks, footerLinks]" :key="i">
+        <hr v-if="i > 0" class="my-2 border-panel" />
+        <RouterLink
+          v-for="link in links"
+          :key="link.to"
+          :to="link.to"
+          :class="linkClass"
+          active-class="bg-panel !border-accent !text-white"
+        >
+          <svg v-bind="iconAttrs">
+            <path v-for="d in link.icon" :key="d" :d="d" />
+          </svg>
+          {{ link.label }}
+        </RouterLink>
+      </template>
+      <button :class="[linkClass, 'mt-auto text-sm text-neutral-500']" @click="help = true">
+        <svg v-bind="iconAttrs">
+          <path v-for="d in keyboardIcon" :key="d" :d="d" />
+        </svg>
         Shortcuts
-        <kbd class="ml-1 rounded border border-white/20 px-1 font-sans">?</kbd>
+        <kbd class="ml-auto rounded border border-white/20 px-1.5 font-sans text-xs">?</kbd>
       </button>
     </nav>
     <main class="min-w-0 flex-1 p-6">
