@@ -1,3 +1,5 @@
+# AGENTS.md
+
 Default to using Bun instead of Node.js.
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`
@@ -43,3 +45,40 @@ This project is a Chrome extension (Manifest V3). The build uses **Vite + `@crxj
   - `src/shared/` — code and styles used by more than one entry point.
 - TypeScript is pinned to 6.0.x: `vue-tsc` and `typescript-eslint` do not support the TS 7 native compiler yet.
 - Reference docs for features: `docs/origin/` (Language Reactor, the product we clone).
+
+## Claude API key for testing AI mode
+
+The file `TOKEN_CLAUDE` in the repo root has a Claude API key. Use it to test AI mode (AI subtitle translation and the word popup).
+Also `TOKEN_DEEPSEEK` for Deepseek API key.
+
+- The file is in `.gitignore`. Never commit it.
+- Do not open it with a file reader. Do not print it, log it, or put it in screenshots, docs, or commit messages.
+- Use it only through shell substitution, for example `"$(cat CLAUDE_TOKEN)"`.
+
+## Testing the extension in a browser
+
+Branded Chrome ignores `--load-extension`. Use Chrome for Testing:
+
+1. Download it into a temp folder (not the repo): `bunx @puppeteer/browsers install chrome@stable --path <temp>/cft`
+2. Build: `bun run build`
+3. Start it with the extension:
+
+   ```sh
+   agent-browser --session lm --headed \
+     --executable-path "<path to Google Chrome for Testing binary>" \
+     --extension "$PWD/dist" \
+     --args "--disable-blink-features=AutomationControlled" \
+     open "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+   ```
+
+   Without `--disable-blink-features=AutomationControlled`, YouTube returns empty captions.
+
+4. Get the extension ID on `chrome://extensions` with `chrome.management.getAll`. The app page is `chrome-extension://<id>/src/app/index.html#/settings`.
+5. To set the API key, run this on the app page (the key is not shown in the output):
+
+   ```sh
+   agent-browser --session lm eval "chrome.storage.local.get('settings').then(({settings}) => chrome.storage.local.set({settings: {...settings, provider: 'claude', claudeKey: '$(tr -d '[:space:]' < CLAUDE_TOKEN)'}})).then(() => 'ok')"
+   ```
+
+6. To force AI subtitle translation, set the translation language (`nativeLang`) to a language with no human-made track on the video, for example `fa`.
+7. Close the browser when you are done: `agent-browser --session lm close`

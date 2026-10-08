@@ -30,5 +30,6 @@
     "statusBar.debuggingForeground": "#FFF5F5",
     "statusBar.noFolderBackground": "#121212",
     "statusBar.noFolderForeground": "#BEBEBE"
-  }
+  },
+  "folder-color.pathColors": []
 }
