@@ -65,6 +65,16 @@ async function ask(settings: Settings, system: string, user: string): Promise<st
     )
   }
 
+  if (settings.provider === 'ollama') {
+    if (!settings.ollamaModel) throw new Error('Set the Ollama model name in Settings.')
+    return chat('Ollama', settings.ollamaBaseUrl, settings.ollamaModel, system, user)
+  }
+
+  if (settings.provider === 'lmstudio') {
+    if (!settings.lmstudioModel) throw new Error('Set the LM Studio model name in Settings.')
+    return chat('LM Studio', settings.lmstudioBaseUrl, settings.lmstudioModel, system, user)
+  }
+
   if (!settings.localModel) throw new Error('Set the local model name in Settings.')
   return chat('Local model', settings.localBaseUrl, settings.localModel, system, user)
 }

@@ -65,7 +65,7 @@ export interface VideoRef {
   endMs: number
 }
 
-export type Provider = 'claude' | 'openai' | 'grok' | 'deepseek' | 'local'
+export type Provider = 'claude' | 'openai' | 'grok' | 'deepseek' | 'ollama' | 'lmstudio' | 'local'
 
 export interface Settings {
   studyLang: string
@@ -79,7 +79,11 @@ export interface Settings {
   grokModel: string
   deepseekKey: string
   deepseekModel: string
-  /** OpenAI-compatible endpoint (Ollama, llama.cpp server, LM Studio). */
+  ollamaBaseUrl: string
+  ollamaModel: string
+  lmstudioBaseUrl: string
+  lmstudioModel: string
+  /** Other OpenAI-compatible endpoint (llama.cpp server, vLLM, ...). */
   localBaseUrl: string
   localModel: string
   autoPause: boolean
@@ -105,7 +109,11 @@ export const DEFAULT_SETTINGS: Settings = {
   grokModel: 'grok-4.3',
   deepseekKey: '',
   deepseekModel: 'deepseek-flash',
-  localBaseUrl: 'http://localhost:11434/v1',
+  ollamaBaseUrl: 'http://localhost:11434/v1',
+  ollamaModel: '',
+  lmstudioBaseUrl: 'http://localhost:1234/v1',
+  lmstudioModel: '',
+  localBaseUrl: 'http://localhost:8080/v1',
   localModel: '',
   autoPause: false,
   subtitlesOnTop: false,

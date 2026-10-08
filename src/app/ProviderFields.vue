@@ -13,7 +13,9 @@ const { settings } = useSettings()
         <option value="openai">OpenAI API (ChatGPT)</option>
         <option value="grok">xAI API (Grok)</option>
         <option value="deepseek">DeepSeek API</option>
-        <option value="local">Local model (Ollama, llama.cpp, LM Studio)</option>
+        <option value="ollama">Ollama (local)</option>
+        <option value="lmstudio">LM Studio (local)</option>
+        <option value="local">Other local server (llama.cpp, vLLM, ...)</option>
       </select>
     </div>
 
@@ -141,19 +143,198 @@ const { settings } = useSettings()
       </div>
     </template>
 
+    <template v-else-if="settings.provider === 'ollama'">
+      <div>
+        <label :class="label" for="obase">Base URL</label>
+        <input id="obase" v-model="settings.ollamaBaseUrl" :class="input" />
+        <p class="mt-1 text-xs text-neutral-500">
+          Default:
+          <button
+            type="button"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            @click="settings.ollamaBaseUrl = 'http://localhost:11434/v1'"
+          >
+            http://localhost:11434/v1
+          </button>
+        </p>
+      </div>
+      <div>
+        <label :class="label" for="olmodel">Model name</label>
+        <input
+          id="olmodel"
+          v-model="settings.ollamaModel"
+          :class="input"
+          placeholder="gemma4:26b"
+        />
+        <p class="mt-1 text-xs text-neutral-500">
+          Examples:
+          <button
+            v-for="m in ['gemma4:26b', 'qwen3.6:35b-a3b']"
+            :key="m"
+            type="button"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            @click="settings.ollamaModel = m"
+          >
+            {{ m }}
+          </button>
+          — Both are fast and good at translation.
+        </p>
+      </div>
+      <div class="rounded border border-white/10 p-3 text-xs text-neutral-400">
+        <p class="font-medium text-neutral-300">Set up Ollama</p>
+        <ol class="mt-2 list-decimal space-y-1 pl-4">
+          <li>
+            Install Ollama from
+            <a href="https://ollama.com/download" target="_blank" class="underline hover:text-white"
+              >ollama.com</a
+            >.
+          </li>
+          <li>
+            Download a model:
+            <code class="font-mono text-neutral-300">ollama pull gemma4:26b</code>
+          </li>
+          <li>
+            Stop Ollama if it runs. Then start it, and allow the extension to connect:
+            <code class="font-mono break-all text-neutral-300"
+              >OLLAMA_ORIGINS="chrome-extension://*" ollama serve</code
+            >
+          </li>
+          <li>Keep the terminal open while you use LingoMingo.</li>
+        </ol>
+        <p class="mt-2 text-neutral-500">
+          Error 403 means that Ollama runs without <code class="font-mono">OLLAMA_ORIGINS</code>.
+        </p>
+      </div>
+    </template>
+
+    <template v-else-if="settings.provider === 'lmstudio'">
+      <div>
+        <label :class="label" for="lsbase">Base URL</label>
+        <input id="lsbase" v-model="settings.lmstudioBaseUrl" :class="input" />
+        <p class="mt-1 text-xs text-neutral-500">
+          Default:
+          <button
+            type="button"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            @click="settings.lmstudioBaseUrl = 'http://localhost:1234/v1'"
+          >
+            http://localhost:1234/v1
+          </button>
+        </p>
+      </div>
+      <div>
+        <label :class="label" for="lsmodel">Model name</label>
+        <input
+          id="lsmodel"
+          v-model="settings.lmstudioModel"
+          :class="input"
+          placeholder="google/gemma-4-26b-a4b"
+        />
+        <p class="mt-1 text-xs text-neutral-500">
+          Examples:
+          <button
+            v-for="m in ['google/gemma-4-26b-a4b', 'qwen/qwen3.6-35b-a3b']"
+            :key="m"
+            type="button"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            @click="settings.lmstudioModel = m"
+          >
+            {{ m }}
+          </button>
+          — Both are fast and good at translation.
+        </p>
+      </div>
+      <div class="rounded border border-white/10 p-3 text-xs text-neutral-400">
+        <p class="font-medium text-neutral-300">Set up LM Studio</p>
+        <ol class="mt-2 list-decimal space-y-1 pl-4">
+          <li>
+            Install LM Studio from
+            <a
+              href="https://lmstudio.ai/download"
+              target="_blank"
+              class="underline hover:text-white"
+              >lmstudio.ai</a
+            >.
+          </li>
+          <li>
+            Download a model in the Discover tab, or run
+            <code class="font-mono text-neutral-300">lms get google/gemma-4-26b-a4b</code>
+          </li>
+          <li>
+            Start the server in the Developer tab, or run
+            <code class="font-mono text-neutral-300">lms server start</code>
+          </li>
+          <li>Use the model name that the Developer tab shows.</li>
+        </ol>
+        <p class="mt-2 text-neutral-500">
+          If requests fail, turn on Enable CORS in the server settings.
+        </p>
+      </div>
+    </template>
+
     <template v-else>
       <div>
         <label :class="label" for="base">Base URL (OpenAI-compatible)</label>
         <input id="base" v-model="settings.localBaseUrl" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
-          Ollama: http://localhost:11434/v1 — start it with OLLAMA_ORIGINS="chrome-extension://*".
-          llama.cpp server: http://localhost:8080/v1
+          <span
+            v-for="[name, url] in [
+              ['llama.cpp', 'http://localhost:8080/v1'],
+              ['vLLM', 'http://localhost:8000/v1'],
+            ]"
+            :key="url"
+            class="mr-3 inline-block"
+          >
+            {{ name }}:
+            <button
+              type="button"
+              class="font-mono text-neutral-400 underline hover:text-white"
+              @click="settings.localBaseUrl = url"
+            >
+              {{ url }}
+            </button>
+          </span>
         </p>
       </div>
       <div>
         <label :class="label" for="lmodel">Model name</label>
-        <input id="lmodel" v-model="settings.localModel" :class="input" placeholder="llama3.1:8b" />
+        <input id="lmodel" v-model="settings.localModel" :class="input" placeholder="gemma4" />
+        <p class="mt-1 text-xs text-neutral-500">The model name that your server uses.</p>
+      </div>
+      <div class="rounded border border-white/10 p-3 text-xs text-neutral-400">
+        <p class="font-medium text-neutral-300">Set up llama.cpp</p>
+        <ol class="mt-2 list-decimal space-y-1 pl-4">
+          <li>
+            Install llama.cpp:
+            <code class="font-mono text-neutral-300">brew install llama.cpp</code>, or get it from
+            <a
+              href="https://github.com/ggml-org/llama.cpp/releases"
+              target="_blank"
+              class="underline hover:text-white"
+              >GitHub</a
+            >.
+          </li>
+          <li>
+            Start the server. It downloads the model the first time:
+            <code class="font-mono break-all text-neutral-300"
+              >llama-server -hf ggml-org/gemma-4-26B-A4B-it-GGUF:Q4_0 --alias gemma4 --port
+              8080</code
+            >
+          </li>
+          <li>Use the <code class="font-mono">--alias</code> value as the model name.</li>
+        </ol>
+        <p class="mt-2 text-neutral-500">
+          Other servers work too, if they have an OpenAI-compatible API.
+        </p>
       </div>
     </template>
+
+    <p
+      v-if="!['ollama', 'lmstudio', 'local'].includes(settings.provider)"
+      class="text-xs text-neutral-500"
+    >
+      LingoMingo sends subtitle lines, and the words and sentences that you open in the word popup,
+      to this provider. The privacy policy of the provider applies.
+    </p>
   </div>
 </template>
