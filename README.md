@@ -1,15 +1,43 @@
-# lingomingo
+# Lingomingo
 
-To install dependencies:
+A Chrome extension (Manifest V3) to learn languages with Netflix, YouTube, and any web page.
+It is a simplified clone of Language Reactor. See [docs/origin/](docs/origin/README.md).
+
+Stack: Bun, Vite + CRXJS, Vue 3, TypeScript, Tailwind CSS v4.
+
+## Setup
 
 ```bash
 bun install
 ```
 
-To run:
+## Scripts
 
-```bash
-bun run index.ts
+| Command                | What it does                                    |
+| ---------------------- | ----------------------------------------------- |
+| `bun run dev`          | Dev build in `dist/` with HMR (keep it running) |
+| `bun run build`        | Production build in `dist/`                     |
+| `bun run typecheck`    | Type check with `vue-tsc`                       |
+| `bun run lint`         | ESLint                                          |
+| `bun run format`       | Prettier (write)                                |
+| `bun run format:check` | Prettier (check only)                           |
+| `bun run test`         | `bun test`                                      |
+
+## Load the extension in Chrome
+
+1. Run `bun run dev` (or `bun run build`).
+2. Open `chrome://extensions` and turn on **Developer mode**.
+3. Click **Load unpacked** and select the `dist/` folder.
+
+## Structure
+
 ```
-
-This project was created using `bun init` in bun v1.4.2. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+manifest.config.ts   Extension manifest (CRXJS)
+vite.config.ts       Build config
+src/
+  background/        Service worker: toolbar click opens app page, context menu
+  content/           Netflix / YouTube content scripts (Vue in shadow DOM)
+  sidepanel/         Chrome side panel page
+  app/               Main extension page: media, reader, saved items, settings, ...
+  shared/            Shared code and styles (Tailwind theme)
+```

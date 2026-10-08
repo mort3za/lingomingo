@@ -1,19 +1,24 @@
 {
   "compilerOptions": {
     // Environment setup & latest features
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "target": "ESNext",
     "module": "Preserve",
     "moduleDetection": "force",
-    "jsx": "react-jsx",
     "allowJs": true,
-    "types": ["bun"],
+    "types": ["bun", "chrome", "vite/client"],
 
     // Bundler mode
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
+
+    // Path alias (keep in sync with vite.config.ts)
+    "paths": {
+      "@/*": ["./src/*"]
+    },
 
     // Best practices
     "strict": true,
@@ -26,5 +31,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  }
+  },
+  "include": ["src/**/*", "src/**/*.vue", "*.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }

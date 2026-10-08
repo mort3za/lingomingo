@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+
+/* Theme tokens from docs/origin/README.md "Visual style". */
+@theme {
+  --color-surface: #1e1f22;
+  --color-surface-deep: #111111;
+  --color-panel: #2b2d31;
+  --color-accent: #9c3fc0;
+  --font-sans: 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
+}
