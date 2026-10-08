@@ -74,15 +74,23 @@ watch(
       <button class="text-white/60 hover:text-white" @click="emit('close')">✕</button>
     </div>
     <div class="relative min-h-0 flex-1">
-      <button
-        v-if="away"
-        class="absolute top-2 right-4 z-10 rounded-full bg-accent px-3 py-1 text-[13px] font-medium shadow-lg hover:brightness-110"
-        title="Scroll to the current sentence"
-        @click="scrollToTop(s.activeIdx.value)"
+      <!-- Scrollbar shows only on hover. Its space is always kept, so the rows do not move. -->
+      <div
+        ref="list"
+        class="relative h-full space-y-1 overflow-y-auto p-2 pr-1 [scrollbar-color:transparent_transparent] [scrollbar-gutter:stable] hover:[scrollbar-color:rgb(255_255_255/0.3)_transparent]"
+        @scroll="updateAway"
       >
-        {{ away === 'above' ? '↑' : '↓' }} Current
-      </button>
-      <div ref="list" class="relative h-full space-y-1 overflow-y-auto p-2" @scroll="updateAway">
+        <!-- Sticky in the list, so it lines up with the rows whatever the scrollbar width is.
+             No height, so the rows do not move. -->
+        <div v-if="away" class="sticky top-0 z-10 mb-0 flex h-0 items-start justify-end">
+          <button
+            class="mr-2 rounded-full bg-accent px-3 py-1 text-[13px] font-medium shadow-lg hover:brightness-110"
+            title="Scroll to the current sentence"
+            @click="scrollToTop(s.activeIdx.value)"
+          >
+            {{ away === 'above' ? '↑' : '↓' }} Current
+          </button>
+        </div>
         <div v-if="s.status.value !== 'ready'" class="p-2 text-[15px] text-neutral-400">
           {{ s.message.value || 'Loading…' }}
         </div>
