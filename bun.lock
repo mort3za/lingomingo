@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "localingo",
+      "name": "lingomingo",
       "devDependencies": {
         "@types/bun": "latest",
       },

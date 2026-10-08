@@ -1,4 +1,4 @@
-# localingo
+# lingomingo
 
 To install dependencies:
 
