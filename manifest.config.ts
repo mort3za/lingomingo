@@ -20,7 +20,9 @@ export default defineManifest({
   // unlimitedStorage: subtitle translations are cached per video.
   permissions: ['contextMenus', 'sidePanel', 'storage', 'unlimitedStorage'],
   // The background calls the Claude API, the DeepSeek API, and a local model (Ollama, llama.cpp).
+  // The Media page reads YouTube channel RSS feeds.
   host_permissions: [
+    'https://www.youtube.com/*',
     'https://api.anthropic.com/*',
     'https://api.deepseek.com/*',
     'http://localhost/*',

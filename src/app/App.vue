@@ -34,7 +34,7 @@ const footerLinks = [
         {{ link.label }}
       </RouterLink>
     </nav>
-    <main class="flex-1 p-6">
+    <main class="min-w-0 flex-1 p-6">
       <RouterView />
     </main>
   </div>
