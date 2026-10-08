@@ -76,6 +76,45 @@ async function fetchCues(track: CaptionTrack, extra: [string, string][]): Promis
   return parseJson3(JSON.parse(text))
 }
 
+const CAPTIONS_TTL = 7 * 86400_000
+
+interface Captions {
+  study: Cue[]
+  native: Cue[] | null
+}
+
+/**
+ * Captions of a video, cached by video and tracks for 7 days. Without the cache, each load
+ * waits again for the player to load its own captions, which takes seconds (more with ads).
+ */
+async function videoCaptions(
+  id: string,
+  studyTrack: CaptionTrack,
+  nativeTrack: CaptionTrack | null,
+): Promise<Captions> {
+  const trackKey = (t: CaptionTrack | null) => (t ? `${t.languageCode}:${t.kind ?? ''}` : '')
+  const key = `cues:${id}:${trackKey(studyTrack)}:${trackKey(nativeTrack)}`
+  const cached = (await chrome.storage.local.get(key))[key] as
+    (Captions & { at: number }) | undefined
+  if (cached && Date.now() - cached.at < CAPTIONS_TTL) return cached
+  // The page script needs the video to play its own captions once. Ads delay this.
+  const pot = await askPage<{ params: [string, string][] }>(
+    { type: 'get-caption-params', videoId: id, lang: studyTrack.languageCode },
+    'caption-params',
+    id,
+    { tries: 12, everyMs: 6000 },
+  )
+  const extra = pot?.params ?? []
+  const study = await fetchCues(studyTrack, extra)
+  // If the human translation track fails, fall back to AI translation.
+  const native = nativeTrack ? await fetchCues(nativeTrack, extra).catch(() => null) : null
+  // Do not keep a failed human track: the next load tries it again.
+  if (!nativeTrack || native) {
+    await chrome.storage.local.set({ [key]: { study, native, at: Date.now() } })
+  }
+  return { study, native }
+}
+
 export function useYoutubeSession() {
   const settings = ref<Settings>({ ...DEFAULT_SETTINGS })
   const saved = ref<SavedItem[]>([])
@@ -179,20 +218,12 @@ export function useYoutubeSession() {
         message.value = `No ${LANGUAGES[studyLang] ?? studyLang} subtitles on this video.`
         return
       }
-      // The page script needs the video to play its own captions once. Ads delay this.
-      const pot = await askPage<{ params: [string, string][] }>(
-        { type: 'get-caption-params', videoId: id, lang: studyTrack.languageCode },
-        'caption-params',
-        id,
-        { tries: 12, everyMs: 6000 },
-      )
-      if (token !== loadToken) return
-      const extra = pot?.params ?? []
-      const studyCues = await fetchCues(studyTrack, extra)
-      if (token !== loadToken) return
       const nativeTrack = nativeLang === studyLang ? null : pickTrack(info.tracks, nativeLang)
-      // If the human translation track fails, fall back to AI translation.
-      const nativeCues = nativeTrack ? await fetchCues(nativeTrack, extra).catch(() => null) : null
+      const { study: studyCues, native: nativeCues } = await videoCaptions(
+        id,
+        studyTrack,
+        nativeTrack,
+      )
       if (token !== loadToken) return
       human.value = nativeCues ? alignTranslation(studyCues, nativeCues) : []
       machine.value = studyCues.map(() => null)

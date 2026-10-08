@@ -63,10 +63,12 @@ interface CachedChunk {
 const fresh = (c: CachedChunk | undefined): c is CachedChunk =>
   !!c && Date.now() - c.at < TRANSLATION_TTL
 
-/** Remove cached translations older than 7 days. */
+/** Remove cached translations and captions (`cues:`, from the content script) older than 7 days. */
 async function pruneTranslations() {
   const all = await chrome.storage.local.get(null)
-  const old = Object.keys(all).filter((k) => k.startsWith('tr:') && !fresh(all[k] as CachedChunk))
+  const old = Object.keys(all).filter(
+    (k) => (k.startsWith('tr:') || k.startsWith('cues:')) && !fresh(all[k] as CachedChunk),
+  )
   if (old.length) await chrome.storage.local.remove(old)
 }
 
