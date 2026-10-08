@@ -165,8 +165,10 @@ onBeforeUnmount(() => {
       @mark="(w) => markLearning(w)"
     />
     <Teleport :to="dock" :disabled="!docked">
+      <!-- While the page loads, YouTube adds the related videos column late. Do not show the list
+           on the video first and then move it into the column. -->
       <SidePanel
-        v-if="s.showPanel.value"
+        v-if="s.showPanel.value && (docked || s.status.value !== 'loading')"
         :s="s"
         :selected="selected"
         :docked="docked"
