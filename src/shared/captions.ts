@@ -13,10 +13,40 @@ export function audioLang(tracks: CaptionTrack[]): string | null {
   return asr ? primaryLang(asr.languageCode) : null
 }
 
-/** Pick a human-made track for a language. Auto-generated (`asr`) tracks are never accepted. */
-export function pickTrack(tracks: CaptionTrack[], lang: string): CaptionTrack | null {
-  const manual = tracks.filter((t) => t.kind !== 'asr' && primaryLang(t.languageCode) === lang)
-  return manual.find((t) => t.languageCode.toLowerCase() === lang) ?? manual[0] ?? null
+/** An audio track of the player (`streamingData.adaptiveFormats[].audioTrack`). */
+export interface AudioTrack {
+  /** Language and kind, for example `en-US.4` (original audio) or `de-DE.10` (auto-dubbed). */
+  id: string
+  isAutoDubbed?: boolean
+}
+
+/**
+ * Auto-dubbed videos have an auto-generated track for each dubbed audio track. Drop those:
+ * only the track of the original audio is what the video says.
+ */
+export function dropDubbed<T extends Pick<CaptionTrack, 'languageCode' | 'kind'>>(
+  tracks: T[],
+  audio: AudioTrack[],
+): T[] {
+  const dubbed = new Set(
+    audio.filter((a) => a.isAutoDubbed).map((a) => primaryLang(a.id.split('.')[0] ?? '')),
+  )
+  return tracks.filter((t) => t.kind !== 'asr' || !dubbed.has(primaryLang(t.languageCode)))
+}
+
+/** Pick a track for a language: a human-made one, else the auto-generated (`asr`) one. */
+export function pickTrack<T extends Pick<CaptionTrack, 'languageCode' | 'kind'>>(
+  tracks: T[],
+  lang: string,
+): T | null {
+  const same = tracks.filter((t) => primaryLang(t.languageCode) === lang)
+  const manual = same.filter((t) => t.kind !== 'asr')
+  return (
+    manual.find((t) => t.languageCode.toLowerCase() === lang) ??
+    manual[0] ??
+    same.find((t) => t.kind === 'asr') ??
+    null
+  )
 }
 
 interface Json3 {

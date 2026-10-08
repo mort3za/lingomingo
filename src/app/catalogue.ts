@@ -1,3 +1,6 @@
+import { dropDubbed, type AudioTrack } from '@/shared/captions'
+import type { CaptionTrack } from '@/shared/types'
+
 export interface Channel {
   /** YouTube channel ID (starts with `UC`). */
   id: string
@@ -354,9 +357,22 @@ export interface CatalogueVideo {
 
 const first = (el: Element, tag: string) => el.getElementsByTagName(tag)[0]
 
-/** Latest videos of a channel (YouTube RSS feed, about 15 items). */
+/**
+ * Latest videos of a channel. Each RSS feed has only 15 items, and on some channels most of
+ * them are Shorts. So also read the feed of the channel's long-videos playlist (`UULF` + the
+ * ID without `UC`).
+ */
 export async function fetchChannelVideos(channel: Channel): Promise<CatalogueVideo[]> {
-  const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`)
+  const [all, long] = await Promise.all([
+    readFeed(channel, `channel_id=${channel.id}`),
+    readFeed(channel, `playlist_id=UULF${channel.id.slice(2)}`).catch(() => []),
+  ])
+  const seen = new Set(all.map((v) => v.videoId))
+  return [...all, ...long.filter((v) => !seen.has(v.videoId))]
+}
+
+async function readFeed(channel: Channel, query: string): Promise<CatalogueVideo[]> {
+  const res = await fetch(`https://www.youtube.com/feeds/videos.xml?${query}`)
   if (!res.ok) throw new Error(`${channel.name}: HTTP ${res.status}`)
   const doc = new DOMParser().parseFromString(await res.text(), 'application/xml')
   return [...doc.getElementsByTagName('entry')].map((e) => ({
@@ -397,5 +413,49 @@ export async function channelPhoto(id: string): Promise<string> {
     const url = found.replace(/=s\d+/, '=s88') // the page links a 900 px image
     await chrome.storage.local.set({ [key]: { url, at: Date.now() } })
     return url
+  }
+}
+
+export type TrackInfo = Pick<CaptionTrack, 'languageCode' | 'kind'>
+
+const TRACKS_TTL = 7 * 86400_000
+
+/**
+ * Caption tracks of a video, cached by video for 7 days. No API gives them without a login,
+ * so this reads the player data in the watch page. The data is about 750 KB in, so it stops
+ * reading once the data is found.
+ */
+export async function videoTracks(id: string): Promise<TrackInfo[]> {
+  const key = `tracks:${id}`
+  const cached = (await chrome.storage.local.get(key))[key] as
+    { tracks: TrackInfo[]; at: number } | undefined
+  if (cached && Date.now() - cached.at < TRACKS_TTL) return cached.tracks
+  const res = await fetch(`https://www.youtube.com/watch?v=${id}&ucbcb=1`)
+  if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`)
+  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader()
+  let html = ''
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) throw new Error('No player data on watch page')
+    html += value
+    // `captions` comes before `videoDetails` in the player data. No `captions`: no tracks.
+    const start = html.indexOf('ytInitialPlayerResponse = ')
+    const end = start < 0 ? -1 : html.indexOf('"videoDetails":', start)
+    if (end < 0) continue
+    void reader.cancel()
+    const data = html.slice(start, end)
+    const json = data.match(/"captionTracks":(\[.*?\]),"audioTracks"/)?.[1]
+    const all = json
+      ? (JSON.parse(json) as CaptionTrack[]).map(({ languageCode, kind }) => ({
+          languageCode,
+          kind,
+        }))
+      : []
+    const audio = [...data.matchAll(/"audioTrack":(\{[^{}]*\})/g)].map(
+      (m) => JSON.parse(m[1]!) as AudioTrack,
+    )
+    const tracks = dropDubbed(all, audio)
+    await chrome.storage.local.set({ [key]: { tracks, at: Date.now() } })
+    return tracks
   }
 }
