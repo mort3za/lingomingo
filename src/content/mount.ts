@@ -4,7 +4,11 @@ import css from '@/shared/styles/main.css?inline'
 /**
  * Mount a Vue app inside a shadow root, so page CSS and our CSS do not mix.
  */
-export function mountInShadow(component: Component, props: Record<string, unknown> = {}) {
+export function mountInShadow(
+  component: Component,
+  props: Record<string, unknown> = {},
+  parent: Element = document.body,
+): HTMLElement {
   // Shadow roots ignore @property rules, but Tailwind needs them (shadows, rings, transforms).
   // Register them on the page document instead.
   const properties = new CSSStyleSheet()
@@ -19,7 +23,8 @@ export function mountInShadow(component: Component, props: Record<string, unknow
 
   const root = document.createElement('div')
   shadow.append(style, root)
-  document.body.append(host)
+  parent.append(host)
 
   createApp(component, props).mount(root)
+  return host
 }

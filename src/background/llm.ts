@@ -1,0 +1,86 @@
+import { extractJson } from '@/shared/llm-json'
+import { LANGUAGES, type Settings } from '@/shared/types'
+
+async function ask(settings: Settings, system: string, user: string): Promise<string> {
+  if (settings.provider === 'claude') {
+    if (!settings.claudeKey) throw new Error('Add your Claude API key in Settings.')
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': settings.claudeKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: settings.claudeModel,
+        max_tokens: 4096,
+        system,
+        messages: [{ role: 'user', content: user }],
+      }),
+    })
+    if (!res.ok) throw new Error(`Claude API ${res.status}: ${(await res.text()).slice(0, 200)}`)
+    const data = (await res.json()) as { content: { type: string; text?: string }[] }
+    return data.content.map((c) => c.text ?? '').join('')
+  }
+
+  if (!settings.localModel) throw new Error('Set the local model name in Settings.')
+  const base = settings.localBaseUrl.replace(/\/+$/, '')
+  const res = await fetch(`${base}/chat/completions`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      model: settings.localModel,
+      temperature: 0,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: user },
+      ],
+    }),
+  })
+  if (!res.ok) throw new Error(`Local model ${res.status}: ${(await res.text()).slice(0, 200)}`)
+  const data = (await res.json()) as { choices: { message: { content: string } }[] }
+  return data.choices[0]?.message.content ?? ''
+}
+
+const name = (code: string) => LANGUAGES[code] ?? code
+
+export async function translateLines(
+  settings: Settings,
+  lines: string[],
+  studyLang: string,
+  nativeLang: string,
+): Promise<string[]> {
+  const system =
+    `You translate subtitle lines from ${name(studyLang)} to ${name(nativeLang)}. ` +
+    `Input is a JSON array of strings. Answer with ONLY a JSON array of the same length, ` +
+    `with one translation per input line, in the same order. Keep each translation short and natural.`
+  const user = JSON.stringify(lines)
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const out = extractJson(await ask(settings, system, user))
+      if (Array.isArray(out) && out.length === lines.length) return out.map(String)
+    } catch (e) {
+      if (attempt === 1) throw e
+    }
+  }
+  throw new Error('Model returned a wrong number of lines.')
+}
+
+export async function translateWord(
+  settings: Settings,
+  word: string,
+  sentence: string,
+  studyLang: string,
+  nativeLang: string,
+): Promise<string[]> {
+  const system =
+    `You are a dictionary. Translate a ${name(studyLang)} word to ${name(nativeLang)}, ` +
+    `using the sentence for meaning. Answer with ONLY JSON: {"translations":["best","alt1","alt2"]} ` +
+    `(1 to 3 short items, the word in its dictionary form if it helps).`
+  const out = extractJson(await ask(settings, system, JSON.stringify({ word, sentence }))) as {
+    translations?: unknown
+  }
+  if (!Array.isArray(out.translations)) throw new Error('Bad answer from model.')
+  return out.translations.map(String).slice(0, 3)
+}

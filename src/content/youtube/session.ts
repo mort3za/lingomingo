@@ -1,0 +1,380 @@
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import { alignTranslation, findCueIndex, parseJson3, pickTrack } from '@/shared/captions'
+import { send } from '@/shared/messages'
+import {
+  getSavedItems,
+  getSettings,
+  onStorageKey,
+  patchSettings,
+  phraseId,
+  removeItems,
+  upsertItem,
+  wordId,
+} from '@/shared/storage'
+import { wordKey } from '@/shared/tokenize'
+import {
+  DEFAULT_SETTINGS,
+  LANGUAGES,
+  type CaptionTrack,
+  type Cue,
+  type SavedItem,
+  type SavedWord,
+  type Settings,
+  type Stage,
+} from '@/shared/types'
+
+const CHUNK = 40
+const RETRY_MS = 15_000
+
+type Status = 'idle' | 'loading' | 'ready' | 'no-subs' | 'error'
+
+function currentVideoId(): string | null {
+  return location.pathname === '/watch' ? new URLSearchParams(location.search).get('v') : null
+}
+
+/**
+ * Send a request to the page-world script (youtube-main.ts) every `everyMs`, until an answer
+ * for this video comes back. Answers for other videos are ignored: right after a navigation
+ * the player can still hold the previous video.
+ */
+function askPage<T>(
+  request: Record<string, unknown>,
+  replyType: string,
+  videoId: string,
+  { tries, everyMs }: { tries: number; everyMs: number },
+): Promise<T | null> {
+  return new Promise((resolve) => {
+    let count = 0
+    const ask = () => {
+      if (count++ >= tries) return done(null)
+      window.postMessage({ source: 'lingomingo', ...request }, '*')
+    }
+    const onMsg = (e: MessageEvent) => {
+      const d = e.data
+      if (e.source !== window || d?.source !== 'lingomingo' || d.type !== replyType) return
+      if (d.videoId !== videoId) return
+      // A null answer means "not yet" (for example an ad is playing). Ask again later.
+      if (d.params === null) return
+      done(d as T)
+    }
+    const timer = setInterval(ask, everyMs)
+    const done = (value: T | null) => {
+      clearInterval(timer)
+      window.removeEventListener('message', onMsg)
+      resolve(value)
+    }
+    window.addEventListener('message', onMsg)
+    ask()
+  })
+}
+
+async function fetchCues(track: CaptionTrack, extra: [string, string][]): Promise<Cue[]> {
+  const url = new URL(track.baseUrl, location.href)
+  for (const [k, v] of extra) if (!url.searchParams.has(k)) url.searchParams.set(k, v)
+  url.searchParams.set('fmt', 'json3')
+  const res = await fetch(url, { credentials: 'include' })
+  if (!res.ok) throw new Error(`Caption download failed (${res.status}).`)
+  const text = await res.text()
+  if (!text) throw new Error('YouTube returned empty captions.')
+  return parseJson3(JSON.parse(text))
+}
+
+export function useYoutubeSession() {
+  const settings = ref<Settings>({ ...DEFAULT_SETTINGS })
+  const saved = ref<SavedItem[]>([])
+  const videoId = ref<string | null>(null)
+  const title = ref('')
+  const status = ref<Status>('idle')
+  const message = ref('')
+  const cues = shallowRef<Cue[]>([])
+  const human = ref<(string | null)[]>([])
+  const machine = ref<(string | null)[]>([])
+  const translationError = ref('')
+  const activeIdx = ref(-1)
+  const cueVisible = ref(false)
+
+  const translationOf = (i: number): string | null => human.value[i] ?? machine.value[i] ?? null
+
+  const stageByWord = computed(() => {
+    const map = new Map<string, Stage>()
+    for (const it of saved.value) {
+      if (it.itemType === 'WORD' && it.langCode === settings.value.studyLang) {
+        map.set(wordKey(it.text), it.stage)
+      }
+    }
+    return map
+  })
+
+  const savedPhraseIds = computed(
+    () => new Set(saved.value.filter((i) => i.itemType === 'PHRASE').map((i) => i.id)),
+  )
+
+  const video = () => document.querySelector<HTMLVideoElement>('video.html5-main-video')
+
+  // ---- loading ----
+  let loadToken = 0
+  async function load() {
+    const id = currentVideoId()
+    const token = ++loadToken
+    videoId.value = id
+    cues.value = []
+    human.value = []
+    machine.value = []
+    activeIdx.value = -1
+    translationError.value = ''
+    message.value = ''
+    requested.clear()
+    if (!id) {
+      status.value = 'idle'
+      return
+    }
+    status.value = 'loading'
+    try {
+      const { studyLang, nativeLang } = settings.value
+      const info = await askPage<{ title: string; tracks: CaptionTrack[] }>(
+        { type: 'get-tracks' },
+        'tracks',
+        id,
+        { tries: 25, everyMs: 200 },
+      )
+      if (token !== loadToken) return
+      if (!info) throw new Error('Could not read the YouTube player.')
+      title.value = info.title
+      const studyTrack = pickTrack(info.tracks, studyLang)
+      if (!studyTrack) {
+        status.value = 'no-subs'
+        message.value = `No human-made ${LANGUAGES[studyLang] ?? studyLang} subtitles on this video.`
+        return
+      }
+      // The page script needs the video to play its own captions once. Ads delay this.
+      const pot = await askPage<{ params: [string, string][] }>(
+        { type: 'get-caption-params', videoId: id, lang: studyTrack.languageCode },
+        'caption-params',
+        id,
+        { tries: 12, everyMs: 6000 },
+      )
+      if (token !== loadToken) return
+      const extra = pot?.params ?? []
+      const studyCues = await fetchCues(studyTrack, extra)
+      if (token !== loadToken) return
+      const nativeTrack = nativeLang === studyLang ? null : pickTrack(info.tracks, nativeLang)
+      // If the human translation track fails, fall back to AI translation.
+      const nativeCues = nativeTrack ? await fetchCues(nativeTrack, extra).catch(() => null) : null
+      if (token !== loadToken) return
+      human.value = nativeCues ? alignTranslation(studyCues, nativeCues) : []
+      machine.value = studyCues.map(() => null)
+      cues.value = studyCues
+      status.value = 'ready'
+      ensureTranslations(0)
+    } catch (e) {
+      if (token !== loadToken) return
+      status.value = 'error'
+      message.value = e instanceof Error ? e.message : String(e)
+    }
+  }
+
+  // ---- AI translation, by chunks of cues ----
+  const requested = new Map<number, 'busy' | number>() // chunk -> busy | time of failure
+  async function translateChunk(chunk: number) {
+    const id = videoId.value
+    const token = loadToken
+    const slice = cues.value.slice(chunk * CHUNK, (chunk + 1) * CHUNK)
+    if (!id || !slice.length) return
+    const failedAt = requested.get(chunk)
+    if (failedAt === 'busy' || (failedAt && Date.now() - failedAt < RETRY_MS)) return
+    requested.set(chunk, 'busy')
+    try {
+      const out = await send({
+        type: 'translate-chunk',
+        videoId: id,
+        studyLang: settings.value.studyLang,
+        nativeLang: settings.value.nativeLang,
+        chunk,
+        lines: slice.map((c) => c.text),
+      })
+      if (token !== loadToken) return
+      const next = [...machine.value]
+      out.forEach((t, i) => (next[chunk * CHUNK + i] = t))
+      machine.value = next
+      translationError.value = ''
+      requested.delete(chunk)
+    } catch (e) {
+      if (token !== loadToken) return
+      requested.set(chunk, Date.now())
+      translationError.value = e instanceof Error ? e.message : String(e)
+    }
+  }
+
+  function ensureTranslations(idx: number) {
+    if (status.value !== 'ready') return
+    // A human translation track exists: never use AI for this video.
+    if (human.value.length) return
+    const chunk = Math.floor(Math.max(idx, 0) / CHUNK)
+    void translateChunk(chunk)
+    if (idx % CHUNK > CHUNK - 15) void translateChunk(chunk + 1)
+  }
+
+  // ---- playback loop ----
+  let raf = 0
+  let pausedFor = -1
+  function tick() {
+    const v = video()
+    if (v && cues.value.length) {
+      const t = v.currentTime
+      const idx = findCueIndex(cues.value, t)
+      if (idx !== activeIdx.value) {
+        activeIdx.value = idx
+        ensureTranslations(idx)
+      }
+      const cue = cues.value[idx]
+      if (cue) {
+        // Pause only when playback just crossed the end, not after a seek into a gap.
+        const atEnd = t >= cue.end - 0.05 && t < cue.end + 0.5
+        if (settings.value.autoPause && !v.paused && idx !== pausedFor && atEnd) {
+          pausedFor = idx
+          v.pause()
+        }
+        cueVisible.value = t < cue.end + 0.4 || v.paused
+      } else {
+        cueVisible.value = false
+      }
+    }
+    raf = requestAnimationFrame(tick)
+  }
+
+  function goTo(idx: number) {
+    const v = video()
+    const cue = cues.value[idx]
+    if (!v || !cue) return
+    pausedFor = -1
+    v.currentTime = cue.start
+    void v.play()
+  }
+  const repeat = () => goTo(Math.max(activeIdx.value, 0))
+  const next = () => goTo(Math.min(activeIdx.value + 1, cues.value.length - 1))
+  const prev = () => goTo(Math.max(activeIdx.value - 1, 0))
+  function togglePlay() {
+    const v = video()
+    if (!v) return
+    if (v.paused) void v.play()
+    else v.pause()
+  }
+  const toggleAutoPause = () => patchSettings({ autoPause: !settings.value.autoPause })
+
+  // ---- saving ----
+  function videoRef(idx: number) {
+    const cue = cues.value[idx]
+    return {
+      source: 'YOUTUBE' as const,
+      videoId: videoId.value ?? '',
+      title: title.value,
+      startMs: Math.round((cue?.start ?? 0) * 1000),
+      endMs: Math.round((cue?.end ?? 0) * 1000),
+    }
+  }
+
+  const phraseKey = (idx: number) =>
+    phraseId(settings.value.studyLang, videoId.value ?? '', videoRef(idx).startMs)
+
+  async function togglePhrase(idx: number) {
+    const cue = cues.value[idx]
+    if (!cue || !videoId.value) return
+    const id = phraseKey(idx)
+    if (savedPhraseIds.value.has(id)) return removeItems([id])
+    const now = Date.now()
+    await upsertItem({
+      id,
+      itemType: 'PHRASE',
+      langCode: settings.value.studyLang,
+      translationLang: settings.value.nativeLang,
+      stage: 'LEARNING',
+      createdAt: now,
+      updatedAt: now,
+      text: cue.text,
+      translation: translationOf(idx),
+      source: videoRef(idx),
+    })
+  }
+
+  async function markWord(word: string, idx: number, stage: Stage, translations: string[]) {
+    const id = wordId(settings.value.studyLang, word)
+    const old = saved.value.find((i): i is SavedWord => i.id === id)
+    const now = Date.now()
+    await upsertItem({
+      id,
+      itemType: 'WORD',
+      langCode: settings.value.studyLang,
+      translationLang: settings.value.nativeLang,
+      stage,
+      createdAt: now,
+      updatedAt: now,
+      text: word,
+      // Copy: chrome.storage cannot store Vue proxies.
+      translations: [...(translations.length ? translations : (old?.translations ?? []))],
+      context: cues.value[idx]
+        ? { sentence: cues.value[idx]!.text, translation: translationOf(idx) }
+        : null,
+      source: videoId.value ? videoRef(idx) : null,
+    })
+  }
+
+  const unmarkWord = (word: string) => removeItems([wordId(settings.value.studyLang, word)])
+
+  // ---- lifecycle ----
+  const stops: (() => void)[] = []
+  async function refreshSettings() {
+    const before = settings.value
+    settings.value = await getSettings()
+    if (
+      before.studyLang !== settings.value.studyLang ||
+      before.nativeLang !== settings.value.nativeLang
+    ) {
+      void load()
+    }
+  }
+  async function refreshSaved() {
+    saved.value = await getSavedItems()
+  }
+
+  onMounted(async () => {
+    settings.value = await getSettings()
+    await refreshSaved()
+    stops.push(onStorageKey('settings', refreshSettings), onStorageKey('savedItems', refreshSaved))
+    document.addEventListener('yt-navigate-finish', load)
+    stops.push(() => document.removeEventListener('yt-navigate-finish', load))
+    raf = requestAnimationFrame(tick)
+    void load()
+  })
+  onBeforeUnmount(() => {
+    cancelAnimationFrame(raf)
+    stops.forEach((s) => s())
+  })
+
+  return {
+    settings,
+    saved,
+    videoId,
+    status,
+    message,
+    cues,
+    activeIdx,
+    cueVisible,
+    translationError,
+    translationOf,
+    stageByWord,
+    savedPhraseIds,
+    video,
+    goTo,
+    repeat,
+    next,
+    prev,
+    togglePlay,
+    toggleAutoPause,
+    togglePhrase,
+    markWord,
+    unmarkWord,
+    phraseKey,
+  }
+}
+
+export type YoutubeSession = ReturnType<typeof useYoutubeSession>

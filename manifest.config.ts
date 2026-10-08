@@ -17,7 +17,10 @@ export default defineManifest({
   side_panel: {
     default_path: 'src/sidepanel/index.html',
   },
-  permissions: ['contextMenus', 'sidePanel'],
+  // unlimitedStorage: subtitle translations are cached per video.
+  permissions: ['contextMenus', 'sidePanel', 'storage', 'unlimitedStorage'],
+  // The background calls the Claude API and a local model (Ollama, llama.cpp).
+  host_permissions: ['https://api.anthropic.com/*', 'http://localhost/*', 'http://127.0.0.1/*'],
   content_scripts: [
     {
       matches: ['https://www.netflix.com/*'],
@@ -26,6 +29,13 @@ export default defineManifest({
     {
       matches: ['https://www.youtube.com/*'],
       js: ['src/content/youtube.ts'],
+    },
+    {
+      // Runs in the page itself, to read the player data that isolated scripts cannot see.
+      matches: ['https://www.youtube.com/*'],
+      js: ['src/content/youtube-main.ts'],
+      world: 'MAIN',
+      run_at: 'document_start',
     },
   ],
 })
