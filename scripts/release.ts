@@ -1,6 +1,7 @@
-// Makes a new release: bumps the version in package.json, asks Claude Code to write release notes
-// from the commits since the last tag, then commits, tags and pushes. The tag push starts
-// .github/workflows/release.yml, which builds the zip and makes the GitHub release.
+// Makes a new release: offers to commit uncommitted changes, bumps the version in package.json,
+// asks Claude Code to write release notes from the commits since the last tag, then commits,
+// tags and pushes. The tag push starts .github/workflows/release.yml, which builds the zip and
+// makes the GitHub release.
 // Run: bun run release patch|minor|major
 import { $ } from 'bun'
 import { tmpdir } from 'node:os'
@@ -15,8 +16,17 @@ function fail(message: string): never {
 const bump = process.argv[2] ?? ''
 if (!BUMPS.includes(bump)) fail('Usage: bun run release patch|minor|major')
 
-if ((await $`git status --porcelain`.text()).trim()) fail('Commit or stash your changes first.')
 if ((await $`git branch --show-current`.text()).trim() !== 'main') fail('Switch to main first.')
+
+const dirty = async () => (await $`git status --porcelain`.text()).trim()
+if (await dirty()) {
+  await $`git status --short`
+  // globalThis: the release notes code below has its own `prompt` const.
+  const answer = globalThis.prompt('Commit these changes, then release? [Y/n]') ?? ''
+  if (/^n/i.test(answer)) fail('Canceled.')
+  await $`claude -p /my-commit-general --allowedTools Agent ${'Bash(git *)'}`
+  if (await dirty()) fail('Some changes are still not committed. Commit or stash them first.')
+}
 await $`git pull --ff-only`
 
 // Stop before anything is pushed, because a failed check in CI leaves a tag with no release.
