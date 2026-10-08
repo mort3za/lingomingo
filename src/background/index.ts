@@ -10,7 +10,11 @@ chrome.action.onClicked.addListener(() => {
   chrome.tabs.create({ url: APP_URL })
 })
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  // First install: walk the user through the initial setup.
+  if (reason === chrome.runtime.OnInstalledReason.INSTALL) {
+    chrome.tabs.create({ url: `${APP_URL}#/setup` })
+  }
   chrome.contextMenus.create({
     id: READ_MENU_ID,
     title: 'Read in LingoMingo',
