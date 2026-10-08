@@ -4,6 +4,7 @@ import { translateLines, translateWord } from './llm'
 
 const APP_URL = chrome.runtime.getURL('src/app/index.html')
 const READ_MENU_ID = 'read-in-lingomingo'
+const OPEN_MENU_ID = 'open-lingomingo'
 
 chrome.action.onClicked.addListener(() => {
   chrome.tabs.create({ url: APP_URL })
@@ -15,9 +16,19 @@ chrome.runtime.onInstalled.addListener(() => {
     title: 'Read in LingoMingo',
     contexts: ['page', 'selection'],
   })
+  // Right-click menu of the toolbar button.
+  chrome.contextMenus.create({
+    id: OPEN_MENU_ID,
+    title: 'Open LingoMingo',
+    contexts: ['action'],
+  })
 })
 
 chrome.contextMenus.onClicked.addListener((info) => {
+  if (info.menuItemId === OPEN_MENU_ID) {
+    chrome.tabs.create({ url: APP_URL })
+    return
+  }
   if (info.menuItemId !== READ_MENU_ID || !info.pageUrl) return
   const url = `${APP_URL}#/reader?url=${encodeURIComponent(info.pageUrl)}`
   chrome.tabs.create({ url })

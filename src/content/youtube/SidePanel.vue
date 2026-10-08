@@ -16,6 +16,14 @@ const emit = defineEmits<{
   mark: [word: string, idx: number]
 }>()
 
+// Index of the row whose text was just copied, to show a check mark for a short time.
+const copied = ref<number | null>(null)
+async function copy(i: number) {
+  await navigator.clipboard.writeText(props.s.cues.value[i]?.text ?? '')
+  copied.value = i
+  setTimeout(() => copied.value === i && (copied.value = null), 1000)
+}
+
 // Scroll the list only, never the page: no scrollIntoView.
 const list = ref<HTMLElement>()
 const rows = new Map<number, HTMLElement>()
@@ -57,25 +65,25 @@ watch(
     :class="
       docked
         ? 'h-full w-full overflow-hidden rounded-xl bg-surface'
-        : 'absolute top-0 right-0 bottom-14 w-[340px] bg-surface/95'
+        : 'absolute top-0 right-0 bottom-14 w-[374px] bg-surface/95'
     "
     class="pointer-events-auto flex flex-col font-sans text-white"
   >
     <div class="flex items-center justify-between border-b border-white/10 px-3 py-2">
-      <div class="border-b-2 border-accent pb-1 text-sm font-medium">Subtitles</div>
+      <div class="border-b-2 border-accent pb-1 text-[15px] font-medium">Subtitles</div>
       <button class="text-white/60 hover:text-white" @click="emit('close')">✕</button>
     </div>
     <div class="relative min-h-0 flex-1">
       <button
         v-if="away"
-        class="absolute top-2 right-4 z-10 rounded-full bg-accent px-3 py-1 text-xs font-medium shadow-lg hover:brightness-110"
+        class="absolute top-2 right-4 z-10 rounded-full bg-accent px-3 py-1 text-[13px] font-medium shadow-lg hover:brightness-110"
         title="Scroll to the current sentence"
         @click="scrollToTop(s.activeIdx.value)"
       >
         {{ away === 'above' ? '↑' : '↓' }} Current
       </button>
       <div ref="list" class="relative h-full space-y-1 overflow-y-auto p-2" @scroll="updateAway">
-        <div v-if="s.status.value !== 'ready'" class="p-2 text-sm text-neutral-400">
+        <div v-if="s.status.value !== 'ready'" class="p-2 text-[15px] text-neutral-400">
           {{ s.message.value || 'Loading…' }}
         </div>
         <div
@@ -83,7 +91,7 @@ watch(
           :key="i"
           :ref="(el) => el && rows.set(i, el as HTMLElement)"
           :class="
-            'flex cursor-pointer gap-2 rounded px-2 py-1.5 text-sm hover:bg-white/10 ' +
+            'group flex cursor-pointer gap-2 rounded px-2 py-1.5 text-[15px] hover:bg-white/10 ' +
             (i === s.activeIdx.value ? 'bg-accent/40' : 'bg-panel')
           "
           @click="s.goTo(i)"
@@ -101,20 +109,42 @@ watch(
             </div>
             <div
               v-if="s.translationOf(i)"
-              class="text-xs text-neutral-400"
+              class="text-[13px] text-neutral-400"
               :dir="dirOf(s.settings.value.nativeLang)"
             >
               {{ s.translationOf(i) }}
             </div>
           </div>
-          <button
-            :class="
-              s.savedPhraseIds.value.has(s.phraseKey(i)) ? 'text-yellow-300' : 'text-white/40'
-            "
-            @click.stop="s.togglePhrase(i)"
-          >
-            {{ s.savedPhraseIds.value.has(s.phraseKey(i)) ? '★' : '☆' }}
-          </button>
+          <div class="flex flex-col items-center gap-1">
+            <button
+              :class="
+                s.savedPhraseIds.value.has(s.phraseKey(i)) ? 'text-yellow-300' : 'text-white/40'
+              "
+              @click.stop="s.togglePhrase(i)"
+            >
+              {{ s.savedPhraseIds.value.has(s.phraseKey(i)) ? '★' : '☆' }}
+            </button>
+            <button
+              class="text-white/40 opacity-0 group-hover:opacity-100 hover:text-white focus-visible:opacity-100"
+              title="Copy"
+              @click.stop="copy(i)"
+            >
+              <span v-if="copied === i">✓</span>
+              <svg
+                v-else
+                class="size-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>

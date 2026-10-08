@@ -38,7 +38,7 @@ watchEffect(() => {
 // The subtitles list goes on the right of the video, as high as the video: over the related
 // videos column, or (in theater mode, fullscreen and narrow windows) next to the player, which
 // then gets narrower. On Shorts, or if the video would get too narrow, it stays on the video.
-const BESIDE_WIDTH = 364 // 340px list + 12px padding on each side
+const BESIDE_WIDTH = 398 // 374px list + 12px padding on each side
 const MIN_VIDEO_WIDTH = 480
 const { host: dockHost, root: dock } = shadowHost()
 dock.style.height = '100%'
