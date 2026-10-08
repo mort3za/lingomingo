@@ -127,8 +127,8 @@ watch(
             <button
               :class="
                 s.savedPhraseIds.value.has(s.phraseKey(i))
-                  ? 'text-yellow-300'
-                  : 'text-white/40 opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
+                  ? 'text-yellow-300 hover:text-yellow-100'
+                  : 'text-white/40 opacity-0 group-hover:opacity-100 hover:text-white focus-visible:opacity-100'
               "
               @click.stop="s.togglePhrase(i)"
             >

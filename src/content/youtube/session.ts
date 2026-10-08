@@ -1,6 +1,6 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { alignTranslation, audioLang, findCueIndex, parseJson3, pickTrack } from '@/shared/captions'
-import { send } from '@/shared/messages'
+import { translateChunk as requestChunk } from '@/shared/messages'
 import {
   getSavedItems,
   getSettings,
@@ -189,6 +189,8 @@ export function useYoutubeSession() {
     translationError.value = ''
     message.value = ''
     requested.clear()
+    cancels.forEach((c) => c())
+    cancels.clear()
     showSubs.value = false
     showPanel.value = false
     if (!id) {
@@ -239,6 +241,7 @@ export function useYoutubeSession() {
 
   // ---- AI translation, by chunks of cues ----
   const requested = new Map<number, 'busy' | number>() // chunk -> busy | time of failure
+  const cancels = new Set<() => void>() // open chunk requests, closed on the next load
   async function translateChunk(chunk: number) {
     const id = videoId.value
     const token = loadToken
@@ -247,15 +250,25 @@ export function useYoutubeSession() {
     const failedAt = requested.get(chunk)
     if (failedAt === 'busy' || (failedAt && Date.now() - failedAt < RETRY_MS)) return
     requested.set(chunk, 'busy')
-    try {
-      const out = await send({
-        type: 'translate-chunk',
+    const show = (i: number, text: string) => {
+      if (token !== loadToken) return
+      const next = [...machine.value]
+      next[chunk * CHUNK + i] = text
+      machine.value = next
+    }
+    const { done, cancel } = requestChunk(
+      {
         videoId: id,
         studyLang: settings.value.studyLang,
         nativeLang: settings.value.nativeLang,
         chunk,
         lines: slice.map((c) => c.text),
-      })
+      },
+      show,
+    )
+    cancels.add(cancel)
+    try {
+      const out = await done
       if (token !== loadToken) return
       const next = [...machine.value]
       out.forEach((t, i) => (next[chunk * CHUNK + i] = t))
@@ -266,6 +279,8 @@ export function useYoutubeSession() {
       if (token !== loadToken) return
       requested.set(chunk, Date.now())
       translationError.value = e instanceof Error ? e.message : String(e)
+    } finally {
+      cancels.delete(cancel)
     }
   }
 
@@ -421,6 +436,7 @@ export function useYoutubeSession() {
     void load()
   })
   onBeforeUnmount(() => {
+    cancels.forEach((c) => c())
     cancelAnimationFrame(raf)
     stops.forEach((s) => s())
   })

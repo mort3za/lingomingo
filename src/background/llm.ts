@@ -1,7 +1,18 @@
-import { extractJson } from '@/shared/llm-json'
+import { errorMessage, extractJson, finishedLines } from '@/shared/llm-json'
 import { LANGUAGES, type Settings } from '@/shared/types'
 
-async function ask(settings: Settings, system: string, user: string): Promise<string> {
+/** `onText` turns on streaming: it gets the whole answer so far after each new piece. */
+interface Call {
+  signal?: AbortSignal
+  onText?: (text: string) => void
+}
+
+async function ask(
+  settings: Settings,
+  system: string,
+  user: string,
+  call: Call = {},
+): Promise<string> {
   if (settings.provider === 'claude') {
     if (!settings.claudeKey) throw new Error('Add your Claude API key in Settings.')
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -17,9 +28,19 @@ async function ask(settings: Settings, system: string, user: string): Promise<st
         max_tokens: 4096,
         system,
         messages: [{ role: 'user', content: user }],
+        stream: !!call.onText,
       }),
+      signal: call.signal,
     })
-    if (!res.ok) throw new Error(`Claude API ${res.status}: ${(await res.text()).slice(0, 200)}`)
+    if (!res.ok) throw new Error(`Claude API ${res.status}: ${errorMessage(await res.text())}`)
+    if (call.onText) {
+      return readStream(
+        res,
+        (d: { type?: string; delta?: { text?: string } }) =>
+          d.type === 'content_block_delta' ? d.delta?.text : undefined,
+        call.onText,
+      )
+    }
     const data = (await res.json()) as { content: { type: string; text?: string }[] }
     return data.content.map((c) => c.text ?? '').join('')
   }
@@ -32,6 +53,7 @@ async function ask(settings: Settings, system: string, user: string): Promise<st
       settings.openaiModel,
       system,
       user,
+      call,
       settings.openaiKey,
       // Reasoning models reject a custom temperature. undefined drops it from the request.
       { temperature: undefined },
@@ -46,6 +68,7 @@ async function ask(settings: Settings, system: string, user: string): Promise<st
       settings.grokModel,
       system,
       user,
+      call,
       settings.grokKey,
       { temperature: undefined },
     )
@@ -59,6 +82,7 @@ async function ask(settings: Settings, system: string, user: string): Promise<st
       settings.deepseekModel,
       system,
       user,
+      call,
       settings.deepseekKey,
       // Thinking is on by default; short translations do not need it.
       { thinking: { type: 'disabled' } },
@@ -67,16 +91,16 @@ async function ask(settings: Settings, system: string, user: string): Promise<st
 
   if (settings.provider === 'ollama') {
     if (!settings.ollamaModel) throw new Error('Set the Ollama model name in Settings.')
-    return chat('Ollama', settings.ollamaBaseUrl, settings.ollamaModel, system, user)
+    return chat('Ollama', settings.ollamaBaseUrl, settings.ollamaModel, system, user, call)
   }
 
   if (settings.provider === 'lmstudio') {
     if (!settings.lmstudioModel) throw new Error('Set the LM Studio model name in Settings.')
-    return chat('LM Studio', settings.lmstudioBaseUrl, settings.lmstudioModel, system, user)
+    return chat('LM Studio', settings.lmstudioBaseUrl, settings.lmstudioModel, system, user, call)
   }
 
   if (!settings.localModel) throw new Error('Set the local model name in Settings.')
-  return chat('Local model', settings.localBaseUrl, settings.localModel, system, user)
+  return chat('Local model', settings.localBaseUrl, settings.localModel, system, user, call)
 }
 
 /** OpenAI-compatible chat completion (OpenAI, xAI, DeepSeek, Ollama, llama.cpp, LM Studio). */
@@ -86,6 +110,7 @@ async function chat(
   model: string,
   system: string,
   user: string,
+  call: Call,
   key?: string,
   extra?: Record<string, unknown>,
 ): Promise<string> {
@@ -103,22 +128,108 @@ async function chat(
         { role: 'system', content: system },
         { role: 'user', content: user },
       ],
+      stream: !!call.onText,
       ...extra,
     }),
+    signal: call.signal,
   })
-  if (!res.ok) throw new Error(`${label} ${res.status}: ${(await res.text()).slice(0, 200)}`)
+  if (!res.ok) throw new Error(`${label} ${res.status}: ${errorMessage(await res.text())}`)
+  if (call.onText) {
+    return readStream(
+      res,
+      (d: { choices?: { delta?: { content?: string } }[] }) => d.choices?.[0]?.delta?.content,
+      call.onText,
+    )
+  }
   const data = (await res.json()) as { choices: { message: { content: string } }[] }
   return data.choices[0]?.message.content ?? ''
 }
 
+/** Read a server-sent-events answer. `piece` gets the text out of each event. */
+async function readStream<T>(
+  res: Response,
+  piece: (data: T) => string | undefined,
+  onText: (text: string) => void,
+): Promise<string> {
+  const reader = res.body!.pipeThrough(new TextDecoderStream()).getReader()
+  let text = ''
+  let rest = ''
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) return text
+    const lines = (rest + value).split('\n')
+    rest = lines.pop() ?? ''
+    for (const line of lines) {
+      const data = line.startsWith('data:') ? line.slice(5).trim() : ''
+      if (!data || data === '[DONE]') continue
+      const p = piece(JSON.parse(data) as T)
+      if (!p) continue
+      text += p
+      onText(text)
+    }
+  }
+}
+
 const name = (code: string) => LANGUAGES[code] ?? code
 
+/**
+ * Translate subtitle lines. `onLine` gets each line as soon as the model writes it.
+ * Lines that the model leaves out are asked again.
+ */
 export async function translateLines(
   settings: Settings,
   lines: string[],
   studyLang: string,
   nativeLang: string,
+  signal?: AbortSignal,
+  onLine?: (index: number, text: string) => void,
 ): Promise<string[]> {
+  const out: (string | undefined)[] = lines.map(() => undefined)
+  const put = (i: number, text: string) => {
+    if (out[i] !== undefined) return
+    out[i] = text
+    onLine?.(i, text)
+  }
+  let todo = lines.map((_, i) => i)
+  // Ask again for the missing lines, while each answer brings new lines.
+  while (todo.length) {
+    const ids = todo
+    await askLines(
+      settings,
+      ids.map((i) => lines[i]!),
+      studyLang,
+      nativeLang,
+      signal,
+      (j, text) => put(ids[j]!, text),
+    )
+    todo = ids.filter((i) => out[i] === undefined)
+    if (todo.length === ids.length) break
+  }
+  if (todo.length === 1) throw new Error('Model returned a wrong number of lines.')
+  // No progress: smaller requests are easier for the model to keep aligned.
+  const half = Math.ceil(todo.length / 2)
+  for (const part of todo.length ? [todo.slice(0, half), todo.slice(half)] : []) {
+    await translateLines(
+      settings,
+      part.map((i) => lines[i]!),
+      studyLang,
+      nativeLang,
+      signal,
+      (j, text) => put(part[j]!, text),
+    )
+  }
+  return out as string[]
+}
+
+/** One request. `onLine` gets each finished line of the answer, with its index in `lines`. */
+async function askLines(
+  settings: Settings,
+  lines: string[],
+  studyLang: string,
+  nativeLang: string,
+  signal: AbortSignal | undefined,
+  onLine: (index: number, text: string) => void,
+): Promise<void> {
   // Numbered keys keep the model aligned. A plain array lets it merge or split lines, mostly
   // with auto-generated captions, where a sentence runs across several lines.
   const system =
@@ -128,24 +239,12 @@ export async function translateLines(
     `translation of each line under its own key. Never merge or split lines. ` +
     `Keep each translation short and natural.`
   const user = JSON.stringify(Object.fromEntries(lines.map((line, i) => [i + 1, line])))
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const out = extractJson(await ask(settings, system, user)) as Record<string, unknown>
-      const result = lines.map((_, i) => out[i + 1])
-      if (result.every((t) => typeof t === 'string')) return result as string[]
-    } catch (e) {
-      if (attempt === 1) throw e
+  const read = (text: string) => {
+    for (const [key, line] of finishedLines(text)) {
+      if (key >= 1 && key <= lines.length) onLine(key - 1, line)
     }
   }
-  // Still misaligned: smaller requests are easier for the model to keep aligned.
-  if (lines.length > 1) {
-    const half = Math.ceil(lines.length / 2)
-    return [
-      ...(await translateLines(settings, lines.slice(0, half), studyLang, nativeLang)),
-      ...(await translateLines(settings, lines.slice(half), studyLang, nativeLang)),
-    ]
-  }
-  throw new Error('Model returned a wrong number of lines.')
+  read(await ask(settings, system, user, { signal, onText: read }))
 }
 
 export async function translateWord(

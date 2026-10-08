@@ -1,4 +1,10 @@
-import type { Request, Response } from '@/shared/messages'
+import {
+  CHUNK_PORT,
+  type ChunkMessage,
+  type ChunkRequest,
+  type Request,
+  type Response,
+} from '@/shared/messages'
 import { getSettings } from '@/shared/storage'
 import { translateLines, translateWord } from './llm'
 
@@ -40,14 +46,27 @@ chrome.contextMenus.onClicked.addListener((info) => {
 
 async function handle(req: Request): Promise<string[]> {
   const settings = await getSettings()
-  if (req.type === 'translate-word') {
-    return translateWord(settings, req.word, req.sentence, req.studyLang, req.nativeLang)
-  }
+  return translateWord(settings, req.word, req.sentence, req.studyLang, req.nativeLang)
+}
+
+async function translateChunk(
+  req: ChunkRequest,
+  signal: AbortSignal,
+  onLine: (index: number, text: string) => void,
+): Promise<string[]> {
+  const settings = await getSettings()
   // Translations of a video are cached by chunk for 7 days, so a reload costs nothing.
   const key = `tr:${req.videoId}:${req.studyLang}:${req.nativeLang}:${req.chunk}`
   const cached = (await chrome.storage.local.get(key))[key] as CachedChunk | undefined
   if (fresh(cached) && cached.lines.length === req.lines.length) return cached.lines
-  const out = await translateLines(settings, req.lines, req.studyLang, req.nativeLang)
+  const out = await translateLines(
+    settings,
+    req.lines,
+    req.studyLang,
+    req.nativeLang,
+    signal,
+    onLine,
+  )
   await chrome.storage.local.set({ [key]: { lines: out, at: Date.now() } satisfies CachedChunk })
   return out
 }
@@ -81,4 +100,21 @@ chrome.runtime.onMessage.addListener((req: Request, _sender, sendResponse) => {
     (e: unknown) => sendResponse({ ok: false, error: e instanceof Error ? e.message : String(e) }),
   )
   return true // answer is async
+})
+
+// A port per chunk: lines go back while the model writes them. When the page closes the port
+// (tab closed, reload, other video), the request stops, so a local model does not keep working.
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name !== CHUNK_PORT) return
+  const ctrl = new AbortController()
+  port.onDisconnect.addListener(() => ctrl.abort())
+  const post = (msg: ChunkMessage) => {
+    if (!ctrl.signal.aborted) port.postMessage(msg)
+  }
+  port.onMessage.addListener((req: ChunkRequest) => {
+    translateChunk(req, ctrl.signal, (index, text) => post({ type: 'line', index, text })).then(
+      (lines) => post({ type: 'done', lines }),
+      (e: unknown) => post({ type: 'error', error: e instanceof Error ? e.message : String(e) }),
+    )
+  })
 })

@@ -8,7 +8,7 @@ import {
   pickTrack,
 } from './captions'
 import { toCsv } from './export'
-import { extractJson } from './llm-json'
+import { errorMessage, extractJson, finishedLines } from './llm-json'
 import { answer, formatSpan, isDue, learningWords, preview } from './review'
 import { tokenize } from './tokenize'
 import { dirOf, type SavedItem, type SavedWord } from './types'
@@ -106,6 +106,23 @@ test('tokenize marks words', () => {
 test('extractJson reads json inside text', () => {
   expect(extractJson('Sure!\n```json\n["a","b"]\n```')).toEqual(['a', 'b'])
   expect(extractJson('{"translations":["x"]}')).toEqual({ translations: ['x'] })
+})
+
+test('finishedLines reads finished pairs from a part of an answer', () => {
+  const part = '```json\n{\n  "1": "say \\"hi\\"",\n  "2": "two",\n  "3": "thr'
+  expect([...finishedLines(part)]).toEqual([
+    [1, 'say "hi"'],
+    [2, 'two'],
+  ])
+})
+
+test('errorMessage reads the message from an API error body', () => {
+  expect(
+    errorMessage('{"error":{"message":"model \'x\' not found","type":"not_found_error"}}'),
+  ).toBe("model 'x' not found")
+  expect(errorMessage('{"type":"error","error":{"type":"x","message":"bad key"}}')).toBe('bad key')
+  expect(errorMessage('{"error":"no model"}')).toBe('no model')
+  expect(errorMessage('Bad Gateway')).toBe('Bad Gateway')
 })
 
 test('toCsv escapes quotes and commas', () => {
