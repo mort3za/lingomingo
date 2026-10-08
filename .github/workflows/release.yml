@@ -1,0 +1,48 @@
+# Runs only when a version tag (v1.2.3) is pushed. Normal pushes do not start it.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # actions/checkout replaces an annotated tag with a lightweight one.
+      # Fetch the real tag again, so that the tag message is available.
+      - run: git fetch --force origin "$GITHUB_REF:$GITHUB_REF"
+
+      - uses: oven-sh/setup-bun@v2
+
+      - run: bun install --frozen-lockfile
+
+      # The manifest version comes from package.json, so the tag must match it.
+      - name: Check tag matches package.json version
+        run: |
+          version="$(jq -r .version package.json)"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+
+      - run: bun run typecheck
+      - run: bun test
+      - run: bun run build
+
+      - name: Zip dist
+        run: cd dist && zip -r "../lingomingo-$GITHUB_REF_NAME.zip" .
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "lingomingo-$GITHUB_REF_NAME.zip" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-from-tag \
+            --verify-tag

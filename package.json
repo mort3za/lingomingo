@@ -15,7 +15,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "bun test"
+    "test": "bun test",
+    "release": "bun scripts/release.ts"
   },
   "dependencies": {
     "ts-fsrs": "^5.4.2",
