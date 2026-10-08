@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
-import { wordId } from '@/shared/storage'
 import type { Stage } from '@/shared/types'
 import SidePanel from './SidePanel.vue'
 import SubtitleBar from './SubtitleBar.vue'
@@ -45,11 +44,7 @@ function openWord(word: string, el: HTMLElement, idx = s.activeIdx.value) {
 }
 
 const savedItem = computed(() =>
-  selected.value
-    ? (s.saved.value.find(
-        (i) => i.id === wordId(s.settings.value.studyLang, selected.value!.word),
-      ) ?? null)
-    : null,
+  selected.value ? (s.savedWordOf(selected.value.word) ?? null) : null,
 )
 
 async function setStage(stage: Stage, translations: string[]) {

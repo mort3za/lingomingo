@@ -11,7 +11,6 @@ import {
   upsertItem,
   wordId,
 } from '@/shared/storage'
-import { wordKey } from '@/shared/tokenize'
 import {
   DEFAULT_SETTINGS,
   LANGUAGES,
@@ -22,6 +21,7 @@ import {
   type Settings,
   type Stage,
 } from '@/shared/types'
+import { lemmaOf, loadWordList, type Vocab, type WordList } from '@/shared/vocab'
 
 const CHUNK = 40
 const RETRY_MS = 15_000
@@ -99,15 +99,37 @@ export function useYoutubeSession() {
 
   const translationOf = (i: number): string | null => human.value[i] ?? machine.value[i] ?? null
 
-  const stageByWord = computed(() => {
-    const map = new Map<string, Stage>()
-    for (const it of saved.value) {
-      if (it.itemType === 'WORD' && it.langCode === settings.value.studyLang) {
-        map.set(wordKey(it.text), it.stage)
-      }
-    }
-    return map
-  })
+  // Word list of the study language: frequency ranks and lemmas.
+  const list = shallowRef<WordList | null>(null)
+  watch(
+    () => settings.value.studyLang,
+    async (lang) => {
+      list.value = null
+      const value = await loadWordList(lang).catch(() => null)
+      if (lang === settings.value.studyLang) list.value = value
+    },
+    { immediate: true },
+  )
+  const lemma = (word: string) => lemmaOf(word, list.value?.lemmas)
+
+  const savedWords = computed(() =>
+    saved.value.filter(
+      (i): i is SavedWord => i.itemType === 'WORD' && i.langCode === settings.value.studyLang,
+    ),
+  )
+  /** The saved word with the same lemma ("ging" finds a saved "gehe"). */
+  const savedWordOf = (word: string) => savedWords.value.find((i) => lemma(i.text) === lemma(word))
+
+  const stageByWord = computed(() => new Map(savedWords.value.map((i) => [lemma(i.text), i.stage])))
+
+  const vocab = computed<Vocab>(() => ({
+    stages: stageByWord.value,
+    list: list.value,
+    level: settings.value.vocabLevels[settings.value.studyLang],
+    showKnownGreen: settings.value.showKnownGreen,
+    showSuggested: settings.value.showSuggested,
+    darkenRare: settings.value.darkenRare,
+  }))
 
   const savedPhraseIds = computed(
     () => new Set(saved.value.filter((i) => i.itemType === 'PHRASE').map((i) => i.id)),
@@ -306,8 +328,9 @@ export function useYoutubeSession() {
   }
 
   async function markWord(word: string, idx: number, stage: Stage, translations: string[]) {
-    const id = wordId(settings.value.studyLang, word)
-    const old = saved.value.find((i): i is SavedWord => i.id === id)
+    const old = savedWordOf(word)
+    // One saved item per lemma: marking "ging" updates a saved "gehe".
+    const id = old?.id ?? wordId(settings.value.studyLang, lemma(word))
     const now = Date.now()
     await upsertItem({
       id,
@@ -329,7 +352,10 @@ export function useYoutubeSession() {
     })
   }
 
-  const unmarkWord = (word: string) => removeItems([wordId(settings.value.studyLang, word)])
+  function unmarkWord(word: string) {
+    const old = savedWordOf(word)
+    if (old) return removeItems([old.id])
+  }
 
   // Translate the current cue when the user turns the subtitles or the list on.
   watch([showSubs, showPanel], () => ensureTranslations(activeIdx.value))
@@ -378,7 +404,8 @@ export function useYoutubeSession() {
     studying,
     translationError,
     translationOf,
-    stageByWord,
+    vocab,
+    savedWordOf,
     savedPhraseIds,
     video,
     goTo,

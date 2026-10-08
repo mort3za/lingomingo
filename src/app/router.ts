@@ -10,5 +10,6 @@ export const router = createRouter({
     { path: '/review', component: () => import('./pages/ReviewPage.vue') },
     { path: '/saved-items', component: () => import('./pages/SavedItemsPage.vue') },
     { path: '/settings', component: () => import('./pages/SettingsPage.vue') },
+    { path: '/credits', component: () => import('./pages/CreditsPage.vue') },
   ],
 })

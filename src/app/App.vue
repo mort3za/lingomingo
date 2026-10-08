@@ -6,6 +6,7 @@ const mainLinks = [
 ]
 const footerLinks = [
   { to: '/settings', label: 'Settings' },
+  { to: '/credits', label: 'Credits' },
 ]
 </script>
 

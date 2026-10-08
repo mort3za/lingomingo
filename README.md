@@ -41,3 +41,9 @@ src/
   app/               Main extension page: media, reader, saved items, settings, ...
   shared/            Shared code and styles (Tailwind theme)
 ```
+
+## License
+
+Code: [GNU GPL v3](LICENSE) or later.
+
+Word lists in `public/freq/` have their own licenses: frequency lists (`<lang>.txt`) are CC BY-SA 4.0, lemma lists (`<lang>-lemmas.txt`) are ODbL 1.0. See [public/freq/CREDITS.txt](public/freq/CREDITS.txt). To make them again: `bun scripts/freq-lists.ts`.

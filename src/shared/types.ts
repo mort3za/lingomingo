@@ -80,6 +80,11 @@ export interface Settings {
   localModel: string
   autoPause: boolean
   hideTranslation: boolean
+  /** Vocabulary level by study language: words up to this frequency rank count as known. */
+  vocabLevels: Record<string, number>
+  showKnownGreen: boolean
+  showSuggested: boolean
+  darkenRare: boolean
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -94,6 +99,10 @@ export const DEFAULT_SETTINGS: Settings = {
   localModel: '',
   autoPause: false,
   hideTranslation: false,
+  vocabLevels: {},
+  showKnownGreen: true,
+  showSuggested: true,
+  darkenRare: true,
 }
 
 export const LANGUAGES: Record<string, string> = {

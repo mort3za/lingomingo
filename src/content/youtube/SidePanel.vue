@@ -48,7 +48,7 @@ watch(
             <WordText
               :text="c.text"
               :lang="s.settings.value.studyLang"
-              :stages="s.stageByWord.value"
+              :vocab="s.vocab.value"
               :selected="selected?.idx === i ? selected.word : null"
               @word="(w, el) => emit('word', w, el, i)"
               @mark="(w) => emit('mark', w, i)"

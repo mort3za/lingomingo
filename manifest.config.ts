@@ -39,6 +39,13 @@ export default defineManifest({
     'http://localhost/*',
     'http://127.0.0.1/*',
   ],
+  // Content scripts load the word frequency lists for the vocabulary level.
+  web_accessible_resources: [
+    {
+      resources: ['freq/*.txt'],
+      matches: ['https://www.youtube.com/*', 'https://www.netflix.com/*'],
+    },
+  ],
   content_scripts: [
     {
       matches: ['https://www.netflix.com/*'],

@@ -39,7 +39,7 @@ const round =
             <WordText
               :text="cue.text"
               :lang="s.settings.value.studyLang"
-              :stages="s.stageByWord.value"
+              :vocab="s.vocab.value"
               :selected="selected"
               @word="(w, el) => emit('word', w, el)"
               @mark="(w) => emit('mark', w)"

@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { getSettings, onStorageKey, patchSettings } from '@/shared/storage'
 import { DEFAULT_SETTINGS, LANGUAGES, type Settings } from '@/shared/types'
+import { LEVEL_LANGS } from '@/shared/vocab'
+import VocabLevelDialog from '../VocabLevelDialog.vue'
 
 const settings = ref<Settings>({ ...DEFAULT_SETTINGS })
 const savedAt = ref(false)
@@ -37,6 +39,16 @@ watch(
   },
   { deep: true },
 )
+
+const levelOpen = ref(false)
+const level = computed(() => settings.value.vocabLevels[settings.value.studyLang])
+function setLevel(value: number | undefined) {
+  const levels = { ...settings.value.vocabLevels }
+  if (value === undefined) delete levels[settings.value.studyLang]
+  else levels[settings.value.studyLang] = value
+  settings.value.vocabLevels = levels
+  levelOpen.value = false
+}
 
 const input =
   'w-full rounded border border-white/10 bg-surface-deep px-3 py-2 text-sm text-white outline-none focus:border-accent'
@@ -76,6 +88,55 @@ const label = 'mb-1 block text-xs font-medium tracking-wide text-neutral-400 upp
         <input v-model="settings.hideTranslation" type="checkbox" class="accent-accent" />
         Hide translation line
       </label>
+    </section>
+
+    <section class="space-y-4">
+      <h2 class="text-lg font-medium">Vocabulary highlighting</h2>
+      <div v-if="LEVEL_LANGS.includes(settings.studyLang)" class="flex items-center gap-3">
+        <button
+          type="button"
+          class="rounded border border-white/30 px-4 py-2 text-sm font-medium tracking-wide uppercase hover:bg-white/10"
+          @click="levelOpen = true"
+        >
+          Set vocabulary level
+        </button>
+        <span class="text-sm text-neutral-400">
+          {{ level === undefined ? 'Not set' : `You know the ${level} most common words` }}
+        </span>
+        <button
+          v-if="level !== undefined"
+          type="button"
+          class="text-sm text-neutral-400 underline hover:text-white"
+          @click="setLevel(undefined)"
+        >
+          Turn off
+        </button>
+      </div>
+      <p v-else class="text-sm text-neutral-400">
+        Vocabulary level is not available for {{ LANGUAGES[settings.studyLang] }} yet.
+      </p>
+      <label class="flex items-center gap-2 text-sm text-emerald-300">
+        <input v-model="settings.showKnownGreen" type="checkbox" class="accent-accent" />
+        Show known words in green
+      </label>
+      <label class="flex items-center gap-2 text-sm text-orange-200">
+        <input v-model="settings.showSuggested" type="checkbox" class="accent-accent" />
+        Show suggested words in orange color
+      </label>
+      <label class="flex items-center gap-2 text-sm text-white/45">
+        <input v-model="settings.darkenRare" type="checkbox" class="accent-accent" />
+        Darken rare words (recommended)
+      </label>
+      <VocabLevelDialog
+        v-if="levelOpen"
+        v-model:show-known-green="settings.showKnownGreen"
+        v-model:darken-rare="settings.darkenRare"
+        :lang="settings.studyLang"
+        :level="level"
+        :show-suggested="settings.showSuggested"
+        @set="setLevel"
+        @close="levelOpen = false"
+      />
     </section>
 
     <section class="space-y-4">

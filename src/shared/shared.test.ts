@@ -5,6 +5,7 @@ import { extractJson } from './llm-json'
 import { answer, formatSpan, isDue, learningWords, preview } from './review'
 import { tokenize } from './tokenize'
 import { dirOf, type SavedItem, type SavedWord } from './types'
+import { parseWordList, wordClass, type Vocab } from './vocab'
 
 test('pickTrack never returns auto-generated tracks', () => {
   const tracks = [
@@ -157,4 +158,48 @@ test('formatSpan', () => {
   expect(formatSpan(3 * 3_600_000)).toBe('3h')
   expect(formatSpan(5 * 86_400_000)).toBe('5d')
   expect(formatSpan(60 * 86_400_000)).toBe('2mo')
+})
+
+test('wordClass colors words by stage and vocabulary level', () => {
+  const v: Vocab = {
+    stages: new Map([['haus', 'LEARNING']]),
+    list: parseWordList("ich 60\nhaus 50\nhafen 40\nthat 30\ns 20\nl' 10\n", ''),
+    level: 1,
+    showKnownGreen: true,
+    showSuggested: true,
+    darkenRare: true,
+  }
+  expect(wordClass('Ich', v)).toBe('KNOWN') // rank 1 <= level
+  expect(wordClass('Haus', v)).toBe('LEARNING') // a saved stage wins
+  expect(wordClass('Hafen', v)).toBe('SUGGESTED') // just above the level
+  expect(wordClass('Kerzenlicht', v)).toBe('RARE') // not in the list
+  expect(wordClass('2024', v)).toBe('PLAIN') // no letters
+  expect(wordClass("that's", { ...v, level: 5 })).toBe('KNOWN') // parts: that (4), s (5)
+  expect(wordClass('l’ich', v)).toBe('SUGGESTED') // parts: l' (6), ich (1)
+  expect(wordClass('Ich', { ...v, showKnownGreen: false })).toBe('PLAIN')
+  expect(wordClass('Hafen', { ...v, showSuggested: false })).toBe('PLAIN')
+  expect(wordClass('Kerzenlicht', { ...v, darkenRare: false })).toBe('PLAIN')
+  // No level set: only saved stages show.
+  expect(wordClass('Ich', { ...v, level: undefined })).toBe('PLAIN')
+  expect(wordClass('Haus', { ...v, level: undefined })).toBe('LEARNING')
+})
+
+test('wordClass gives all forms of a word the lemma stage and rank', () => {
+  const v: Vocab = {
+    stages: new Map([['gehen', 'LEARNING']]),
+    // "häuser" + "haus" (3 + 2) rank above "ich" (4).
+    list: parseWordList('ich 4\nhäuser 3\nhaus 2\nging 1\n', 'haus\thäuser\ngehen\tging\n'),
+    level: 2,
+    showKnownGreen: true,
+    showSuggested: true,
+    darkenRare: true,
+  }
+  expect(wordClass('Ging', v)).toBe('LEARNING') // the stage of the lemma "gehen"
+  expect(wordClass('Häuser', v)).toBe('KNOWN') // rank of "haus" (1) <= level
+})
+
+test('parseWordList picks the most frequent lemma for an ambiguous form', () => {
+  const list = parseWordList('suis 10\nest 9\nsuivre 2\n', 'être\tsuis\nsuivre\tsuis\nêtre\test\n')
+  expect(list.lemmas.get('suis')).toBe('être') // score: être 5 + 9, suivre 5
+  expect([...list.ranks.keys()]).toEqual(['être', 'suivre'])
 })

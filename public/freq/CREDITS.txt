@@ -1,0 +1,13 @@
+Word frequency lists (<lang>.txt) are made from FrequencyWords by Hermit Dave
+(https://github.com/hermitdave/FrequencyWords), made from OpenSubtitles 2018
+(http://opus.nlpl.eu/OpenSubtitles2018.php).
+License: CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/).
+Changes: only the 20,000 most frequent words, lowercased, punctuation-only entries removed.
+
+Lemma lists (<lang>-lemmas.txt) are made from Lemmatization Lists by Michal Měchura
+(https://github.com/michmech/lemmatization-lists).
+License: Open Database License (ODbL) 1.0 (https://opendatacommons.org/licenses/odbl/1-0/).
+Changes: only the pairs whose word form is in <lang>.txt, lowercased.
+
+Each file holds data from one source only, under that source's license. The extension joins
+them at runtime. Made with scripts/freq-lists.ts.
