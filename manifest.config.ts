@@ -6,9 +6,20 @@ export default defineManifest({
   name: 'Lingomingo',
   description: 'Learn languages with Netflix, YouTube, and any web page.',
   version: pkg.version,
+  // PNGs are made from public/icons/icon.svg.
+  icons: {
+    16: 'icons/icon-16.png',
+    32: 'icons/icon-32.png',
+    48: 'icons/icon-48.png',
+    128: 'icons/icon-128.png',
+  },
   // No default_popup: a click on the toolbar button opens the app page (see background).
   action: {
     default_title: 'Open Lingomingo',
+    default_icon: {
+      16: 'icons/icon-16.png',
+      32: 'icons/icon-32.png',
+    },
   },
   background: {
     service_worker: 'src/background/index.ts',
