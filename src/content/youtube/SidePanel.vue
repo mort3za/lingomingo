@@ -118,7 +118,9 @@ watch(
           <div class="flex flex-col items-center gap-1">
             <button
               :class="
-                s.savedPhraseIds.value.has(s.phraseKey(i)) ? 'text-yellow-300' : 'text-white/40'
+                s.savedPhraseIds.value.has(s.phraseKey(i))
+                  ? 'text-yellow-300'
+                  : 'text-white/40 opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
               "
               @click.stop="s.togglePhrase(i)"
             >
