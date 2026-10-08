@@ -33,7 +33,8 @@ function makeButton(t: Toggle): { btn: HTMLButtonElement; path: SVGPathElement }
   svg.setAttribute('width', '24')
   svg.setAttribute('height', '24')
   const path = document.createElementNS(ns, 'path')
-  path.setAttribute('fill', '#fff')
+  // Persian red, the `--color-accent` theme token. The CSS variable is not available here.
+  path.setAttribute('fill', '#cc3333')
   path.setAttribute('fill-rule', 'evenodd')
   svg.append(path)
   btn.append(svg)
