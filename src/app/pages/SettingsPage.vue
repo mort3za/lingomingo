@@ -13,15 +13,15 @@ const check = 'flex items-center gap-2 text-sm'
 
 <template>
   <div class="max-w-3xl space-y-6">
-    <div class="flex items-center gap-3">
-      <h1 class="text-2xl font-semibold">Settings</h1>
-      <span v-if="saved" class="text-sm text-emerald-400">Saved</span>
-      <RouterLink
-        to="/setup"
-        class="ml-auto rounded border border-white/20 px-3 py-1.5 text-sm hover:bg-white/10"
-      >
-        Run initial setup
-      </RouterLink>
+    <div>
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-semibold">Settings</h1>
+        <span v-if="saved" class="text-sm text-emerald-400">Saved</span>
+      </div>
+      <p :class="hint">
+        Changes save automatically. Want help step by step? Open the
+        <RouterLink to="/setup" class="text-accent hover:underline">setup guide</RouterLink>.
+      </p>
     </div>
 
     <section :class="card">
