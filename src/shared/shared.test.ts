@@ -3,7 +3,7 @@ import { alignTranslation, findCueIndex, parseJson3, pickTrack } from './caption
 import { toCsv } from './export'
 import { extractJson } from './llm-json'
 import { tokenize } from './tokenize'
-import type { SavedItem } from './types'
+import { dirOf, type SavedItem } from './types'
 
 test('pickTrack never returns auto-generated tracks', () => {
   const tracks = [
@@ -83,4 +83,11 @@ test('toCsv escapes quotes and commas', () => {
     source: { source: 'YOUTUBE', videoId: 'v', title: 'T', startMs: 0, endMs: 1 },
   }
   expect(toCsv([item]).split('\n')[1]).toContain('"Hola, ""amigo"""')
+})
+
+test('dirOf gives rtl for Persian and Arabic, ltr for others', () => {
+  expect(dirOf('fa')).toBe('rtl')
+  expect(dirOf('ar')).toBe('rtl')
+  expect(dirOf('de')).toBe('ltr')
+  expect(dirOf('en')).toBe('ltr')
 })

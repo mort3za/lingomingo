@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { toCsv, toJson } from '@/shared/export'
 import { getSavedItems, onStorageKey, removeItems, setStage } from '@/shared/storage'
-import { LANGUAGES, type SavedItem, type Stage } from '@/shared/types'
+import { dirOf, LANGUAGES, type SavedItem, type Stage } from '@/shared/types'
 
 const items = ref<SavedItem[]>([])
 const tab = ref<'WORD' | 'PHRASE'>('WORD')
@@ -158,13 +158,15 @@ const btn = 'rounded px-3 py-1.5 text-sm hover:bg-white/10 '
               @change="toggle(i.id)"
             />
           </td>
-          <td class="p-2" :class="stageColor[i.stage]">
+          <td class="p-2 text-start" :class="stageColor[i.stage]" :dir="dirOf(i.langCode)">
             {{ i.text }}
             <div v-if="i.itemType === 'WORD' && i.context" class="text-xs text-neutral-500">
               {{ i.context.sentence }}
             </div>
           </td>
-          <td class="p-2 text-neutral-300">{{ translationOf(i) }}</td>
+          <td class="p-2 text-start text-neutral-300" :dir="dirOf(i.translationLang)">
+            {{ translationOf(i) }}
+          </td>
           <td class="p-2" :class="stageColor[i.stage]">{{ stageLabel[i.stage] }}</td>
           <td class="p-2">
             <a

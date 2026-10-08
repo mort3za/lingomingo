@@ -98,3 +98,8 @@ export const LANGUAGES: Record<string, string> = {
   sv: 'Swedish',
   tr: 'Turkish',
 }
+
+const RTL_LANGUAGES = new Set(['ar', 'fa', 'he', 'ur'])
+
+/** Text direction of a language, for the `dir` attribute. */
+export const dirOf = (lang: string) => (RTL_LANGUAGES.has(lang) ? 'rtl' : 'ltr')

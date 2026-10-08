@@ -18,8 +18,10 @@ export function mountInShadow(
   const host = document.createElement('lingomingo-root')
   const shadow = host.attachShadow({ mode: 'open' })
 
+  // rem follows the page's root font size (YouTube sets 10px), so use px for Tailwind's 16px rem.
   const style = document.createElement('style')
-  style.textContent = `:host { all: initial; }\n${css}`
+  const pxCss = css.replace(/(\d*\.?\d+)rem\b/g, (_, n: string) => `${Number(n) * 16}px`)
+  style.textContent = `:host { all: initial; }\n${pxCss}`
 
   const root = document.createElement('div')
   shadow.append(style, root)

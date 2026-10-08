@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { send } from '@/shared/messages'
-import type { SavedItem, Stage } from '@/shared/types'
+import { dirOf, type SavedItem, type Stage } from '@/shared/types'
 
 const props = defineProps<{
   word: string
@@ -54,17 +54,17 @@ const btn = 'flex-1 rounded px-2 py-1 text-xs font-medium hover:bg-white/20 '
 <template>
   <div
     data-lm-popup
-    class="fixed z-10 w-60 -translate-x-1/2 -translate-y-full rounded-lg bg-[#1565a0] p-3 text-white shadow-xl"
+    class="fixed z-10 w-60 -translate-x-1/2 -translate-y-full rounded-lg bg-[#1565a0] p-3 font-sans text-white shadow-xl"
     :style="style"
     @click.stop
   >
     <div class="mb-2 flex items-start justify-between gap-2">
-      <div class="text-base font-semibold">{{ word }}</div>
+      <div class="text-base font-semibold" :dir="dirOf(studyLang)">{{ word }}</div>
       <button class="text-white/60 hover:text-white" @click="emit('close')">✕</button>
     </div>
     <div v-if="loading" class="text-sm text-white/70">…</div>
     <div v-else-if="error" class="text-xs text-red-200">{{ error }}</div>
-    <ol v-else class="text-sm">
+    <ol v-else class="text-sm" :dir="dirOf(nativeLang)">
       <li
         v-for="(t, i) in translations"
         :key="i"

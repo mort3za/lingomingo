@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { dirOf } from '@/shared/types'
 import type { YoutubeSession } from './session'
 import WordText from './WordText.vue'
 
@@ -31,7 +32,10 @@ const round =
     <div class="flex min-h-20 flex-1 flex-col justify-center text-center">
       <template v-if="s.status.value === 'ready'">
         <template v-if="cue && s.cueVisible.value">
-          <div class="text-[28px] leading-snug font-medium">
+          <div
+            class="text-[28px] leading-snug font-medium"
+            :dir="dirOf(s.settings.value.studyLang)"
+          >
             <WordText
               :text="cue.text"
               :lang="s.settings.value.studyLang"
@@ -43,7 +47,11 @@ const round =
           </div>
           <template v-if="!s.settings.value.hideTranslation">
             <hr class="my-1 border-white/20" />
-            <div v-if="translation" class="text-[22px] leading-snug text-neutral-400">
+            <div
+              v-if="translation"
+              class="text-[22px] leading-snug text-neutral-400"
+              :dir="dirOf(s.settings.value.nativeLang)"
+            >
               {{ translation }}
             </div>
             <div v-else-if="s.translationError.value" class="text-sm text-red-300">

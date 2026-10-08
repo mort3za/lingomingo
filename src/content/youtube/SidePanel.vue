@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, watch } from 'vue'
+import { dirOf } from '@/shared/types'
 import type { YoutubeSession } from './session'
 
 const props = defineProps<{ s: YoutubeSession }>()
@@ -38,8 +39,12 @@ watch(
         @click="s.goTo(i)"
       >
         <div class="flex-1">
-          <div>{{ c.text }}</div>
-          <div v-if="s.translationOf(i)" class="text-xs text-neutral-400">
+          <div :dir="dirOf(s.settings.value.studyLang)">{{ c.text }}</div>
+          <div
+            v-if="s.translationOf(i)"
+            class="text-xs text-neutral-400"
+            :dir="dirOf(s.settings.value.nativeLang)"
+          >
             {{ s.translationOf(i) }}
           </div>
         </div>
