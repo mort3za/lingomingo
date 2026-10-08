@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
 import type { Stage } from '@/shared/types'
 import { shadowHost } from '../mount'
-import { currentPlayer, relatedColumn } from './page'
+import { currentPlayer, fullBleedRow, relatedColumn } from './page'
 import SidePanel from './SidePanel.vue'
 import SubtitleBar from './SubtitleBar.vue'
 import { useYoutubeSession } from './session'
@@ -35,19 +35,47 @@ watchEffect(() => {
     !s.showSubs.value || (s.status.value !== 'loading' && s.status.value !== 'ready')
 })
 
-// The subtitles list goes over the related videos, next to the video, as high as the video.
-// In fullscreen, on Shorts, or in narrow windows there is no such column: it stays on the video.
+// The subtitles list goes on the right of the video, as high as the video: over the related
+// videos column, or (in theater mode, fullscreen and narrow windows) next to the player, which
+// then gets narrower. On Shorts, or if the video would get too narrow, it stays on the video.
+const BESIDE_WIDTH = 364 // 340px list + 12px padding on each side
+const MIN_VIDEO_WIDTH = 480
 const { host: dockHost, root: dock } = shadowHost()
 dock.style.height = '100%'
 const docked = ref(false)
+// Out of fullscreen, make the row only as high as the narrower video needs.
+const squeezeStyle = document.createElement('style')
+squeezeStyle.textContent =
+  'ytd-watch-flexy:not([fullscreen]) #full-bleed-container[lm-squeezed] {' +
+  ` height: max(calc((100vw - ${BESIDE_WIDTH}px) * 9 / 16), ${MIN_VIDEO_WIDTH}px) !important;` +
+  ' min-height: 0 !important; }'
+document.documentElement.append(squeezeStyle)
+let squeezed = false
 function placeDock() {
   const column = relatedColumn()
-  docked.value = !!column
+  const row = column ? null : fullBleedRow()
+  const beside = row && row.clientWidth >= BESIDE_WIDTH + MIN_VIDEO_WIDTH ? row : null
+  docked.value = !!(column || beside)
   if (column && dockHost.parentElement !== column) column.prepend(dockHost)
-  const height = Math.min(currentPlayer()?.offsetHeight ?? 0, innerHeight - 80)
-  dockHost.style.cssText =
-    `display:${docked.value && s.showPanel.value ? 'block' : 'none'};height:${height}px;` +
-    'position:sticky;top:72px;z-index:100;margin-bottom:12px;'
+  if (beside && dockHost.parentElement !== beside) beside.append(dockHost)
+  const show = docked.value && s.showPanel.value
+  if (column) {
+    const height = Math.min(currentPlayer()?.offsetHeight ?? 0, innerHeight - 80)
+    dockHost.style.cssText =
+      `display:${show ? 'block' : 'none'};height:${height}px;` +
+      'position:sticky;top:72px;z-index:100;margin-bottom:12px;'
+  } else {
+    dockHost.style.cssText =
+      `display:${show ? 'block' : 'none'};flex:none;width:${BESIDE_WIDTH}px;` +
+      'padding:12px;box-sizing:border-box;'
+  }
+  // The player sets the size of its video on window resize only.
+  const squeeze = !!beside && show
+  document.querySelector('#full-bleed-container')?.toggleAttribute('lm-squeezed', squeeze)
+  if (squeeze !== squeezed) {
+    squeezed = squeeze
+    window.dispatchEvent(new Event('resize'))
+  }
 }
 let dockTimer = 0
 
@@ -121,6 +149,8 @@ onBeforeUnmount(() => {
   document.removeEventListener('fullscreenchange', placeDock)
   clearInterval(dockTimer)
   dockHost.remove()
+  document.querySelector('#full-bleed-container')?.removeAttribute('lm-squeezed')
+  squeezeStyle.remove()
   hideNative.remove()
 })
 </script>

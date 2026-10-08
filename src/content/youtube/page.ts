@@ -26,9 +26,19 @@ export function toolbarGroup(): Element | null {
   )
 }
 
+/**
+ * The full-width row around the watch player in theater mode, fullscreen and narrow windows.
+ * It is a flex row: another child in it makes the player narrower.
+ */
+export function fullBleedRow(): HTMLElement | null {
+  if (isShorts()) return null
+  return currentPlayer()?.closest<HTMLElement>('#full-bleed-container') ?? null
+}
+
 /** The related videos column next to the watch player, if YouTube shows it now. */
 export function relatedColumn(): HTMLElement | null {
-  if (isShorts() || document.fullscreenElement) return null
+  // In theater mode the column is still visible, but below the video.
+  if (isShorts() || document.fullscreenElement || fullBleedRow()) return null
   const column = document.querySelector<HTMLElement>('ytd-watch-flexy #secondary')
   // In narrow windows YouTube hides this column and moves the related videos below the video.
   return column && column.getClientRects().length > 0 ? column : null
