@@ -2,7 +2,15 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch, type Directive } from 'vue'
 import { getSettings, onStorageKey } from '@/shared/storage'
 import { LANGUAGES } from '@/shared/types'
-import { CHANNELS, channelPhoto, fetchChannelVideos, type CatalogueVideo } from '../catalogue'
+import { pickTrack } from '@/shared/captions'
+import {
+  CHANNELS,
+  channelPhoto,
+  fetchChannelVideos,
+  videoTracks,
+  type CatalogueVideo,
+  type TrackInfo,
+} from '../catalogue'
 
 const studyLang = ref('')
 const videos = ref<CatalogueVideo[]>([])
@@ -11,7 +19,7 @@ const loading = ref(false)
 const channelId = ref('') // '' = all channels
 const sort = ref<'date' | 'views'>('date')
 const query = ref('')
-const hideShorts = ref(true)
+const hideShorts = ref(false)
 
 const channels = computed(() => CHANNELS[studyLang.value] ?? [])
 
@@ -74,6 +82,39 @@ function loadPhoto(id: string) {
     (url) => (photos.value[id] = url),
     () => {},
   )
+}
+
+// Subtitle tracks load when their video comes into view, at most 4 at a time (each one reads
+// a large page). On error the video has no badge.
+const tracks = ref<Record<string, TrackInfo[]>>({})
+const queued = new Set<string>()
+const queue: string[] = []
+let running = 0
+function loadTracks(id: string) {
+  if (queued.has(id)) return
+  queued.add(id)
+  queue.push(id)
+  next()
+}
+function next() {
+  const id = running < 4 && queue.shift()
+  if (!id) return
+  running++
+  videoTracks(id)
+    .then(
+      (t) => (tracks.value[id] = t),
+      () => {},
+    )
+    .finally(() => {
+      running--
+      next()
+    })
+}
+function subsOf(id: string): 'cc' | 'auto' | 'none' | null {
+  const t = tracks.value[id]
+  if (!t) return null
+  const track = pickTrack(t, studyLang.value)
+  return !track ? 'none' : track.kind === 'asr' ? 'auto' : 'cc'
 }
 
 const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
@@ -174,6 +215,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
         :href="watchUrl(v)"
         target="_blank"
         class="flex gap-5 rounded p-1 hover:bg-white/5"
+        v-visible="() => loadTracks(v.videoId)"
       >
         <img
           :src="thumbUrl(v)"
@@ -190,6 +232,21 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
               v-if="v.isShort"
               class="ms-2 rounded border border-white/20 px-1.5 text-xs text-neutral-300"
               >Short</span
+            >
+            <span
+              v-if="subsOf(v.videoId) === 'cc'"
+              class="ms-2 rounded bg-accent px-1.5 text-xs text-white"
+              title="Human-made subtitles"
+              >CC</span
+            >
+            <span
+              v-else-if="subsOf(v.videoId) === 'auto'"
+              class="ms-2 rounded border border-white/20 px-1.5 text-xs text-neutral-300"
+              title="Only auto-generated subtitles"
+              >Auto CC</span
+            >
+            <span v-else-if="subsOf(v.videoId) === 'none'" class="ms-2 text-xs text-neutral-500"
+              >No subtitles</span
             >
           </div>
         </div>

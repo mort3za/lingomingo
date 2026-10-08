@@ -1,5 +1,12 @@
 import { expect, test } from 'bun:test'
-import { alignTranslation, audioLang, findCueIndex, parseJson3, pickTrack } from './captions'
+import {
+  alignTranslation,
+  audioLang,
+  dropDubbed,
+  findCueIndex,
+  parseJson3,
+  pickTrack,
+} from './captions'
 import { toCsv } from './export'
 import { extractJson } from './llm-json'
 import { answer, formatSpan, isDue, learningWords, preview } from './review'
@@ -7,14 +14,34 @@ import { tokenize } from './tokenize'
 import { dirOf, type SavedItem, type SavedWord } from './types'
 import { parseWordList, wordClass, type Vocab } from './vocab'
 
-test('pickTrack never returns auto-generated tracks', () => {
+test('pickTrack prefers human-made tracks, then auto-generated', () => {
   const tracks = [
     { baseUrl: 'a', languageCode: 'es', kind: 'asr' },
     { baseUrl: 'b', languageCode: 'es-MX' },
     { baseUrl: 'c', languageCode: 'en', kind: 'asr' },
   ]
   expect(pickTrack(tracks, 'es')?.baseUrl).toBe('b')
-  expect(pickTrack(tracks, 'en')).toBeNull()
+  expect(pickTrack(tracks, 'en')?.baseUrl).toBe('c')
+  expect(pickTrack(tracks, 'de')).toBeNull()
+})
+
+test('dropDubbed removes auto-generated tracks of auto-dubbed audio', () => {
+  const tracks = [
+    { languageCode: 'ar', kind: 'asr' },
+    { languageCode: 'de-DE', kind: 'asr' },
+    { languageCode: 'de' },
+    { languageCode: 'en', kind: 'asr' },
+  ]
+  const audio = [
+    { id: 'ar.10', isAutoDubbed: true },
+    { id: 'de-DE.10', isAutoDubbed: true },
+    { id: 'en-US.4' },
+  ]
+  expect(dropDubbed(tracks, audio)).toEqual([
+    { languageCode: 'de' },
+    { languageCode: 'en', kind: 'asr' },
+  ])
+  expect(dropDubbed(tracks, [])).toEqual(tracks)
 })
 
 test('audioLang reads the auto-generated track', () => {
