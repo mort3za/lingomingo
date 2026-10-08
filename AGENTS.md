@@ -53,7 +53,7 @@ Also `TOKEN_DEEPSEEK` for Deepseek API key.
 
 - The file is in `.gitignore`. Never commit it.
 - Do not open it with a file reader. Do not print it, log it, or put it in screenshots, docs, or commit messages.
-- Use it only through shell substitution, for example `"$(cat CLAUDE_TOKEN)"`.
+- Use it only through shell substitution, for example `"$(cat TOKEN_CLAUDE)"`.
 
 ## Testing the extension in a browser
 
@@ -77,7 +77,7 @@ Branded Chrome ignores `--load-extension`. Use Chrome for Testing:
 5. To set the API key, run this on the app page (the key is not shown in the output):
 
    ```sh
-   agent-browser --session lm eval "chrome.storage.local.get('settings').then(({settings}) => chrome.storage.local.set({settings: {...settings, provider: 'claude', claudeKey: '$(tr -d '[:space:]' < CLAUDE_TOKEN)'}})).then(() => 'ok')"
+   agent-browser --session lm eval "chrome.storage.local.get('settings').then(({settings}) => chrome.storage.local.set({settings: {...settings, provider: 'claude', claudeKey: '$(tr -d '[:space:]' < TOKEN_CLAUDE)'}})).then(() => 'ok')"
    ```
 
 6. To force AI subtitle translation, set the translation language (`nativeLang`) to a language with no human-made track on the video, for example `fa`.

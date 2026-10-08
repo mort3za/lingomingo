@@ -19,8 +19,13 @@ export default defineManifest({
   },
   // unlimitedStorage: subtitle translations are cached per video.
   permissions: ['contextMenus', 'sidePanel', 'storage', 'unlimitedStorage'],
-  // The background calls the Claude API and a local model (Ollama, llama.cpp).
-  host_permissions: ['https://api.anthropic.com/*', 'http://localhost/*', 'http://127.0.0.1/*'],
+  // The background calls the Claude API, the DeepSeek API, and a local model (Ollama, llama.cpp).
+  host_permissions: [
+    'https://api.anthropic.com/*',
+    'https://api.deepseek.com/*',
+    'http://localhost/*',
+    'http://127.0.0.1/*',
+  ],
   content_scripts: [
     {
       matches: ['https://www.netflix.com/*'],

@@ -49,7 +49,7 @@ export interface VideoRef {
   endMs: number
 }
 
-export type Provider = 'claude' | 'local'
+export type Provider = 'claude' | 'deepseek' | 'local'
 
 export interface Settings {
   studyLang: string
@@ -57,6 +57,8 @@ export interface Settings {
   provider: Provider
   claudeKey: string
   claudeModel: string
+  deepseekKey: string
+  deepseekModel: string
   /** OpenAI-compatible endpoint (Ollama, llama.cpp server, LM Studio). */
   localBaseUrl: string
   localModel: string
@@ -70,6 +72,8 @@ export const DEFAULT_SETTINGS: Settings = {
   provider: 'claude',
   claudeKey: '',
   claudeModel: 'claude-haiku-5-5',
+  deepseekKey: '',
+  deepseekModel: 'deepseek-flash',
   localBaseUrl: 'http://localhost:11434/v1',
   localModel: '',
   autoPause: false,

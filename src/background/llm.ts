@@ -24,13 +24,40 @@ async function ask(settings: Settings, system: string, user: string): Promise<st
     return data.content.map((c) => c.text ?? '').join('')
   }
 
+  if (settings.provider === 'deepseek') {
+    if (!settings.deepseekKey) throw new Error('Add your DeepSeek API key in Settings.')
+    return chat(
+      'DeepSeek API',
+      'https://api.deepseek.com',
+      settings.deepseekModel,
+      system,
+      user,
+      settings.deepseekKey,
+    )
+  }
+
   if (!settings.localModel) throw new Error('Set the local model name in Settings.')
-  const base = settings.localBaseUrl.replace(/\/+$/, '')
+  return chat('Local model', settings.localBaseUrl, settings.localModel, system, user)
+}
+
+/** OpenAI-compatible chat completion (DeepSeek, Ollama, llama.cpp, LM Studio). */
+async function chat(
+  label: string,
+  baseUrl: string,
+  model: string,
+  system: string,
+  user: string,
+  key?: string,
+): Promise<string> {
+  const base = baseUrl.replace(/\/+$/, '')
   const res = await fetch(`${base}/chat/completions`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: {
+      'content-type': 'application/json',
+      ...(key ? { authorization: `Bearer ${key}` } : {}),
+    },
     body: JSON.stringify({
-      model: settings.localModel,
+      model,
       temperature: 0,
       messages: [
         { role: 'system', content: system },
@@ -38,7 +65,7 @@ async function ask(settings: Settings, system: string, user: string): Promise<st
       ],
     }),
   })
-  if (!res.ok) throw new Error(`Local model ${res.status}: ${(await res.text()).slice(0, 200)}`)
+  if (!res.ok) throw new Error(`${label} ${res.status}: ${(await res.text()).slice(0, 200)}`)
   const data = (await res.json()) as { choices: { message: { content: string } }[] }
   return data.choices[0]?.message.content ?? ''
 }

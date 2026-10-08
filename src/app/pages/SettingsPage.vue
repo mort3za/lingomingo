@@ -88,6 +88,7 @@ const label = 'mb-1 block text-xs font-medium tracking-wide text-neutral-400 upp
         <label :class="label" for="provider">Provider</label>
         <select id="provider" v-model="settings.provider" :class="input">
           <option value="claude">Claude API</option>
+          <option value="deepseek">DeepSeek API</option>
           <option value="local">Local model (Ollama, llama.cpp, LM Studio)</option>
         </select>
       </div>
@@ -119,6 +120,37 @@ const label = 'mb-1 block text-xs font-medium tracking-wide text-neutral-400 upp
               {{ m }}
             </button>
             — Haiku is the cheapest and fastest.
+          </p>
+        </div>
+      </template>
+
+      <template v-else-if="settings.provider === 'deepseek'">
+        <div>
+          <label :class="label" for="dkey">API key</label>
+          <input
+            id="dkey"
+            v-model="settings.deepseekKey"
+            type="password"
+            :class="input"
+            placeholder="sk-..."
+          />
+          <p class="mt-1 text-xs text-neutral-500">Stored only in this browser.</p>
+        </div>
+        <div>
+          <label :class="label" for="dmodel">Model</label>
+          <input id="dmodel" v-model="settings.deepseekModel" :class="input" />
+          <p class="mt-1 text-xs text-neutral-500">
+            Examples:
+            <button
+              v-for="m in ['deepseek-flash', 'deepseek-v4-pro']"
+              :key="m"
+              type="button"
+              class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+              @click="settings.deepseekModel = m"
+            >
+              {{ m }}
+            </button>
+            — Flash is the cheapest and fastest.
           </p>
         </div>
       </template>
