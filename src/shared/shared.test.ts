@@ -2,8 +2,9 @@ import { expect, test } from 'bun:test'
 import { alignTranslation, audioLang, findCueIndex, parseJson3, pickTrack } from './captions'
 import { toCsv } from './export'
 import { extractJson } from './llm-json'
+import { answer, formatSpan, isDue, learningWords, preview } from './review'
 import { tokenize } from './tokenize'
-import { dirOf, type SavedItem } from './types'
+import { dirOf, type SavedItem, type SavedWord } from './types'
 
 test('pickTrack never returns auto-generated tracks', () => {
   const tracks = [
@@ -100,4 +101,60 @@ test('dirOf gives rtl for Persian and Arabic, ltr for others', () => {
   expect(dirOf('ar')).toBe('rtl')
   expect(dirOf('de')).toBe('ltr')
   expect(dirOf('en')).toBe('ltr')
+})
+
+const word = (over: Partial<SavedWord> = {}): SavedWord => ({
+  id: 'w:de:haus',
+  itemType: 'WORD',
+  langCode: 'de',
+  translationLang: 'en',
+  stage: 'LEARNING',
+  createdAt: 0,
+  updatedAt: 0,
+  text: 'Haus',
+  translations: ['house'],
+  context: null,
+  source: null,
+  ...over,
+})
+
+test('learningWords keeps Learning words of the language, soonest due first', () => {
+  const later = word({ id: 'a', review: { ...answer(word(), 0, 3), due: 5000 } })
+  const items: SavedItem[] = [
+    later,
+    word({ id: 'b', createdAt: 100 }),
+    word({ id: 'c', stage: 'KNOWN' }),
+    word({ id: 'd', langCode: 'es' }),
+  ]
+  expect(learningWords(items, 'de').map((w) => w.id)).toEqual(['b', 'a'])
+})
+
+test('FSRS: harder grades come back sooner, and a good answer moves the word out', () => {
+  const now = Date.UTC(2026, 0, 1)
+  const due = preview(word(), now)
+  expect(due[1]).toBeLessThan(due[2])
+  expect(due[2]).toBeLessThanOrEqual(due[3])
+  expect(due[3]).toBeLessThan(due[4])
+  expect(due[4] - now).toBeGreaterThanOrEqual(86_400_000)
+
+  // Good, Good: the word leaves the learning steps and is due in days.
+  let w = word({ createdAt: now })
+  expect(isDue(w, now)).toBe(true)
+  w = { ...w, review: answer(w, now, 3) }
+  const t = now + 10 * 60_000
+  w = { ...w, review: answer(w, t, 3) }
+  expect(w.review!.reps).toBe(2)
+  expect(w.review!.due - t).toBeGreaterThanOrEqual(86_400_000)
+  expect(isDue(w, t)).toBe(false)
+  // The state survives a JSON round trip (chrome.storage).
+  const stored = JSON.parse(JSON.stringify(w)) as SavedWord
+  expect(answer(stored, w.review!.due, 3).due).toBeGreaterThan(w.review!.due)
+})
+
+test('formatSpan', () => {
+  expect(formatSpan(30_000)).toBe('30s')
+  expect(formatSpan(10 * 60_000)).toBe('10m')
+  expect(formatSpan(3 * 3_600_000)).toBe('3h')
+  expect(formatSpan(5 * 86_400_000)).toBe('5d')
+  expect(formatSpan(60 * 86_400_000)).toBe('2mo')
 })

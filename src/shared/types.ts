@@ -30,6 +30,22 @@ export interface SavedWord extends SavedBase {
   /** Sentence where the word was marked. */
   context: { sentence: string; translation: string | null } | null
   source: VideoRef | null
+  /** FSRS review state. Missing = new card, never reviewed. */
+  review?: ReviewCard
+}
+
+/** The ts-fsrs `Card`, with dates as ms so chrome.storage can keep it. */
+export interface ReviewCard {
+  due: number
+  stability: number
+  difficulty: number
+  elapsed_days: number
+  scheduled_days: number
+  learning_steps: number
+  reps: number
+  lapses: number
+  state: number
+  last_review?: number
 }
 
 export interface SavedPhrase extends SavedBase {

@@ -7,10 +7,8 @@ export const router = createRouter({
     { path: '/', redirect: '/media' },
     { path: '/media', component: () => import('./pages/MediaPage.vue') },
     { path: '/reader', component: () => import('./pages/ReaderPage.vue') },
-    { path: '/chatbot', component: () => import('./pages/ChatbotPage.vue') },
-    { path: '/phrasepump', component: () => import('./pages/PhrasePumpPage.vue') },
+    { path: '/review', component: () => import('./pages/ReviewPage.vue') },
     { path: '/saved-items', component: () => import('./pages/SavedItemsPage.vue') },
-    { path: '/help', component: () => import('./pages/HelpPage.vue') },
     { path: '/settings', component: () => import('./pages/SettingsPage.vue') },
   ],
 })

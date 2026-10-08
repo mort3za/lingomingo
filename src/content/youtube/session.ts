@@ -324,6 +324,8 @@ export function useYoutubeSession() {
         ? { sentence: cues.value[idx]!.text, translation: translationOf(idx) }
         : null,
       source: videoId.value ? videoRef(idx) : null,
+      // Keep the review history when the stage changes.
+      ...(old?.review && { review: { ...old.review } }),
     })
   }
 

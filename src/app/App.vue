@@ -1,12 +1,10 @@
 <script setup lang="ts">
 const mainLinks = [
   { to: '/media', label: 'Media' },
-  { to: '/chatbot', label: 'Chatbot' },
-  { to: '/phrasepump', label: 'PhrasePump' },
+  { to: '/review', label: 'Review' },
   { to: '/saved-items', label: 'Saved' },
 ]
 const footerLinks = [
-  { to: '/help', label: 'Help' },
   { to: '/settings', label: 'Settings' },
 ]
 </script>

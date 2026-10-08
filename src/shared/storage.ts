@@ -1,5 +1,5 @@
 import { wordKey } from './tokenize'
-import { DEFAULT_SETTINGS, type SavedItem, type Settings } from './types'
+import { DEFAULT_SETTINGS, type ReviewCard, type SavedItem, type Settings } from './types'
 
 export async function getSettings(): Promise<Settings> {
   const { settings } = await chrome.storage.local.get('settings')
@@ -59,6 +59,17 @@ export function setStage(ids: string[], stage: SavedItem['stage']): Promise<void
   return serial(async () =>
     setSavedItems(
       (await getSavedItems()).map((x) => (pick.has(x.id) ? { ...x, stage, updatedAt: now } : x)),
+    ),
+  )
+}
+
+export function setReview(id: string, review: ReviewCard): Promise<void> {
+  const now = Date.now()
+  return serial(async () =>
+    setSavedItems(
+      (await getSavedItems()).map((x) =>
+        x.id === id && x.itemType === 'WORD' ? { ...x, review, updatedAt: now } : x,
+      ),
     ),
   )
 }
