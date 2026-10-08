@@ -388,6 +388,26 @@ async function readFeed(channel: Channel, query: string): Promise<CatalogueVideo
 
 const PHOTO_TTL = 30 * 86400_000
 
+interface CachedPhoto {
+  url: string
+  at: number
+}
+
+// Older entries hold the remote URL, not the image: load them again.
+const freshPhoto = (c: CachedPhoto | undefined): c is CachedPhoto =>
+  !!c?.url.startsWith('data:') && Date.now() - c.at < PHOTO_TTL
+
+/** Cached photos of these channels, in one storage read. Channels without one are left out. */
+export async function cachedChannelPhotos(ids: string[]): Promise<Record<string, string>> {
+  const all = await chrome.storage.local.get(ids.map((id) => `photo:${id}`))
+  const out: Record<string, string> = {}
+  for (const id of ids) {
+    const c = all[`photo:${id}`] as CachedPhoto | undefined
+    if (freshPhoto(c)) out[id] = c.url
+  }
+  return out
+}
+
 /**
  * Channel photo as a data URL, cached by channel for 30 days. The image itself is cached too:
  * YouTube lets the browser keep it for only 1 day. The RSS feed has no photo, so this reads
@@ -396,10 +416,8 @@ const PHOTO_TTL = 30 * 86400_000
  */
 export async function channelPhoto(id: string): Promise<string> {
   const key = `photo:${id}`
-  const cached = (await chrome.storage.local.get(key))[key] as
-    { url: string; at: number } | undefined
-  // Older entries hold the remote URL, not the image: load them again.
-  if (cached?.url.startsWith('data:') && Date.now() - cached.at < PHOTO_TTL) return cached.url
+  const cached = (await chrome.storage.local.get(key))[key] as CachedPhoto | undefined
+  if (freshPhoto(cached)) return cached.url
   // ucbcb=1: in the EU, without it the page redirects to consent.youtube.com (no CORS access).
   const res = await fetch(`https://www.youtube.com/channel/${id}?ucbcb=1`)
   if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`)

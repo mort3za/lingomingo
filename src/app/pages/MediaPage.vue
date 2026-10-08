@@ -5,6 +5,7 @@ import { LANGUAGES } from '@/shared/types'
 import { pickTrack } from '@/shared/captions'
 import {
   CHANNELS,
+  cachedChannelPhotos,
   channelPhoto,
   fetchChannelVideos,
   videoTracks,
@@ -24,7 +25,11 @@ const hideShorts = ref(false)
 const channels = computed(() => CHANNELS[studyLang.value] ?? [])
 
 async function refreshLang() {
-  studyLang.value = (await getSettings()).studyLang
+  const lang = (await getSettings()).studyLang
+  // Cached photos show together with their rows, not after the rows come into view.
+  const cached = await cachedChannelPhotos((CHANNELS[lang] ?? []).map((c) => c.id))
+  photos.value = { ...photos.value, ...cached }
+  studyLang.value = lang
 }
 let stop = () => {}
 onMounted(() => {
