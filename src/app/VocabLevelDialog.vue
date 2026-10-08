@@ -92,8 +92,10 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
               <span v-if="row.rank === 0" class="flex-1 text-center text-neutral-300">
                 I don't know any words yet.
               </span>
-              <span v-else class="grid flex-1 grid-cols-3 gap-x-2 text-center" :dir="dirOf(lang)">
-                <span v-for="w in row.words" :key="w" :class="style(w)">{{ w }}</span>
+              <span v-else class="flex flex-1 flex-wrap gap-x-4 gap-y-0.5" :dir="dirOf(lang)">
+                <span v-for="w in row.words" :key="w" class="whitespace-nowrap" :class="style(w)">{{
+                  w
+                }}</span>
               </span>
             </button>
           </div>
