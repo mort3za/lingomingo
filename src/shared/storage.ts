@@ -63,7 +63,8 @@ export function setStage(ids: string[], stage: SavedItem['stage']): Promise<void
   )
 }
 
-export function setReview(id: string, review: ReviewCard): Promise<void> {
+/** `review` undefined = new card again (for undo). */
+export function setReview(id: string, review: ReviewCard | undefined): Promise<void> {
   const now = Date.now()
   return serial(async () =>
     setSavedItems(

@@ -1,16 +1,30 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import type { Grade } from 'ts-fsrs'
+import { Rating, type Grade } from 'ts-fsrs'
 import { answer, dueAt, formatSpan, GRADES, isDue, learningWords, preview } from '@/shared/review'
 import { getSavedItems, getSettings, onStorageKey, setReview, setStage } from '@/shared/storage'
 import { tokenize, wordKey } from '@/shared/tokenize'
-import { DEFAULT_SETTINGS, dirOf, LANGUAGES, type SavedItem, type Settings } from '@/shared/types'
+import {
+  DEFAULT_SETTINGS,
+  dirOf,
+  LANGUAGES,
+  type ReviewCard,
+  type SavedItem,
+  type SavedWord,
+  type Settings,
+  type Stage,
+} from '@/shared/types'
+import { ignoreKey } from '../shortcuts'
 
 const items = ref<SavedItem[]>([])
 const settings = ref<Settings>({ ...DEFAULT_SETTINGS })
 const now = ref(Date.now())
 const revealed = ref(false)
 const busy = ref(false)
+/** State of the last answered word, for undo. */
+const last = ref<{ id: string; text: string; review?: ReviewCard; stage: Stage } | null>(null)
+/** After undo, show this word first, also when other words are due sooner. */
+const pinned = ref<string | null>(null)
 
 const refreshItems = async () => (items.value = await getSavedItems())
 const refreshSettings = async () => (settings.value = await getSettings())
@@ -29,7 +43,9 @@ onBeforeUnmount(() => stops.forEach((s) => s()))
 const lang = computed(() => settings.value.studyLang)
 const words = computed(() => learningWords(items.value, lang.value))
 const queue = computed(() => words.value.filter((w) => isDue(w, now.value)))
-const current = computed(() => queue.value[0] ?? null)
+const current = computed(
+  () => queue.value.find((w) => w.id === pinned.value) ?? queue.value[0] ?? null,
+)
 const due = computed(() => (current.value ? preview(current.value, now.value) : null))
 watch(
   () => current.value?.id,
@@ -46,11 +62,17 @@ const example = computed(() => {
   }))
 })
 
+const remember = (w: SavedWord) => {
+  last.value = { id: w.id, text: w.text, review: w.review, stage: w.stage }
+  pinned.value = null
+}
+
 async function rate(grade: Grade) {
   const w = current.value
   if (!w || busy.value) return
   busy.value = true
   try {
+    remember(w)
     await setReview(w.id, answer(w, Date.now(), grade))
     now.value = Date.now()
     revealed.value = false
@@ -64,20 +86,39 @@ async function learned() {
   if (!w || busy.value) return
   busy.value = true
   try {
+    remember(w)
     await setStage([w.id], 'KNOWN')
   } finally {
     busy.value = false
   }
 }
 
+async function undo() {
+  const u = last.value
+  if (!u || busy.value) return
+  busy.value = true
+  try {
+    await setReview(u.id, u.review)
+    await setStage([u.id], u.stage)
+    last.value = null
+    pinned.value = u.id
+  } finally {
+    busy.value = false
+  }
+}
+
 function onKeydown(e: KeyboardEvent) {
-  const el = e.target as HTMLElement | null
-  if (el?.matches('input, textarea, select') || e.metaKey || e.ctrlKey || e.altKey) return
-  if (!current.value) return
+  if (ignoreKey(e)) return
   const key = e.key.toLowerCase()
-  if (!revealed.value) {
+  if (key === 'z' && last.value) {
+    void undo()
+  } else if (!current.value) {
+    return
+  } else if (!revealed.value) {
     if (key !== ' ' && key !== 'enter') return
     revealed.value = true
+  } else if (key === ' ' || key === 'enter') {
+    void rate(Rating.Good)
   } else if (key === 'k') {
     void learned()
   } else {
@@ -101,6 +142,7 @@ const gradeColor: Record<number, string> = {
   4: 'bg-sky-600/70 hover:bg-sky-600',
 }
 const btn = 'rounded px-3 py-2 text-sm font-medium disabled:opacity-50 '
+const kbd = 'rounded border border-current/40 px-1 font-sans text-xs'
 </script>
 
 <template>
@@ -110,6 +152,15 @@ const btn = 'rounded px-3 py-2 text-sm font-medium disabled:opacity-50 '
       <span class="text-sm text-neutral-400">
         {{ LANGUAGES[lang] ?? lang }} · {{ queue.length }} due · {{ words.length }} learning
       </span>
+      <button
+        v-if="last"
+        class="ml-auto text-sm text-neutral-400 hover:text-white disabled:opacity-50"
+        :disabled="busy"
+        :title="`Undo the answer for “${last.text}”`"
+        @click="undo"
+      >
+        ↶ Undo <kbd :class="kbd">Z</kbd>
+      </button>
     </div>
 
     <section v-if="current" class="space-y-6 rounded-lg bg-panel p-6">
@@ -131,7 +182,7 @@ const btn = 'rounded px-3 py-2 text-sm font-medium disabled:opacity-50 '
 
       <div v-if="!revealed" class="text-center">
         <button :class="btn + 'bg-accent px-6'" @click="revealed = true">
-          Show answer <span class="opacity-60">(Space)</span>
+          Show answer <kbd :class="kbd + ' ml-1 opacity-70'">Space</kbd>
         </button>
       </div>
 
@@ -165,8 +216,11 @@ const btn = 'rounded px-3 py-2 text-sm font-medium disabled:opacity-50 '
             @click="rate(g.grade)"
           >
             {{ g.label }}
-            <div class="text-xs font-normal opacity-80">
-              {{ due ? formatSpan(due[g.grade] - now) : '' }} · {{ g.key }}
+            <div
+              class="mt-0.5 flex items-center justify-center gap-1.5 text-xs font-normal opacity-80"
+            >
+              {{ due ? formatSpan(due[g.grade] - now) : '' }}
+              <kbd :class="kbd">{{ g.grade === Rating.Good ? `${g.key} / Space` : g.key }}</kbd>
             </div>
           </button>
           <button
@@ -178,7 +232,7 @@ const btn = 'rounded px-3 py-2 text-sm font-medium disabled:opacity-50 '
             @click="learned"
           >
             ✓ Learned
-            <div class="text-xs font-normal opacity-80">K</div>
+            <div class="mt-0.5 text-xs font-normal opacity-80"><kbd :class="kbd">K</kbd></div>
           </button>
         </div>
       </template>
