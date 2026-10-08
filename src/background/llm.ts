@@ -109,18 +109,31 @@ export async function translateLines(
   studyLang: string,
   nativeLang: string,
 ): Promise<string[]> {
+  // Numbered keys keep the model aligned. A plain array lets it merge or split lines, mostly
+  // with auto-generated captions, where a sentence runs across several lines.
   const system =
     `You translate subtitle lines from ${name(studyLang)} to ${name(nativeLang)}. ` +
-    `Input is a JSON array of strings. Answer with ONLY a JSON array of the same length, ` +
-    `with one translation per input line, in the same order. Keep each translation short and natural.`
-  const user = JSON.stringify(lines)
+    `Input is a JSON object that maps line numbers to lines. A sentence can start in one line ` +
+    `and end in a different line. Answer with ONLY a JSON object with the same keys, and the ` +
+    `translation of each line under its own key. Never merge or split lines. ` +
+    `Keep each translation short and natural.`
+  const user = JSON.stringify(Object.fromEntries(lines.map((line, i) => [i + 1, line])))
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const out = extractJson(await ask(settings, system, user))
-      if (Array.isArray(out) && out.length === lines.length) return out.map(String)
+      const out = extractJson(await ask(settings, system, user)) as Record<string, unknown>
+      const result = lines.map((_, i) => out[i + 1])
+      if (result.every((t) => typeof t === 'string')) return result as string[]
     } catch (e) {
       if (attempt === 1) throw e
     }
+  }
+  // Still misaligned: smaller requests are easier for the model to keep aligned.
+  if (lines.length > 1) {
+    const half = Math.ceil(lines.length / 2)
+    return [
+      ...(await translateLines(settings, lines.slice(0, half), studyLang, nativeLang)),
+      ...(await translateLines(settings, lines.slice(half), studyLang, nativeLang)),
+    ]
   }
   throw new Error('Model returned a wrong number of lines.')
 }
