@@ -1,17 +1,35 @@
 # LingoMingo
 
 A Chrome extension (Manifest V3) to learn languages with YouTube and any web page.
-It is a simplified clone of Language Reactor. See [docs/origin/](docs/origin/README.md).
+It is a simplified clone of Language Reactor.
 
-Stack: Bun, Vite + CRXJS, Vue 3, TypeScript, Tailwind CSS v4.
+![LingoMingo on YouTube: dual subtitles, word colors by level, word popup and subtitle list](docs/screenshot.jpg)
 
-## Setup
+## Install
+
+1. Download the zip file (`lingomingo-***.zip`) from the [latest release](https://github.com/mort3za/lingomingo/releases/latest).
+2. Unzip it into a folder that you keep (Chrome loads the extension from this folder).
+3. Open `chrome://extensions` and turn on **Developer mode** (top right).
+4. Click **Load unpacked** and select the unzipped folder.
+5. Click the LingoMingo toolbar icon to open the app. In **Settings**, set your study language and your native language.
+6. Open a YouTube video with subtitles.
+
+You need **your own API key** to enable subtitle translation and the word dictionary. Get a key from [Claude](https://console.anthropic.com/) or [DeepSeek](https://platform.deepseek.com/), and add it in **Settings**. Or use a local model (Ollama, llama.cpp server, LM Studio) without a key.
+
+To update: download the new zip, replace the files in the same folder, then click the reload icon of LingoMingo on `chrome://extensions`.
+
+## Development
 
 ```bash
 bun install
+bun run dev
 ```
 
-## Scripts
+`bun run dev` writes a dev build to `dist/` and reloads on change. Keep it running. To load it in Chrome: open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and select the `dist/` folder.
+
+To make a release, run `bun run release patch|minor|major` on `main`. It bumps the version, tags and pushes. GitHub Actions then builds the zip and makes the release.
+
+### Scripts
 
 | Command                | What it does                                    |
 | ---------------------- | ----------------------------------------------- |
@@ -22,25 +40,6 @@ bun install
 | `bun run format`       | Prettier (write)                                |
 | `bun run format:check` | Prettier (check only)                           |
 | `bun run test`         | `bun test`                                      |
-
-## Load the extension in Chrome
-
-1. Run `bun run dev` (or `bun run build`).
-2. Open `chrome://extensions` and turn on **Developer mode**.
-3. Click **Load unpacked** and select the `dist/` folder.
-
-## Structure
-
-```
-manifest.config.ts   Extension manifest (CRXJS)
-vite.config.ts       Build config
-src/
-  background/        Service worker: toolbar click opens app page, context menu
-  content/           YouTube content scripts (Vue in shadow DOM)
-  sidepanel/         Chrome side panel page
-  app/               Main extension page: media, reader, saved items, settings, ...
-  shared/            Shared code and styles (Tailwind theme)
-```
 
 ## License
 
