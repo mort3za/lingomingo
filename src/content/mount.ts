@@ -15,6 +15,18 @@ export function mountInShadow(
   properties.replaceSync((css.match(/@property[^{]+\{[^}]*\}/g) ?? []).join('\n'))
   document.adoptedStyleSheets.push(properties)
 
+  const { host, root } = shadowHost()
+  parent.append(host)
+
+  createApp(component, props).mount(root)
+  return host
+}
+
+/**
+ * A host element with our CSS in its shadow root, and the element inside it to render into.
+ * Use it as a `<Teleport>` target for UI that must show outside the app's own host.
+ */
+export function shadowHost(): { host: HTMLElement; root: HTMLElement } {
   const host = document.createElement('lingomingo-root')
   const shadow = host.attachShadow({ mode: 'open' })
 
@@ -25,8 +37,5 @@ export function mountInShadow(
 
   const root = document.createElement('div')
   shadow.append(style, root)
-  parent.append(host)
-
-  createApp(component, props).mount(root)
-  return host
+  return { host, root }
 }

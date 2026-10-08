@@ -21,7 +21,10 @@ const round =
 
 <template>
   <div
-    class="pointer-events-auto absolute bottom-16 left-1/2 flex w-[min(90%,900px)] -translate-x-1/2 items-stretch gap-3 rounded-lg bg-black/80 px-3 py-2 font-sans text-white"
+    :class="
+      s.settings.value.subtitlesOnTop ? 'top-14' : s.onShorts.value ? 'bottom-36' : 'bottom-16'
+    "
+    class="pointer-events-auto absolute left-1/2 flex w-[min(90%,900px)] -translate-x-1/2 items-stretch gap-3 rounded-lg bg-black/80 px-3 py-2 font-sans text-white"
   >
     <div class="flex flex-col justify-center gap-1">
       <button :class="round" title="Next (D)" @click="s.next()">›</button>
@@ -85,6 +88,15 @@ const round =
         @click="s.toggleAutoPause()"
       >
         AP
+      </button>
+      <button
+        :class="round"
+        :title="
+          s.settings.value.subtitlesOnTop ? 'Move subtitles to bottom' : 'Move subtitles to top'
+        "
+        @click="s.toggleSubtitlesOnTop()"
+      >
+        {{ s.settings.value.subtitlesOnTop ? '↓' : '↑' }}
       </button>
     </div>
   </div>

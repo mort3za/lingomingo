@@ -1,4 +1,5 @@
 import { onBeforeUnmount, watchEffect, type Ref } from 'vue'
+import { toolbarGroup } from './page'
 
 // Like the native buttons of the new player: a filled icon when on, an outline icon when off.
 export const ICONS = {
@@ -45,13 +46,11 @@ export function usePlayerToggles(toggles: Toggle[], visible: () => boolean) {
   const parts = toggles.map(makeButton)
   const buttons = parts.map((p) => p.btn)
 
-  // YouTube can rebuild its toolbar. Put the buttons back when they are gone.
+  // YouTube can rebuild its toolbar, and Shorts pages have another one. Keep the buttons in
+  // the toolbar of the current page.
   const place = () => {
-    // `-left` is the button group of the new player. Older players have only the outer bar.
-    const bar =
-      document.querySelector('#movie_player .ytp-right-controls-left') ??
-      document.querySelector('#movie_player .ytp-right-controls')
-    if (bar && !buttons[0]!.isConnected) bar.prepend(...buttons)
+    const bar = toolbarGroup()
+    if (bar && buttons[0]!.parentElement !== bar) bar.prepend(...buttons)
   }
   place()
   const timer = setInterval(place, 1000)

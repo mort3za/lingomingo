@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
 import type { Stage } from '@/shared/types'
+import { shadowHost } from '../mount'
+import { currentPlayer, relatedColumn } from './page'
 import SidePanel from './SidePanel.vue'
 import SubtitleBar from './SubtitleBar.vue'
 import { useYoutubeSession } from './session'
@@ -8,7 +10,9 @@ import { ICONS, usePlayerToggles } from './toolbar'
 import WordPopup from './WordPopup.vue'
 
 const s = useYoutubeSession()
-const selected = ref<{ word: string; idx: number; rect: DOMRect } | null>(null)
+// `inDock`: the word is in the docked subtitles list. The player clips its children, so the popup
+// for such a word must show in the dock too.
+const selected = ref<{ word: string; idx: number; rect: DOMRect; inDock: boolean } | null>(null)
 const active = computed(() => s.status.value !== 'idle')
 watch(s.videoId, () => (selected.value = null))
 watch(s.showSubs, () => (selected.value = null))
@@ -31,6 +35,22 @@ watchEffect(() => {
     !s.showSubs.value || (s.status.value !== 'loading' && s.status.value !== 'ready')
 })
 
+// The subtitles list goes over the related videos, next to the video, as high as the video.
+// In fullscreen, on Shorts, or in narrow windows there is no such column: it stays on the video.
+const { host: dockHost, root: dock } = shadowHost()
+dock.style.height = '100%'
+const docked = ref(false)
+function placeDock() {
+  const column = relatedColumn()
+  docked.value = !!column
+  if (column && dockHost.parentElement !== column) column.prepend(dockHost)
+  const height = Math.min(currentPlayer()?.offsetHeight ?? 0, innerHeight - 80)
+  dockHost.style.cssText =
+    `display:${docked.value && s.showPanel.value ? 'block' : 'none'};height:${height}px;` +
+    'position:sticky;top:72px;z-index:100;margin-bottom:12px;'
+}
+let dockTimer = 0
+
 // Close the popup on a click anywhere outside it.
 function onPointerDown(e: PointerEvent) {
   if (!selected.value) return
@@ -40,7 +60,8 @@ function onPointerDown(e: PointerEvent) {
 
 function openWord(word: string, el: HTMLElement, idx = s.activeIdx.value) {
   s.video()?.pause()
-  selected.value = { word, idx, rect: el.getBoundingClientRect() }
+  const inDock = el.getRootNode() === dock.getRootNode()
+  selected.value = { word, idx, rect: el.getBoundingClientRect(), inDock }
 }
 
 const savedItem = computed(() =>
@@ -89,10 +110,17 @@ function onKeydown(e: KeyboardEvent) {
 onMounted(() => {
   window.addEventListener('keydown', onKeydown, true)
   window.addEventListener('pointerdown', onPointerDown, true)
+  document.addEventListener('fullscreenchange', placeDock)
+  placeDock()
+  dockTimer = window.setInterval(placeDock, 500)
 })
+watch(s.showPanel, placeDock)
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydown, true)
   window.removeEventListener('pointerdown', onPointerDown, true)
+  document.removeEventListener('fullscreenchange', placeDock)
+  clearInterval(dockTimer)
+  dockHost.remove()
   hideNative.remove()
 })
 </script>
@@ -106,27 +134,32 @@ onBeforeUnmount(() => {
       @word="(w, el) => openWord(w, el)"
       @mark="(w) => markLearning(w)"
     />
-    <SidePanel
-      v-if="s.showPanel.value"
-      :s="s"
-      :selected="selected"
-      @close="s.showPanel.value = false"
-      @word="openWord"
-      @mark="markLearning"
-    />
-    <WordPopup
-      v-if="selected"
-      :key="selected.word + selected.idx"
-      class="pointer-events-auto"
-      :word="selected.word"
-      :sentence="s.cues.value[selected.idx]?.text ?? ''"
-      :rect="selected.rect"
-      :study-lang="s.settings.value.studyLang"
-      :native-lang="s.settings.value.nativeLang"
-      :saved-item="savedItem"
-      @stage="setStage"
-      @remove="s.unmarkWord(selected.word)"
-      @close="selected = null"
-    />
+    <Teleport :to="dock" :disabled="!docked">
+      <SidePanel
+        v-if="s.showPanel.value"
+        :s="s"
+        :selected="selected"
+        :docked="docked"
+        @close="s.showPanel.value = false"
+        @word="openWord"
+        @mark="markLearning"
+      />
+    </Teleport>
+    <Teleport :to="dock" :disabled="!selected?.inDock">
+      <WordPopup
+        v-if="selected"
+        :key="selected.word + selected.idx"
+        class="pointer-events-auto"
+        :word="selected.word"
+        :sentence="s.cues.value[selected.idx]?.text ?? ''"
+        :rect="selected.rect"
+        :study-lang="s.settings.value.studyLang"
+        :native-lang="s.settings.value.nativeLang"
+        :saved-item="savedItem"
+        @stage="setStage"
+        @remove="s.unmarkWord(selected.word)"
+        @close="selected = null"
+      />
+    </Teleport>
   </div>
 </template>

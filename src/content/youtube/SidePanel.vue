@@ -4,7 +4,12 @@ import { dirOf } from '@/shared/types'
 import type { YoutubeSession } from './session'
 import WordText from './WordText.vue'
 
-const props = defineProps<{ s: YoutubeSession; selected: { word: string; idx: number } | null }>()
+const props = defineProps<{
+  s: YoutubeSession
+  selected: { word: string; idx: number } | null
+  /** Shown over the related videos column, not on the video. */
+  docked: boolean
+}>()
 const emit = defineEmits<{
   close: []
   word: [word: string, el: HTMLElement, idx: number]
@@ -23,7 +28,12 @@ watch(
 
 <template>
   <div
-    class="pointer-events-auto absolute top-0 right-0 bottom-14 flex w-[340px] flex-col bg-surface/95 font-sans text-white"
+    :class="
+      docked
+        ? 'h-full w-full overflow-hidden rounded-xl bg-surface'
+        : 'absolute top-0 right-0 bottom-14 w-[340px] bg-surface/95'
+    "
+    class="pointer-events-auto flex flex-col font-sans text-white"
   >
     <div class="flex items-center justify-between border-b border-white/10 px-3 py-2">
       <div class="border-b-2 border-accent pb-1 text-sm font-medium">Subtitles</div>

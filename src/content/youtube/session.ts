@@ -22,15 +22,12 @@ import {
   type Stage,
 } from '@/shared/types'
 import { lemmaOf, loadWordList, type Vocab, type WordList } from '@/shared/vocab'
+import { currentPlayer, currentVideoId, isShorts } from './page'
 
 const CHUNK = 40
 const RETRY_MS = 15_000
 
 type Status = 'idle' | 'loading' | 'ready' | 'no-subs' | 'error'
-
-function currentVideoId(): string | null {
-  return location.pathname === '/watch' ? new URLSearchParams(location.search).get('v') : null
-}
 
 /**
  * Send a request to the page-world script (youtube-main.ts) every `everyMs`, until an answer
@@ -83,6 +80,8 @@ export function useYoutubeSession() {
   const settings = ref<Settings>({ ...DEFAULT_SETTINGS })
   const saved = ref<SavedItem[]>([])
   const videoId = ref<string | null>(null)
+  // On Shorts pages, YouTube puts the channel and title over the bottom of the player.
+  const onShorts = ref(false)
   const title = ref('')
   const status = ref<Status>('idle')
   const message = ref('')
@@ -135,7 +134,7 @@ export function useYoutubeSession() {
     () => new Set(saved.value.filter((i) => i.itemType === 'PHRASE').map((i) => i.id)),
   )
 
-  const video = () => document.querySelector<HTMLVideoElement>('video.html5-main-video')
+  const video = () => currentPlayer()?.querySelector<HTMLVideoElement>('video.html5-main-video')
 
   // ---- loading ----
   let loadToken = 0
@@ -143,6 +142,7 @@ export function useYoutubeSession() {
     const id = currentVideoId()
     const token = ++loadToken
     videoId.value = id
+    onShorts.value = isShorts()
     cues.value = []
     human.value = []
     machine.value = []
@@ -170,11 +170,13 @@ export function useYoutubeSession() {
       title.value = info.title
       // No auto-generated track: the language is unknown, so show our UI.
       const spoken = audioLang(info.tracks)
-      showSubs.value = showPanel.value = !spoken || spoken === studyLang
+      showSubs.value = !spoken || spoken === studyLang
+      // The list covers half of a Shorts player, so it starts closed there.
+      showPanel.value = showSubs.value && !isShorts()
       const studyTrack = pickTrack(info.tracks, studyLang)
       if (!studyTrack) {
         status.value = 'no-subs'
-        message.value = `No human-made ${LANGUAGES[studyLang] ?? studyLang} subtitles on this video.`
+        message.value = `No ${LANGUAGES[studyLang] ?? studyLang} subtitles on this video.`
         return
       }
       // The page script needs the video to play its own captions once. Ads delay this.
@@ -291,6 +293,8 @@ export function useYoutubeSession() {
     else v.pause()
   }
   const toggleAutoPause = () => patchSettings({ autoPause: !settings.value.autoPause })
+  const toggleSubtitlesOnTop = () =>
+    patchSettings({ subtitlesOnTop: !settings.value.subtitlesOnTop })
 
   // ---- saving ----
   function videoRef(idx: number) {
@@ -394,6 +398,7 @@ export function useYoutubeSession() {
     settings,
     saved,
     videoId,
+    onShorts,
     status,
     message,
     cues,
@@ -414,6 +419,7 @@ export function useYoutubeSession() {
     prev,
     togglePlay,
     toggleAutoPause,
+    toggleSubtitlesOnTop,
     togglePhrase,
     markWord,
     unmarkWord,
