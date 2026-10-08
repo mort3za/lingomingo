@@ -164,21 +164,42 @@ const { settings } = useSettings()
           id="olmodel"
           v-model="settings.ollamaModel"
           :class="input"
-          placeholder="gemma4:26b"
+          placeholder="translategemma:12b"
         />
-        <p class="mt-1 text-xs text-neutral-500">
-          Examples:
-          <button
-            v-for="m in ['gemma4:26b', 'qwen3.6:35b-a3b']"
-            :key="m"
-            type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
-            @click="settings.ollamaModel = m"
+        <div class="mt-1 space-y-1 text-xs text-neutral-500">
+          <p
+            v-for="m in [
+              {
+                name: 'translategemma:4b',
+                badge: 'Fastest',
+                why: 'Needs about 4 GB of memory. Very low delay, good for slow computers.',
+              },
+              {
+                name: 'translategemma:12b',
+                badge: 'Recommended',
+                why: 'Needs about 8 GB of memory. Better with idioms and slang, and still fast.',
+              },
+              {
+                name: 'translategemma:27b',
+                badge: 'Best',
+                why: 'Needs about 17 GB of memory. Highest quality, but slower.',
+              },
+            ]"
+            :key="m.name"
           >
-            {{ m }}
-          </button>
-          — Both are fast and good at translation.
-        </p>
+            <button
+              type="button"
+              class="font-mono text-neutral-400 underline hover:text-white"
+              @click="settings.ollamaModel = m.name"
+            >
+              {{ m.name }}
+            </button>
+            <span class="ml-1 rounded bg-white/10 px-1.5 py-0.5 text-neutral-300">{{
+              m.badge
+            }}</span>
+            — {{ m.why }}
+          </p>
+        </div>
       </div>
       <div class="rounded border border-white/10 p-3 text-xs text-neutral-400">
         <p class="font-medium text-neutral-300">Set up Ollama</p>
@@ -191,7 +212,7 @@ const { settings } = useSettings()
           </li>
           <li>
             Download a model:
-            <code class="font-mono text-neutral-300">ollama pull gemma4:26b</code>
+            <code class="font-mono text-neutral-300">ollama pull translategemma:12b</code>
           </li>
           <li>
             Stop Ollama if it runs. Then start it, and allow the extension to connect:
