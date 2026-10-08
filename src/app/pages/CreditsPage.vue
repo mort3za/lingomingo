@@ -50,7 +50,7 @@ const data = [
 <template>
   <div class="max-w-2xl space-y-8">
     <h1 class="text-2xl font-semibold">Credits</h1>
-    <p class="text-sm text-neutral-400">Lingomingo uses these open source projects. Thank you!</p>
+    <p class="text-sm text-neutral-400">LingoMingo uses these open source projects. Thank you!</p>
 
     <section class="space-y-3">
       <h2 class="text-lg font-medium">Software</h2>

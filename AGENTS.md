@@ -38,8 +38,8 @@ This project is a Chrome extension (Manifest V3). The build uses **Vite + `@crxj
 - UI: Vue 3 (`<script setup lang="ts">`), vue-router (hash history), Tailwind CSS v4.
 - Manifest: `manifest.config.ts`. Pages not in the manifest must be added to `build.rolldownOptions.input` in `vite.config.ts`.
 - Entry points:
-  - `src/background/` — service worker (toolbar click opens the app page, context menu "Read in Lingomingo").
-  - `src/content/` — Netflix / YouTube content scripts. Mount Vue in a shadow root with `mountInShadow()`.
+  - `src/background/` — service worker (toolbar click opens the app page, context menu "Read in LingoMingo").
+  - `src/content/` — YouTube content scripts. Mount Vue in a shadow root with `mountInShadow()`.
   - `src/sidepanel/` — `chrome.sidePanel` page.
   - `src/app/` — main extension page with all app pages (media, reader, saved items, settings, ...). No popup.
   - `src/shared/` — code and styles used by more than one entry point.

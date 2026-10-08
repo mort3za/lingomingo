@@ -19,8 +19,8 @@ watch(s.showSubs, () => (selected.value = null))
 
 usePlayerToggles(
   [
-    { label: 'Lingomingo subtitles', icon: ICONS.subtitles, on: s.showSubs },
-    { label: 'Lingomingo subtitles list', icon: ICONS.sidebar, on: s.showPanel },
+    { label: 'LingoMingo subtitles', icon: ICONS.subtitles, on: s.showSubs },
+    { label: 'LingoMingo subtitles list', icon: ICONS.sidebar, on: s.showPanel },
   ],
   () => active.value,
 )

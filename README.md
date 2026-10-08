@@ -1,6 +1,6 @@
-# Lingomingo
+# LingoMingo
 
-A Chrome extension (Manifest V3) to learn languages with Netflix, YouTube, and any web page.
+A Chrome extension (Manifest V3) to learn languages with YouTube and any web page.
 It is a simplified clone of Language Reactor. See [docs/origin/](docs/origin/README.md).
 
 Stack: Bun, Vite + CRXJS, Vue 3, TypeScript, Tailwind CSS v4.
@@ -36,7 +36,7 @@ manifest.config.ts   Extension manifest (CRXJS)
 vite.config.ts       Build config
 src/
   background/        Service worker: toolbar click opens app page, context menu
-  content/           Netflix / YouTube content scripts (Vue in shadow DOM)
+  content/           YouTube content scripts (Vue in shadow DOM)
   sidepanel/         Chrome side panel page
   app/               Main extension page: media, reader, saved items, settings, ...
   shared/            Shared code and styles (Tailwind theme)

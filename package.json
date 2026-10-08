@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "license": "GPL-3.0-or-later",
+  "author": "Morteza Ziyaeimehr <morteza.zym@gmail.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mort3za/lingomingo.git"

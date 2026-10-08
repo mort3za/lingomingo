@@ -12,7 +12,7 @@ chrome.action.onClicked.addListener(() => {
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: READ_MENU_ID,
-    title: 'Read in Lingomingo',
+    title: 'Read in LingoMingo',
     contexts: ['page', 'selection'],
   })
 })

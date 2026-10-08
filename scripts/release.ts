@@ -39,7 +39,7 @@ const format = '--format=- %s%n%b'
 const commits = await $`git log ${range} --no-merges ${format}`.text()
 
 console.log(`Writing release notes for ${tag}...`)
-const prompt = `Write the GitHub release notes for ${tag} of Lingomingo, a Chrome extension for learning languages with Netflix, YouTube and web pages. The git commits since the last release are on stdin.
+const prompt = `Write the GitHub release notes for ${tag} of LingoMingo, a Chrome extension for learning languages with YouTube and web pages. The git commits since the last release are on stdin.
 - Write for users, not developers. Leave out refactors, tooling and other internal changes.
 - Use Markdown "### Features", "### Fixes" and "### Other" sections with short bullet points. Leave out empty sections.
 - Output only the notes: no title, no version, no text before or after.`
