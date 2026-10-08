@@ -389,7 +389,8 @@ async function readFeed(channel: Channel, query: string): Promise<CatalogueVideo
 const PHOTO_TTL = 30 * 86400_000
 
 /**
- * Channel photo URL, cached by channel for 30 days. The RSS feed has no photo, so this reads
+ * Channel photo as a data URL, cached by channel for 30 days. The image itself is cached too:
+ * YouTube lets the browser keep it for only 1 day. The RSS feed has no photo, so this reads
  * the `og:image` tag of the channel page. The page is large (the tag is about 800 KB in),
  * so it stops reading once the tag is found.
  */
@@ -397,7 +398,8 @@ export async function channelPhoto(id: string): Promise<string> {
   const key = `photo:${id}`
   const cached = (await chrome.storage.local.get(key))[key] as
     { url: string; at: number } | undefined
-  if (cached && Date.now() - cached.at < PHOTO_TTL) return cached.url
+  // Older entries hold the remote URL, not the image: load them again.
+  if (cached?.url.startsWith('data:') && Date.now() - cached.at < PHOTO_TTL) return cached.url
   // ucbcb=1: in the EU, without it the page redirects to consent.youtube.com (no CORS access).
   const res = await fetch(`https://www.youtube.com/channel/${id}?ucbcb=1`)
   if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`)
@@ -410,10 +412,21 @@ export async function channelPhoto(id: string): Promise<string> {
     const found = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1]
     if (!found) continue
     void reader.cancel()
-    const url = found.replace(/=s\d+/, '=s88') // the page links a 900 px image
+    const img = await fetch(found.replace(/=s\d+/, '=s88')) // the page links a 900 px image
+    if (!img.ok) throw new Error(`HTTP ${img.status}`)
+    const url = await dataUrl(await img.blob())
     await chrome.storage.local.set({ [key]: { url, at: Date.now() } })
     return url
   }
+}
+
+function dataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(blob)
+  })
 }
 
 export type TrackInfo = Pick<CaptionTrack, 'languageCode' | 'kind'>
