@@ -65,7 +65,7 @@ export interface VideoRef {
   endMs: number
 }
 
-export type Provider = 'claude' | 'deepseek' | 'local'
+export type Provider = 'claude' | 'openai' | 'grok' | 'deepseek' | 'local'
 
 export interface Settings {
   studyLang: string
@@ -73,6 +73,10 @@ export interface Settings {
   provider: Provider
   claudeKey: string
   claudeModel: string
+  openaiKey: string
+  openaiModel: string
+  grokKey: string
+  grokModel: string
   deepseekKey: string
   deepseekModel: string
   /** OpenAI-compatible endpoint (Ollama, llama.cpp server, LM Studio). */
@@ -95,6 +99,10 @@ export const DEFAULT_SETTINGS: Settings = {
   provider: 'claude',
   claudeKey: '',
   claudeModel: 'claude-haiku-5-5',
+  openaiKey: '',
+  openaiModel: 'gpt-6-luna',
+  grokKey: '',
+  grokModel: 'grok-4.3',
   deepseekKey: '',
   deepseekModel: 'deepseek-flash',
   localBaseUrl: 'http://localhost:11434/v1',

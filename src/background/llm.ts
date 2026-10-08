@@ -24,6 +24,33 @@ async function ask(settings: Settings, system: string, user: string): Promise<st
     return data.content.map((c) => c.text ?? '').join('')
   }
 
+  if (settings.provider === 'openai') {
+    if (!settings.openaiKey) throw new Error('Add your OpenAI API key in Settings.')
+    return chat(
+      'OpenAI API',
+      'https://api.openai.com/v1',
+      settings.openaiModel,
+      system,
+      user,
+      settings.openaiKey,
+      // Reasoning models reject a custom temperature. undefined drops it from the request.
+      { temperature: undefined },
+    )
+  }
+
+  if (settings.provider === 'grok') {
+    if (!settings.grokKey) throw new Error('Add your xAI API key in Settings.')
+    return chat(
+      'xAI API',
+      'https://api.x.ai/v1',
+      settings.grokModel,
+      system,
+      user,
+      settings.grokKey,
+      { temperature: undefined },
+    )
+  }
+
   if (settings.provider === 'deepseek') {
     if (!settings.deepseekKey) throw new Error('Add your DeepSeek API key in Settings.')
     return chat(
@@ -42,7 +69,7 @@ async function ask(settings: Settings, system: string, user: string): Promise<st
   return chat('Local model', settings.localBaseUrl, settings.localModel, system, user)
 }
 
-/** OpenAI-compatible chat completion (DeepSeek, Ollama, llama.cpp, LM Studio). */
+/** OpenAI-compatible chat completion (OpenAI, xAI, DeepSeek, Ollama, llama.cpp, LM Studio). */
 async function chat(
   label: string,
   baseUrl: string,
