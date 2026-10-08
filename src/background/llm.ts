@@ -33,6 +33,8 @@ async function ask(settings: Settings, system: string, user: string): Promise<st
       system,
       user,
       settings.deepseekKey,
+      // Thinking is on by default; short translations do not need it.
+      { thinking: { type: 'disabled' } },
     )
   }
 
@@ -48,6 +50,7 @@ async function chat(
   system: string,
   user: string,
   key?: string,
+  extra?: Record<string, unknown>,
 ): Promise<string> {
   const base = baseUrl.replace(/\/+$/, '')
   const res = await fetch(`${base}/chat/completions`, {
@@ -63,6 +66,7 @@ async function chat(
         { role: 'system', content: system },
         { role: 'user', content: user },
       ],
+      ...extra,
     }),
   })
   if (!res.ok) throw new Error(`${label} ${res.status}: ${(await res.text()).slice(0, 200)}`)
