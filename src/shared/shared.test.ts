@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test'
-import { alignTranslation, findCueIndex, parseJson3, pickTrack } from './captions'
+import { alignTranslation, audioLang, findCueIndex, parseJson3, pickTrack } from './captions'
 import { toCsv } from './export'
 import { extractJson } from './llm-json'
 import { tokenize } from './tokenize'
@@ -13,6 +13,16 @@ test('pickTrack never returns auto-generated tracks', () => {
   ]
   expect(pickTrack(tracks, 'es')?.baseUrl).toBe('b')
   expect(pickTrack(tracks, 'en')).toBeNull()
+})
+
+test('audioLang reads the auto-generated track', () => {
+  expect(
+    audioLang([
+      { baseUrl: 'a', languageCode: 'de' },
+      { baseUrl: 'b', languageCode: 'en-US', kind: 'asr' },
+    ]),
+  ).toBe('en')
+  expect(audioLang([{ baseUrl: 'a', languageCode: 'de' }])).toBeNull()
 })
 
 test('pickTrack prefers exact language code', () => {

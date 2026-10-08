@@ -1,5 +1,5 @@
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
-import { alignTranslation, findCueIndex, parseJson3, pickTrack } from '@/shared/captions'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { alignTranslation, audioLang, findCueIndex, parseJson3, pickTrack } from '@/shared/captions'
 import { send } from '@/shared/messages'
 import {
   getSavedItems,
@@ -92,6 +92,10 @@ export function useYoutubeSession() {
   const translationError = ref('')
   const activeIdx = ref(-1)
   const cueVisible = ref(false)
+  // What the user sees. Both start off, and turn on when the video is in the study language.
+  const showSubs = ref(false)
+  const showPanel = ref(false)
+  const studying = () => showSubs.value || showPanel.value
 
   const translationOf = (i: number): string | null => human.value[i] ?? machine.value[i] ?? null
 
@@ -124,6 +128,8 @@ export function useYoutubeSession() {
     translationError.value = ''
     message.value = ''
     requested.clear()
+    showSubs.value = false
+    showPanel.value = false
     if (!id) {
       status.value = 'idle'
       return
@@ -140,6 +146,9 @@ export function useYoutubeSession() {
       if (token !== loadToken) return
       if (!info) throw new Error('Could not read the YouTube player.')
       title.value = info.title
+      // No auto-generated track: the language is unknown, so show our UI.
+      const spoken = audioLang(info.tracks)
+      showSubs.value = showPanel.value = !spoken || spoken === studyLang
       const studyTrack = pickTrack(info.tracks, studyLang)
       if (!studyTrack) {
         status.value = 'no-subs'
@@ -206,7 +215,7 @@ export function useYoutubeSession() {
   }
 
   function ensureTranslations(idx: number) {
-    if (status.value !== 'ready') return
+    if (status.value !== 'ready' || !studying()) return
     // A human translation track exists: never use AI for this video.
     if (human.value.length) return
     const chunk = Math.floor(Math.max(idx, 0) / CHUNK)
@@ -230,7 +239,7 @@ export function useYoutubeSession() {
       if (cue) {
         // Pause only when playback just crossed the end, not after a seek into a gap.
         const atEnd = t >= cue.end - 0.05 && t < cue.end + 0.5
-        if (settings.value.autoPause && !v.paused && idx !== pausedFor && atEnd) {
+        if (settings.value.autoPause && showSubs.value && !v.paused && idx !== pausedFor && atEnd) {
           pausedFor = idx
           v.pause()
         }
@@ -320,6 +329,9 @@ export function useYoutubeSession() {
 
   const unmarkWord = (word: string) => removeItems([wordId(settings.value.studyLang, word)])
 
+  // Translate the current cue when the user turns the subtitles or the list on.
+  watch([showSubs, showPanel], () => ensureTranslations(activeIdx.value))
+
   // ---- lifecycle ----
   const stops: (() => void)[] = []
   async function refreshSettings() {
@@ -359,6 +371,9 @@ export function useYoutubeSession() {
     cues,
     activeIdx,
     cueVisible,
+    showSubs,
+    showPanel,
+    studying,
     translationError,
     translationOf,
     stageByWord,

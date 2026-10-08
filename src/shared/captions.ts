@@ -4,6 +4,15 @@ export function primaryLang(code: string): string {
   return code.toLowerCase().split(/[-_]/)[0] ?? ''
 }
 
+/**
+ * Spoken language of the video: YouTube makes the auto-generated (`asr`) track from the audio.
+ * Null when there is no such track.
+ */
+export function audioLang(tracks: CaptionTrack[]): string | null {
+  const asr = tracks.find((t) => t.kind === 'asr')
+  return asr ? primaryLang(asr.languageCode) : null
+}
+
 /** Pick a human-made track for a language. Auto-generated (`asr`) tracks are never accepted. */
 export function pickTrack(tracks: CaptionTrack[], lang: string): CaptionTrack | null {
   const manual = tracks.filter((t) => t.kind !== 'asr' && primaryLang(t.languageCode) === lang)

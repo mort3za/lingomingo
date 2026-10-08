@@ -5,21 +5,31 @@ import type { Stage } from '@/shared/types'
 import SidePanel from './SidePanel.vue'
 import SubtitleBar from './SubtitleBar.vue'
 import { useYoutubeSession } from './session'
+import { ICONS, usePlayerToggles } from './toolbar'
 import WordPopup from './WordPopup.vue'
 
 const s = useYoutubeSession()
-const panelOpen = ref(false)
 const selected = ref<{ word: string; idx: number; rect: DOMRect } | null>(null)
 const active = computed(() => s.status.value !== 'idle')
 watch(s.videoId, () => (selected.value = null))
+watch(s.showSubs, () => (selected.value = null))
+
+usePlayerToggles(
+  [
+    { label: 'Lingomingo subtitles', icon: ICONS.subtitles, on: s.showSubs },
+    { label: 'Lingomingo subtitles list', icon: ICONS.sidebar, on: s.showPanel },
+  ],
+  () => active.value,
+)
 
 // Hide the native captions while our bar shows subtitles (or loads them).
-// If this video has no usable subtitles for us, the native ones stay visible.
+// If our bar is off, or this video has no usable subtitles for us, the native ones stay visible.
 const hideNative = document.createElement('style')
 hideNative.textContent = '.ytp-caption-window-container { display: none !important; }'
 document.documentElement.append(hideNative)
 watchEffect(() => {
-  hideNative.disabled = s.status.value !== 'loading' && s.status.value !== 'ready'
+  hideNative.disabled =
+    !s.showSubs.value || (s.status.value !== 'loading' && s.status.value !== 'ready')
 })
 
 // Close the popup on a click anywhere outside it.
@@ -60,7 +70,7 @@ function onKeydown(e: KeyboardEvent) {
     e.altKey
   )
     return
-  if (s.status.value !== 'ready') return
+  if (s.status.value !== 'ready' || !s.studying()) return
   const actions: Record<string, () => void> = {
     a: s.prev,
     arrowleft: s.prev,
@@ -93,16 +103,14 @@ onBeforeUnmount(() => {
 
 <template>
   <div v-if="active" class="pointer-events-none absolute inset-0 z-[60]">
-    <SubtitleBar :s="s" :selected="selected?.word ?? null" @word="openWord" @mark="markLearning" />
-    <button
-      v-if="!panelOpen"
-      class="pointer-events-auto absolute top-3 right-3 grid size-9 place-items-center rounded bg-black/60 text-white hover:bg-black/80"
-      title="Subtitles list"
-      @click="panelOpen = true"
-    >
-      ☰
-    </button>
-    <SidePanel v-if="panelOpen" :s="s" @close="panelOpen = false" />
+    <SubtitleBar
+      v-if="s.showSubs.value"
+      :s="s"
+      :selected="selected?.word ?? null"
+      @word="openWord"
+      @mark="markLearning"
+    />
+    <SidePanel v-if="s.showPanel.value" :s="s" @close="s.showPanel.value = false" />
     <WordPopup
       v-if="selected"
       :key="selected.word + selected.idx"
