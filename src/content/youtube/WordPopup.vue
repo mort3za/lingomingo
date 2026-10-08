@@ -1,3 +1,8 @@
+<script lang="ts">
+// Word translations of this tab, so a second click on the same word sends no new request.
+const cache = new Map<string, string[]>()
+</script>
+
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { send } from '@/shared/messages'
@@ -23,8 +28,14 @@ const translations = ref<string[]>(
 const loading = ref(false)
 const error = ref('')
 
+const cacheKey = `${props.studyLang}:${props.nativeLang}:${props.word}`
 onMounted(async () => {
   if (translations.value.length) return
+  const cached = cache.get(cacheKey)
+  if (cached) {
+    translations.value = cached
+    return
+  }
   loading.value = true
   try {
     translations.value = await send({
@@ -34,6 +45,7 @@ onMounted(async () => {
       studyLang: props.studyLang,
       nativeLang: props.nativeLang,
     })
+    cache.set(cacheKey, translations.value)
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
   } finally {
@@ -42,19 +54,29 @@ onMounted(async () => {
 })
 
 const stage = computed(() => props.savedItem?.stage)
-// Show above the word; centered on it, kept inside the screen.
+// A click on the active stage button removes the word from the saved items.
+function pick(s: Stage) {
+  if (stage.value === s) emit('remove')
+  else emit('stage', s, translations.value)
+}
+// Show above the word (below it near the top of the screen); centered on it, kept inside the screen.
+const below = props.rect.top < 240
 const style = computed(() => {
   const x = Math.min(Math.max(props.rect.left + props.rect.width / 2, 130), innerWidth - 130)
-  return { left: `${x}px`, top: `${props.rect.top - 8}px` }
+  const y = below ? props.rect.bottom + 8 : props.rect.top - 8
+  return { left: `${x}px`, top: `${y}px` }
 })
 
-const btn = 'flex-1 rounded px-2 py-1 text-xs font-medium hover:bg-white/20 '
+const btn = 'flex-1 rounded px-2 py-1 text-xs font-medium '
+// Hover only on inactive buttons, so it does not hide the active color.
+const off = 'bg-white/10 hover:bg-white/20'
 </script>
 
 <template>
   <div
     data-lm-popup
-    class="fixed z-10 w-60 -translate-x-1/2 -translate-y-full rounded-lg bg-[#1565a0] p-3 font-sans text-white shadow-xl"
+    class="fixed z-10 w-60 -translate-x-1/2 rounded-lg bg-[#1565a0] p-3 font-sans text-white shadow-xl"
+    :class="below ? '' : '-translate-y-full'"
     :style="style"
     @click.stop
   >
@@ -74,31 +96,21 @@ const btn = 'flex-1 rounded px-2 py-1 text-xs font-medium hover:bg-white/20 '
       </li>
     </ol>
     <div class="mt-3 flex gap-1">
-      <button
-        :class="btn + (stage === 'KNOWN' ? 'bg-emerald-500/60' : 'bg-white/10')"
-        @click="emit('stage', 'KNOWN', translations)"
-      >
+      <button :class="btn + (stage === 'KNOWN' ? 'bg-emerald-500/60' : off)" @click="pick('KNOWN')">
         ✓ Known
       </button>
       <button
-        :class="btn + (stage === 'LEARNING' ? 'bg-orange-500/70' : 'bg-white/10')"
-        @click="emit('stage', 'LEARNING', translations)"
+        :class="btn + (stage === 'LEARNING' ? 'bg-orange-500/70' : off)"
+        @click="pick('LEARNING')"
       >
         Learn
       </button>
       <button
-        :class="btn + (stage === 'SKIPPED' ? 'bg-violet-500/60' : 'bg-white/10')"
-        @click="emit('stage', 'SKIPPED', translations)"
+        :class="btn + (stage === 'SKIPPED' ? 'bg-violet-500/60' : off)"
+        @click="pick('SKIPPED')"
       >
         ⊘ Skip
       </button>
     </div>
-    <button
-      v-if="savedItem"
-      class="mt-2 text-xs text-white/60 hover:text-white"
-      @click="emit('remove')"
-    >
-      Remove from saved
-    </button>
   </div>
 </template>

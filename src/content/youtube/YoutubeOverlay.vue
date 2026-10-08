@@ -39,9 +39,9 @@ function onPointerDown(e: PointerEvent) {
   if (!inPopup) selected.value = null
 }
 
-function openWord(word: string, el: HTMLElement) {
+function openWord(word: string, el: HTMLElement, idx = s.activeIdx.value) {
   s.video()?.pause()
-  selected.value = { word, idx: s.activeIdx.value, rect: el.getBoundingClientRect() }
+  selected.value = { word, idx, rect: el.getBoundingClientRect() }
 }
 
 const savedItem = computed(() =>
@@ -58,7 +58,8 @@ async function setStage(stage: Stage, translations: string[]) {
 }
 
 // Right-click = mark as Learning without a popup.
-const markLearning = (word: string) => s.markWord(word, s.activeIdx.value, 'LEARNING', [])
+const markLearning = (word: string, idx = s.activeIdx.value) =>
+  s.markWord(word, idx, 'LEARNING', [])
 
 function onKeydown(e: KeyboardEvent) {
   const el = e.target as HTMLElement | null
@@ -106,11 +107,18 @@ onBeforeUnmount(() => {
     <SubtitleBar
       v-if="s.showSubs.value"
       :s="s"
-      :selected="selected?.word ?? null"
+      :selected="selected?.idx === s.activeIdx.value ? selected.word : null"
+      @word="(w, el) => openWord(w, el)"
+      @mark="(w) => markLearning(w)"
+    />
+    <SidePanel
+      v-if="s.showPanel.value"
+      :s="s"
+      :selected="selected"
+      @close="s.showPanel.value = false"
       @word="openWord"
       @mark="markLearning"
     />
-    <SidePanel v-if="s.showPanel.value" :s="s" @close="s.showPanel.value = false" />
     <WordPopup
       v-if="selected"
       :key="selected.word + selected.idx"

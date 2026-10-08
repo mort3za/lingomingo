@@ -2,9 +2,14 @@
 import { nextTick, watch } from 'vue'
 import { dirOf } from '@/shared/types'
 import type { YoutubeSession } from './session'
+import WordText from './WordText.vue'
 
-const props = defineProps<{ s: YoutubeSession }>()
-const emit = defineEmits<{ close: [] }>()
+const props = defineProps<{ s: YoutubeSession; selected: { word: string; idx: number } | null }>()
+const emit = defineEmits<{
+  close: []
+  word: [word: string, el: HTMLElement, idx: number]
+  mark: [word: string, idx: number]
+}>()
 
 const rows = new Map<number, HTMLElement>()
 watch(
@@ -39,7 +44,16 @@ watch(
         @click="s.goTo(i)"
       >
         <div class="flex-1">
-          <div :dir="dirOf(s.settings.value.studyLang)">{{ c.text }}</div>
+          <div :dir="dirOf(s.settings.value.studyLang)">
+            <WordText
+              :text="c.text"
+              :lang="s.settings.value.studyLang"
+              :stages="s.stageByWord.value"
+              :selected="selected?.idx === i ? selected.word : null"
+              @word="(w, el) => emit('word', w, el, i)"
+              @mark="(w) => emit('mark', w, i)"
+            />
+          </div>
           <div
             v-if="s.translationOf(i)"
             class="text-xs text-neutral-400"
