@@ -1,7 +1,7 @@
 # LingoMingo
 
 A Chrome extension (Manifest V3) to learn languages with YouTube and any web page.
-It is a simplified clone of Language Reactor.
+It is inspired by Language Reactor. LingoMingo is not affiliated with Language Reactor, YouTube or Google.
 
 ![LingoMingo on YouTube: dual subtitles, word colors by level, word popup and subtitle list](docs/screenshot.jpg)
 
@@ -41,8 +41,12 @@ To make a release, run `bun run release patch|minor|major` on `main`. It bumps t
 | `bun run format:check` | Prettier (check only)                           |
 | `bun run test`         | `bun test`                                      |
 
+## Privacy
+
+LingoMingo has no server, no analytics and no cookies. See [PRIVACY.md](PRIVACY.md).
+
 ## License
 
-Code: [GNU GPL v3](LICENSE) or later.
+Code: [GNU GPL v3](LICENSE) or later. Open source libraries in the extension: [public/THIRD_PARTY_LICENSES.txt](public/THIRD_PARTY_LICENSES.txt).
 
 Word lists in `public/freq/` have their own licenses: frequency lists (`<lang>.txt`) are CC BY-SA 4.0, lemma lists (`<lang>-lemmas.txt`) are ODbL 1.0. See [public/freq/CREDITS.txt](public/freq/CREDITS.txt). To make them again: `bun scripts/freq-lists.ts`.

@@ -35,8 +35,9 @@ jobs:
       - run: bun test
       - run: bun run build
 
+      # The GPL text must ship with the extension. Third-party licenses come from public/.
       - name: Zip dist
-        run: cd dist && zip -r "../lingomingo-$GITHUB_REF_NAME.zip" .
+        run: cp LICENSE dist/ && cd dist && zip -r "../lingomingo-$GITHUB_REF_NAME.zip" .
 
       - name: Create release
         env:
