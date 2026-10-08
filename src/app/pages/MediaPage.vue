@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch, type Directive } from 'vue'
 import { getSettings, onStorageKey } from '@/shared/storage'
 import { LANGUAGES } from '@/shared/types'
-import { CHANNELS, fetchChannelVideos, type CatalogueVideo } from '../catalogue'
+import { CHANNELS, channelPhoto, fetchChannelVideos, type CatalogueVideo } from '../catalogue'
 
 const studyLang = ref('')
 const videos = ref<CatalogueVideo[]>([])
@@ -46,6 +46,35 @@ const shown = computed(() => {
     )
     .sort((a, b) => (sort.value === 'date' ? b.published - a.published : b.views - a.views))
 })
+
+// The list shows PAGE videos, and PAGE more each time its end comes into view.
+const PAGE = 30
+const limit = ref(PAGE)
+const page = computed(() => shown.value.slice(0, limit.value))
+watch(shown, () => (limit.value = PAGE))
+
+/** `v-visible="fn"` calls fn each time the element comes into view. */
+const observers = new WeakMap<Element, IntersectionObserver>()
+const vVisible: Directive<HTMLElement, () => void> = {
+  mounted(el, { value }) {
+    const io = new IntersectionObserver(([e]) => e?.isIntersecting && value())
+    io.observe(el)
+    observers.set(el, io)
+  },
+  unmounted: (el) => observers.get(el)?.disconnect(),
+}
+
+// Channel photos load when their row comes into view. On error the row keeps its letter.
+const photos = ref<Record<string, string>>({})
+const asked = new Set<string>()
+function loadPhoto(id: string) {
+  if (asked.has(id)) return
+  asked.add(id)
+  channelPhoto(id).then(
+    (url) => (photos.value[id] = url),
+    () => {},
+  )
+}
 
 const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
 const units: [Intl.RelativeTimeFormatUnit, number][] = [
@@ -109,9 +138,16 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           v-for="c in channels"
           :key="c.id"
           :class="row + (channelId === c.id ? 'bg-panel' : '')"
+          v-visible="() => loadPhoto(c.id)"
           @click="channelId = c.id"
         >
-          <span class="grid size-9 place-items-center rounded-full bg-accent font-semibold">
+          <img
+            v-if="photos[c.id]"
+            :src="photos[c.id]"
+            alt=""
+            class="size-9 shrink-0 rounded-full object-cover"
+          />
+          <span v-else class="grid size-9 place-items-center rounded-full bg-accent font-semibold">
             {{ c.name[0] }}
           </span>
           <span class="flex-1 truncate">{{ c.name }}</span>
@@ -133,7 +169,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
       <p v-else-if="!shown.length" class="py-12 text-center text-neutral-500">No videos found.</p>
 
       <a
-        v-for="v in shown"
+        v-for="v in page"
         :key="v.videoId"
         :href="watchUrl(v)"
         target="_blank"
@@ -158,6 +194,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           </div>
         </div>
       </a>
+      <div v-if="shown.length > limit" v-visible="() => (limit += PAGE)" class="h-px" />
     </section>
   </div>
 </template>
