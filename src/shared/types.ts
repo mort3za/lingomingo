@@ -95,6 +95,8 @@ export interface Settings {
   showKnownGreen: boolean
   showSuggested: boolean
   darkenRare: boolean
+  /** Channel IDs shown at the top of the channel list on the Media page. */
+  pinnedChannels: string[]
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -122,6 +124,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showKnownGreen: true,
   showSuggested: true,
   darkenRare: true,
+  pinnedChannels: [],
 }
 
 export const LANGUAGES: Record<string, string> = {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch, type Directive } from 'vue'
-import { getSettings, onStorageKey } from '@/shared/storage'
+import { getSettings, onStorageKey, patchSettings } from '@/shared/storage'
 import { LANGUAGES } from '@/shared/types'
 import { pickTrack } from '@/shared/captions'
 import {
@@ -24,8 +24,26 @@ const hideShorts = ref(false)
 
 const channels = computed(() => CHANNELS[studyLang.value] ?? [])
 
+// Pinned channels show first. Sort is stable, so each group keeps the catalogue order.
+const pinned = ref<string[]>([])
+const sortedChannels = computed(() =>
+  [...channels.value].sort(
+    (a, b) => Number(pinned.value.includes(b.id)) - Number(pinned.value.includes(a.id)),
+  ),
+)
+function togglePin(id: string) {
+  // A plain array: chrome.storage saves a Vue proxy as an object, not an array.
+  const list = pinned.value.includes(id)
+    ? pinned.value.filter((p) => p !== id)
+    : [...pinned.value, id]
+  pinned.value = list
+  void patchSettings({ pinnedChannels: list })
+}
+
 async function refreshLang() {
-  const lang = (await getSettings()).studyLang
+  const settings = await getSettings()
+  pinned.value = settings.pinnedChannels
+  const lang = settings.studyLang
   // Cached photos show together with their rows, not after the rows come into view.
   const cached = await cachedChannelPhotos((CHANNELS[lang] ?? []).map((c) => c.id))
   photos.value = { ...photos.value, ...cached }
@@ -48,6 +66,10 @@ watch(channels, async (list) => {
 })
 
 const visible = computed(() => videos.value.filter((v) => !hideShorts.value || !v.isShort))
+function pickChannel(id: string) {
+  channelId.value = id
+  window.scrollTo({ top: 0 })
+}
 const countOf = (id: string) => visible.value.filter((v) => v.channelId === id).length
 const shown = computed(() => {
   const q = query.value.toLowerCase()
@@ -143,6 +165,21 @@ const thumbUrl = (v: CatalogueVideo) => `https://i.ytimg.com/vi/${v.videoId}/mqd
 
 const field =
   'rounded border border-white/10 bg-surface-deep px-3 py-1.5 text-sm outline-none focus:border-accent'
+// Tabler "pin" icon (a tilted push pin), drawn like the icons in the app nav.
+const pinIcon = [
+  'M15 4.5l-4 4l-4 1.5l-1.5 1.5l7 7l1.5 -1.5l1.5 -4l4 -4',
+  'M9 15l-4.5 4.5',
+  'M14.5 4l5.5 5.5',
+]
+const iconAttrs = {
+  class: 'size-4',
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  'stroke-width': 2,
+  'stroke-linecap': 'round',
+  'stroke-linejoin': 'round',
+} as const
 const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm hover:bg-white/5 '
 </script>
 
@@ -174,19 +211,25 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
 
       <div class="border-t border-white/10 pt-4">
         <div class="mb-2 text-center text-neutral-400">Channel</div>
-        <button :class="row + (channelId === '' ? 'bg-panel' : '')" @click="channelId = ''">
+        <button :class="row + (channelId === '' ? 'bg-panel' : '')" @click="pickChannel('')">
           <span class="grid size-9 place-items-center rounded bg-accent font-semibold">
             {{ studyLang.toUpperCase() }}
           </span>
           <span class="flex-1">All channels</span>
         </button>
-        <button
-          v-for="c in channels"
+        <div
+          v-for="c in sortedChannels"
           :key="c.id"
+          class="group relative"
           :class="row + (channelId === c.id ? 'bg-panel' : '')"
           v-visible="() => loadPhoto(c.id)"
-          @click="channelId = c.id"
         >
+          <!-- Covers the whole row, so a click anywhere but the pin picks the channel. -->
+          <button
+            class="absolute inset-0 rounded"
+            :aria-label="c.name"
+            @click="pickChannel(c.id)"
+          />
           <img
             v-if="photos[c.id]"
             :src="photos[c.id]"
@@ -197,10 +240,26 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
             {{ c.name[0] }}
           </span>
           <span class="flex-1 truncate">{{ c.name }}</span>
+          <button
+            class="relative z-10 rounded p-0.5 hover:bg-white/10"
+            :class="
+              pinned.includes(c.id)
+                ? 'text-accent'
+                : 'text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-white focus-visible:opacity-100'
+            "
+            :title="pinned.includes(c.id) ? 'Unpin channel' : 'Pin channel to top'"
+            :aria-label="pinned.includes(c.id) ? 'Unpin channel' : 'Pin channel to top'"
+            :aria-pressed="pinned.includes(c.id)"
+            @click="togglePin(c.id)"
+          >
+            <svg v-bind="iconAttrs" :fill="pinned.includes(c.id) ? 'currentColor' : 'none'">
+              <path v-for="d in pinIcon" :key="d" :d="d" />
+            </svg>
+          </button>
           <span class="rounded bg-white/10 px-1.5 text-xs text-neutral-300">{{
             countOf(c.id)
           }}</span>
-        </button>
+        </div>
       </div>
     </aside>
 
