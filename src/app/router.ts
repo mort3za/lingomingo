@@ -11,6 +11,7 @@ export const router = createRouter({
     { path: '/saved-items', component: () => import('./pages/SavedItemsPage.vue') },
     { path: '/settings', component: () => import('./pages/SettingsPage.vue') },
     { path: '/credits', component: () => import('./pages/CreditsPage.vue') },
+    { path: '/donate', component: () => import('./pages/DonatePage.vue') },
     { path: '/setup', component: () => import('./pages/SetupPage.vue') },
   ],
 })
