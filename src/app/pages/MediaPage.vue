@@ -42,7 +42,8 @@ function togglePin(id: string) {
 
 async function refreshLang() {
   const settings = await getSettings()
-  pinned.value = settings.pinnedChannels
+  // Older versions of the settings page saved this list as an object ({0: id, 1: id}).
+  pinned.value = Object.values(settings.pinnedChannels)
   const lang = settings.studyLang
   // Cached photos show together with their rows, not after the rows come into view.
   const cached = await cachedChannelPhotos((CHANNELS[lang] ?? []).map((c) => c.id))

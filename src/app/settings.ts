@@ -24,7 +24,8 @@ watch(
     stored = json
     clearTimeout(timer)
     timer = setTimeout(async () => {
-      await patchSettings({ ...value })
+      // A plain copy: chrome.storage saves a nested Vue proxy array as an object.
+      await patchSettings(JSON.parse(json))
       saved.value = true
       setTimeout(() => (saved.value = false), 1200)
     }, 300)
