@@ -91,12 +91,40 @@ async function ask(
 
   if (settings.provider === 'ollama') {
     if (!settings.ollamaModel) throw new Error('Set the Ollama model name in Settings.')
-    return chat('Ollama', settings.ollamaBaseUrl, settings.ollamaModel, system, user, call)
+    // Thinking models (gemma4, qwen3, ...) think by default; short translations do not need it.
+    // Models without thinking ignore this field.
+    return chat(
+      'Ollama',
+      settings.ollamaBaseUrl,
+      settings.ollamaModel,
+      system,
+      user,
+      call,
+      undefined,
+      {
+        reasoning_effort: 'none',
+      },
+    )
   }
 
   if (settings.provider === 'lmstudio') {
     if (!settings.lmstudioModel) throw new Error('Set the LM Studio model name in Settings.')
-    return chat('LM Studio', settings.lmstudioBaseUrl, settings.lmstudioModel, system, user, call)
+    const args = [
+      'LM Studio',
+      settings.lmstudioBaseUrl,
+      settings.lmstudioModel,
+      system,
+      user,
+      call,
+    ] as const
+    // LM Studio 0.4.8+ turns thinking off with reasoning_effort "none". Models that always think
+    // (DeepSeek R1) can reject it: then ask again without it.
+    try {
+      return await chat(...args, undefined, { reasoning_effort: 'none' })
+    } catch (e) {
+      if (!(e instanceof Error && /^LM Studio 4\d\d/.test(e.message))) throw e
+      return chat(...args)
+    }
   }
 
   if (!settings.localModel) throw new Error('Set the local model name in Settings.')
