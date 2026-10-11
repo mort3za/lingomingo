@@ -19,25 +19,45 @@ function setLevel(value: number | undefined) {
 </script>
 
 <template>
-  <div v-if="LEVEL_LANGS.includes(settings.studyLang)" class="flex flex-wrap items-center gap-3">
-    <button
-      type="button"
-      class="rounded border border-white/30 px-4 py-2 text-sm font-medium tracking-wide uppercase hover:bg-white/10"
-      @click="levelOpen = true"
-    >
-      Set vocabulary level
-    </button>
-    <span class="text-sm text-neutral-400">
-      {{ level === undefined ? 'Not set' : `You know the ${level} most common words` }}
-    </span>
-    <button
-      v-if="level !== undefined"
-      type="button"
-      class="text-sm text-neutral-400 underline hover:text-white"
-      @click="setLevel(undefined)"
-    >
-      Turn off
-    </button>
+  <div
+    v-if="LEVEL_LANGS.includes(settings.studyLang)"
+    class="flex flex-wrap items-center justify-between gap-3 rounded border border-white/10 bg-surface-deep px-4 py-3"
+  >
+    <div>
+      <div class="text-xs font-medium tracking-wide text-neutral-400 uppercase">
+        Vocabulary level · {{ LANGUAGES[settings.studyLang] }}
+      </div>
+      <div v-if="level === undefined" class="text-sm text-neutral-300">
+        Not set. Set it to see the words you know in color.
+      </div>
+      <div v-else class="text-sm">
+        You know the
+        <span class="font-semibold tabular-nums">{{ level.toLocaleString('en') }}</span> most common
+        words
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <button
+        v-if="level !== undefined"
+        type="button"
+        class="text-sm text-neutral-400 underline hover:text-white"
+        @click="setLevel(undefined)"
+      >
+        Turn off
+      </button>
+      <button
+        type="button"
+        class="rounded px-4 py-2 text-sm font-medium"
+        :class="
+          level === undefined
+            ? 'border border-transparent bg-accent hover:brightness-110'
+            : 'border border-white/20 hover:bg-white/10'
+        "
+        @click="levelOpen = true"
+      >
+        {{ level === undefined ? 'Set level' : 'Change level' }}
+      </button>
+    </div>
   </div>
   <p v-else class="text-sm text-neutral-400">
     Vocabulary level is not available for {{ LANGUAGES[settings.studyLang] }} yet.

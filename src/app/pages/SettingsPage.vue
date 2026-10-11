@@ -1,10 +1,44 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { LEVEL_LANGS, WORD_STYLE } from '@/shared/vocab'
 import LanguageFields from '../LanguageFields.vue'
 import ProviderFields from '../ProviderFields.vue'
 import VocabLevelField from '../VocabLevelField.vue'
 import { useSettings } from '../settings'
 
 const { settings, saved } = useSettings()
+
+const hasLevel = computed(
+  () =>
+    LEVEL_LANGS.includes(settings.value.studyLang) &&
+    settings.value.vocabLevels[settings.value.studyLang] !== undefined,
+)
+const colorOptions = [
+  {
+    key: 'showKnownGreen',
+    title: 'Known words',
+    on: 'green',
+    style: 'KNOWN',
+    hint: 'Words below your level, and words you marked as Known.',
+    needsLevel: false,
+  },
+  {
+    key: 'showSuggested',
+    title: 'Suggested words',
+    on: 'orange',
+    style: 'SUGGESTED',
+    hint: 'The next 1,000 common words above your level. Learn these next.',
+    needsLevel: true,
+  },
+  {
+    key: 'darkenRare',
+    title: 'Rare words',
+    on: 'darker',
+    style: 'RARE',
+    hint: 'Words far above your level, or not in the word list. Skip them for now. Recommended.',
+    needsLevel: true,
+  },
+] as const
 
 const card = 'space-y-4 rounded-lg bg-panel p-5'
 const hint = 'text-sm text-neutral-400'
@@ -38,18 +72,30 @@ const check = 'flex items-center gap-2 text-sm'
         <p :class="hint">Colors in subtitles and texts show which words you know.</p>
       </div>
       <VocabLevelField />
-      <div class="space-y-2 border-t border-white/10 pt-4">
-        <label :class="[check, 'text-emerald-300']">
-          <input v-model="settings.showKnownGreen" type="checkbox" class="accent-accent" />
-          Show known words in green
-        </label>
-        <label :class="[check, 'text-orange-200']">
-          <input v-model="settings.showSuggested" type="checkbox" class="accent-accent" />
-          Show suggested words in orange color
-        </label>
-        <label :class="[check, 'text-white/45']">
-          <input v-model="settings.darkenRare" type="checkbox" class="accent-accent" />
-          Darken rare words (recommended)
+      <div class="space-y-3">
+        <label
+          v-for="opt in colorOptions"
+          :key="opt.key"
+          class="flex items-start gap-3"
+          :class="opt.needsLevel && !hasLevel ? 'opacity-50' : 'cursor-pointer'"
+        >
+          <input
+            v-model="settings[opt.key]"
+            type="checkbox"
+            class="mt-1 accent-accent"
+            :disabled="opt.needsLevel && !hasLevel"
+          />
+          <span class="flex-1">
+            <span class="flex items-center gap-2 text-sm">
+              {{ opt.title }}
+              <span
+                class="rounded bg-surface-deep px-1.5 text-xs"
+                :class="settings[opt.key] ? WORD_STYLE[opt.style] : 'text-neutral-500'"
+                >{{ settings[opt.key] ? opt.on : 'off' }}</span
+              >
+            </span>
+            <span class="block text-xs text-neutral-500">{{ opt.hint }}</span>
+          </span>
         </label>
       </div>
     </section>
