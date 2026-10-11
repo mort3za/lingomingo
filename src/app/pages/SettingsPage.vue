@@ -121,8 +121,10 @@ const check = 'flex items-center gap-2 text-sm'
       <div>
         <h2 class="text-lg font-medium">AI translation</h2>
         <p :class="hint">
-          Used when YouTube has no human-made subtitles in your translation language, and for the
-          word popup. Auto-generated YouTube subtitles are never used.
+          Translates the subtitles when YouTube has no subtitles in your translation language. Also
+          used for the word popup, and for translations and example sentences on the Review and
+          Saved pages. LingoMingo never uses YouTube's automatic translation. It can use YouTube's
+          auto-generated subtitles.
         </p>
       </div>
       <ProviderFields />

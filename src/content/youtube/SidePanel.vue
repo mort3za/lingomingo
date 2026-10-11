@@ -105,10 +105,10 @@ watch(
           @click="s.goTo(i)"
         >
           <div class="flex-1">
-            <div :dir="dirOf(s.settings.value.studyLang)">
+            <div :dir="dirOf(s.lang.value)">
               <WordText
                 :text="c.text"
-                :lang="s.settings.value.studyLang"
+                :lang="s.lang.value"
                 :vocab="s.vocab.value"
                 :selected="selected?.idx === i ? selected.word : null"
                 @word="(w, el) => emit('word', w, el, i)"

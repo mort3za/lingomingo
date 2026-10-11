@@ -130,21 +130,24 @@ export function useYoutubeSession() {
   const translationError = ref('')
   const activeIdx = ref(-1)
   const cueVisible = ref(false)
-  // What the user sees. Both start off, and turn on when the video is in the study language.
+  // What the user sees. Both start off, and turn on when the video is not in the native language.
   const showSubs = ref(false)
   const showPanel = ref(false)
+  // Language of the video: the spoken language, else the study language. Words and phrases
+  // saved from this video get this language, so the study language does not need to match.
+  const lang = ref(DEFAULT_SETTINGS.studyLang)
   const studying = () => showSubs.value || showPanel.value
 
   const translationOf = (i: number): string | null => human.value[i] ?? machine.value[i] ?? null
 
-  // Word list of the study language: frequency ranks and lemmas.
+  // Word list of the video language: frequency ranks and lemmas.
   const list = shallowRef<WordList | null>(null)
   watch(
-    () => settings.value.studyLang,
-    async (lang) => {
+    lang,
+    async (code) => {
       list.value = null
-      const value = await loadWordList(lang).catch(() => null)
-      if (lang === settings.value.studyLang) list.value = value
+      const value = await loadWordList(code).catch(() => null)
+      if (code === lang.value) list.value = value
     },
     { immediate: true },
   )
@@ -152,7 +155,7 @@ export function useYoutubeSession() {
 
   const savedWords = computed(() =>
     saved.value.filter(
-      (i): i is SavedWord => i.itemType === 'WORD' && i.langCode === settings.value.studyLang,
+      (i): i is SavedWord => i.itemType === 'WORD' && i.langCode === lang.value,
     ),
   )
   /** The saved word with the same lemma ("ging" finds a saved "gehe"). */
@@ -163,7 +166,7 @@ export function useYoutubeSession() {
   const vocab = computed<Vocab>(() => ({
     stages: stageByWord.value,
     list: list.value,
-    level: settings.value.vocabLevels[settings.value.studyLang],
+    level: settings.value.vocabLevels[lang.value],
     showKnownGreen: settings.value.showKnownGreen,
     showSuggested: settings.value.showSuggested,
     darkenRare: settings.value.darkenRare,
@@ -209,18 +212,20 @@ export function useYoutubeSession() {
       if (token !== loadToken) return
       if (!info) throw new Error('Could not read the YouTube player.')
       title.value = info.title
-      // No auto-generated track: the language is unknown, so show our UI.
-      const spoken = audioLang(info.tracks)
-      showSubs.value = !spoken || spoken === studyLang
+      // No auto-generated track: the spoken language is unknown, so use the study language.
+      const code = audioLang(info.tracks) ?? studyLang
+      lang.value = code
+      // A video in the native language needs no dual subtitles.
+      showSubs.value = code !== nativeLang
       // The list covers half of a Shorts player, so it starts closed there.
       showPanel.value = showSubs.value && !isShorts()
-      const studyTrack = pickTrack(info.tracks, studyLang)
+      const studyTrack = pickTrack(info.tracks, code)
       if (!studyTrack) {
         status.value = 'no-subs'
-        message.value = `No ${LANGUAGES[studyLang] ?? studyLang} subtitles on this video.`
+        message.value = `No ${LANGUAGES[code] ?? code} subtitles on this video.`
         return
       }
-      const nativeTrack = nativeLang === studyLang ? null : pickTrack(info.tracks, nativeLang)
+      const nativeTrack = nativeLang === code ? null : pickTrack(info.tracks, nativeLang)
       const { study: studyCues, native: nativeCues } = await videoCaptions(
         id,
         studyTrack,
@@ -259,7 +264,7 @@ export function useYoutubeSession() {
     const { done, cancel } = requestChunk(
       {
         videoId: id,
-        studyLang: settings.value.studyLang,
+        studyLang: lang.value,
         nativeLang: settings.value.nativeLang,
         chunk,
         lines: slice.map((c) => c.text),
@@ -355,7 +360,7 @@ export function useYoutubeSession() {
   }
 
   const phraseKey = (idx: number) =>
-    phraseId(settings.value.studyLang, videoId.value ?? '', videoRef(idx).startMs)
+    phraseId(lang.value, videoId.value ?? '', videoRef(idx).startMs)
 
   async function togglePhrase(idx: number) {
     const cue = cues.value[idx]
@@ -366,7 +371,7 @@ export function useYoutubeSession() {
     await upsertItem({
       id,
       itemType: 'PHRASE',
-      langCode: settings.value.studyLang,
+      langCode: lang.value,
       translationLang: settings.value.nativeLang,
       stage: 'LEARNING',
       createdAt: now,
@@ -380,12 +385,12 @@ export function useYoutubeSession() {
   async function markWord(word: string, idx: number, stage: Stage, translations: string[]) {
     const old = savedWordOf(word)
     // One saved item per lemma: marking "ging" updates a saved "gehe".
-    const id = old?.id ?? wordId(settings.value.studyLang, lemma(word))
+    const id = old?.id ?? wordId(lang.value, lemma(word))
     const now = Date.now()
     await upsertItem({
       id,
       itemType: 'WORD',
-      langCode: settings.value.studyLang,
+      langCode: lang.value,
       translationLang: settings.value.nativeLang,
       stage,
       createdAt: now,
@@ -445,6 +450,7 @@ export function useYoutubeSession() {
   return {
     settings,
     saved,
+    lang,
     videoId,
     onShorts,
     status,

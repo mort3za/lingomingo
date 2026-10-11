@@ -37,11 +37,11 @@ const round =
         <template v-if="cue && s.cueVisible.value">
           <div
             class="text-[28px] leading-snug font-medium"
-            :dir="dirOf(s.settings.value.studyLang)"
+            :dir="dirOf(s.lang.value)"
           >
             <WordText
               :text="cue.text"
-              :lang="s.settings.value.studyLang"
+              :lang="s.lang.value"
               :vocab="s.vocab.value"
               :selected="selected"
               @word="(w, el) => emit('word', w, el)"
