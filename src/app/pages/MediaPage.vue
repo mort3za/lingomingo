@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch, type Directive } from 'vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useTemplateRef,
+  watch,
+  type Directive,
+} from 'vue'
 import { getSettings, onStorageKey, patchSettings } from '@/shared/storage'
 import { LANGUAGES } from '@/shared/types'
 import { pickTrack } from '@/shared/captions'
@@ -31,6 +40,23 @@ const sortedChannels = computed(() =>
     (a, b) => Number(pinned.value.includes(b.id)) - Number(pinned.value.includes(a.id)),
   ),
 )
+// Channel search: the header shows a search field in place of its title.
+const channelSearch = ref(false)
+const channelQuery = ref('')
+const channelInput = useTemplateRef<HTMLInputElement>('channelInput')
+async function openChannelSearch() {
+  channelSearch.value = true
+  await nextTick()
+  channelInput.value?.focus()
+}
+function closeChannelSearch() {
+  channelSearch.value = false
+  channelQuery.value = ''
+}
+const foundChannels = computed(() => {
+  const q = channelQuery.value.toLowerCase()
+  return sortedChannels.value.filter((c) => !q || c.name.toLowerCase().includes(q))
+})
 function togglePin(id: string) {
   // A plain array: chrome.storage saves a Vue proxy as an object, not an array.
   const list = pinned.value.includes(id)
@@ -172,6 +198,20 @@ const pinIcon = [
   'M9 15l-4.5 4.5',
   'M14.5 4l5.5 5.5',
 ]
+// Tabler "search" and "x" icons.
+const searchIcon = ['M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0', 'M21 21l-6 -6']
+const closeIcon = ['M18 6l-12 12', 'M6 6l12 12']
+// Tabler "calendar" and "eye" icons for the sort buttons.
+const calendarIcon = [
+  'M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12',
+  'M16 3v4',
+  'M8 3v4',
+  'M4 11h16',
+]
+const eyeIcon = [
+  'M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0',
+  'M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6',
+]
 const iconAttrs = {
   class: 'size-4',
   viewBox: '0 0 24 24',
@@ -192,26 +232,58 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
         <div class="flex overflow-hidden rounded border border-white/10">
           <button
             v-for="s in [
-              ['date', '📅 Date'],
-              ['views', '👁 Views'],
+              ['date', 'Date', calendarIcon],
+              ['views', 'Views', eyeIcon],
             ] as const"
             :key="s[0]"
-            class="flex-1 py-1.5 text-sm"
+            class="flex flex-1 items-center justify-center gap-1.5 py-1.5 text-sm"
             :class="sort === s[0] ? 'bg-panel text-white' : 'text-neutral-400 hover:bg-white/5'"
             @click="sort = s[0]"
           >
+            <svg v-bind="iconAttrs">
+              <path v-for="d in s[2]" :key="d" :d="d" />
+            </svg>
             {{ s[1] }}
           </button>
         </div>
       </div>
-      <input v-model="query" :class="field + ' w-full'" placeholder="🔍 Search videos" />
+      <div class="relative">
+        <svg
+          v-bind="iconAttrs"
+          class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400"
+        >
+          <path v-for="d in searchIcon" :key="d" :d="d" />
+        </svg>
+        <input v-model="query" :class="field + ' w-full ps-9'" placeholder="Search videos" />
+      </div>
       <label class="flex items-center gap-2 text-sm">
         <input v-model="hideShorts" type="checkbox" class="accent-accent" />
         Hide Shorts
       </label>
 
       <div class="border-t border-white/10 pt-4">
-        <div class="mb-2 text-center text-neutral-400">Channel</div>
+        <!-- Same height in both states, so the list does not move when the search opens. -->
+        <div class="mb-2 flex h-8 items-center gap-2 ps-2">
+          <input
+            v-if="channelSearch"
+            ref="channelInput"
+            v-model="channelQuery"
+            :class="field + ' h-8 min-w-0 flex-1'"
+            placeholder="Search channels"
+            @keydown.esc="closeChannelSearch"
+          />
+          <span v-else class="flex-1 text-neutral-400">Channel</span>
+          <button
+            class="rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white"
+            :title="channelSearch ? 'Close search' : 'Search channels'"
+            :aria-label="channelSearch ? 'Close search' : 'Search channels'"
+            @click="channelSearch ? closeChannelSearch() : openChannelSearch()"
+          >
+            <svg v-bind="iconAttrs">
+              <path v-for="d in channelSearch ? closeIcon : searchIcon" :key="d" :d="d" />
+            </svg>
+          </button>
+        </div>
         <button :class="row + (channelId === '' ? 'bg-panel' : '')" @click="pickChannel('')">
           <span class="grid size-9 place-items-center rounded bg-accent font-semibold">
             {{ studyLang.toUpperCase() }}
@@ -219,7 +291,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           <span class="flex-1">All channels</span>
         </button>
         <div
-          v-for="c in sortedChannels"
+          v-for="c in foundChannels"
           :key="c.id"
           class="group relative"
           :class="row + (channelId === c.id ? 'bg-panel' : '')"
@@ -229,6 +301,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           <button
             class="absolute inset-0 rounded"
             :aria-label="c.name"
+            :title="c.name"
             @click="pickChannel(c.id)"
           />
           <img
@@ -261,6 +334,9 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
             countOf(c.id)
           }}</span>
         </div>
+        <p v-if="channelQuery && !foundChannels.length" class="px-2 py-2 text-sm text-neutral-500">
+          No channels found.
+        </p>
       </div>
     </aside>
 
