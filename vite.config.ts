@@ -21,6 +21,9 @@ export default defineConfig({
     },
   },
   server: {
+    // Fixed port: the extension in dist connects to this port for HMR.
+    port: 5180,
+    strictPort: true,
     // Let extension pages and content scripts load modules from the dev server.
     cors: {
       origin: [/chrome-extension:\/\//],
