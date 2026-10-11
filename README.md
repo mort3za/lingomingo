@@ -1,6 +1,6 @@
 # LingoMingo
 
-A Chrome extension (Manifest V3) to learn languages with YouTube and any web page.
+A Chrome extension (Manifest V3) to learn languages with YouTube.
 It is inspired by Language Reactor. LingoMingo is not affiliated with Language Reactor, YouTube or Google.
 
 ![LingoMingo on YouTube: dual subtitles, word colors by level, word popup and subtitle list](docs/screenshot.jpg)

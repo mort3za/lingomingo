@@ -4,7 +4,7 @@ import pkg from './package.json' with { type: 'json' }
 export default defineManifest({
   manifest_version: 3,
   name: 'LingoMingo',
-  description: 'Learn languages with YouTube and any web page.',
+  description: 'Learn languages with YouTube.',
   version: pkg.version,
   // PNGs are made from public/icons/icon.svg.
   icons: {
