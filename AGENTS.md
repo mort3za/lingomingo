@@ -45,6 +45,15 @@ This project is a Chrome extension (Manifest V3). The build uses **Vite + `@crxj
 - TypeScript is pinned to 6.0.x: `vue-tsc` and `typescript-eslint` do not support the TS 7 native compiler yet.
 - Reference docs for features: `docs/origin/` (Language Reactor, the product we clone).
 
+### UI conventions
+
+- New icon: same style as the icons around it (stroke width, size, family). Do not add a different icon set.
+- Row action buttons (star, copy, ...) are hidden by default and show only on row hover.
+- Hover style must never override the active/toggled style. Check both states together.
+- Nothing may shift layout when it appears (scrollbar, hover buttons, loading state). Reserve the space.
+- Brand color is Persian red (not blue, not purple). Use the project color token; do not add a new hex.
+- Check every UI change in the browser (see "Testing the extension in a browser") before you say it is done.
+
 ## Claude API key for testing AI mode
 
 The file `TOKEN_CLAUDE` in the repo root has a Claude API key. Use it to test AI mode (AI subtitle translation and the word popup).
