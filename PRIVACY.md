@@ -1,6 +1,6 @@
 # Privacy policy
 
-Last change: 2026-10-08
+Last change: 2026-10-11
 
 LingoMingo is a free, open source Chrome extension to learn languages with YouTube. This page tells you which data the extension uses, where the data goes, and how to remove it.
 
@@ -40,6 +40,7 @@ AI translation is off until you add an API key or a local model. When it is on, 
 
 - Subtitle lines of the video, when YouTube has no human-made subtitles in your language.
 - The word that you open in the word popup, and its sentence.
+- On the Review page: your words in the Learning stage and their sentences, to get missing translations and example sentences.
 - Your study language and translation language.
 
 LingoMingo does not send your name, e-mail, browser history or other pages.

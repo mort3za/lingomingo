@@ -30,8 +30,16 @@ export interface SavedWord extends SavedBase {
   /** Sentence where the word was marked. */
   context: { sentence: string; translation: string | null } | null
   source: VideoRef | null
+  /** Example sentences from the AI, for the review card. */
+  examples?: Example[]
   /** FSRS review state. Missing = new card, never reviewed. */
   review?: ReviewCard
+}
+
+/** The word in `sentence` is marked with `*`, also when its form is different. */
+export interface Example {
+  sentence: string
+  translation: string
 }
 
 /** The ts-fsrs `Card`, with dates as ms so chrome.storage can keep it. */

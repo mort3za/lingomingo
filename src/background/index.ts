@@ -6,7 +6,7 @@ import {
   type Response,
 } from '@/shared/messages'
 import { getSettings } from '@/shared/storage'
-import { translateLines, translateWord } from './llm'
+import { translateLines, translateWord, wordExtras } from './llm'
 
 const APP_URL = chrome.runtime.getURL('src/app/index.html')
 
@@ -21,8 +21,11 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
   }
 })
 
-async function handle(req: Request): Promise<string[]> {
+async function handle(req: Request): Promise<unknown> {
   const settings = await getSettings()
+  if (req.type === 'word-extras') {
+    return wordExtras(settings, req.words, req.studyLang, req.nativeLang)
+  }
   return translateWord(settings, req.word, req.sentence, req.studyLang, req.nativeLang)
 }
 
@@ -74,7 +77,7 @@ chrome.runtime.onInstalled.addListener(() => void pruneTranslations())
 
 chrome.runtime.onMessage.addListener((req: Request, _sender, sendResponse) => {
   handle(req).then(
-    (data) => sendResponse({ ok: true, data } satisfies Response<string[]>),
+    (data) => sendResponse({ ok: true, data } satisfies Response<unknown>),
     (e: unknown) => sendResponse({ ok: false, error: e instanceof Error ? e.message : String(e) }),
   )
   return true // answer is async

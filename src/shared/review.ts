@@ -1,4 +1,6 @@
 import { createEmptyCard, fsrs, Rating, type Card, type Grade } from 'ts-fsrs'
+import type { WordExtras } from './messages'
+import { tokenize, wordKey } from './tokenize'
 import type { ReviewCard, SavedItem, SavedWord } from './types'
 
 const scheduler = fsrs({ enable_fuzz: true })
@@ -75,4 +77,53 @@ export function formatSpan(ms: number): string {
   if (d < 30) return `${Math.round(d)}d`
   if (d < 365) return `${Math.round(d / 30)}mo`
   return `${Math.round((d / 365) * 10) / 10}y`
+}
+
+/** True when the review card still needs something from the AI. */
+export const needsExtras = (w: SavedWord) =>
+  !w.translations.length || (!!w.context && !w.context.translation) || (w.examples?.length ?? 0) < 2
+
+/** The fields of `w` that the AI answer `r` fills. Fields the word has already stay. */
+export function extrasPatch(w: SavedWord, r: WordExtras): Partial<SavedWord> {
+  const p: Partial<SavedWord> = {}
+  if (!w.translations.length && r.translations.length) p.translations = r.translations
+  if (w.context && !w.context.translation && r.sentence) {
+    p.context = { ...w.context, translation: r.sentence }
+  }
+  if ((w.examples?.length ?? 0) < 2 && r.examples.length) p.examples = r.examples
+  return p
+}
+
+/** Adds the new translations and examples of `r` to those of `w`, without repeats. */
+export function morePatch(w: SavedWord, r: WordExtras): Partial<SavedWord> {
+  const add = <T>(have: T[], next: T[], key: (x: T) => string) => {
+    const seen = new Set(have.map(key))
+    return [...have, ...next.filter((x) => !seen.has(key(x)) && seen.add(key(x)))]
+  }
+  return {
+    ...extrasPatch(w, r),
+    translations: add(w.translations, r.translations, (t) => t.toLowerCase()),
+    examples: add(w.examples ?? [], r.examples, (e) => e.sentence.toLowerCase()),
+  }
+}
+
+/**
+ * A sentence in parts, with the reviewed word marked. AI examples mark it with `*`; other
+ * sentences match the word as written.
+ */
+export function sentenceParts(
+  sentence: string,
+  word: string,
+  lang: string,
+): { text: string; hit: boolean }[] {
+  if (/\*[^*]+\*/.test(sentence)) {
+    return sentence
+      .split(/\*([^*]+)\*/)
+      .map((text, i) => ({ text, hit: i % 2 === 1 }))
+      .filter((p) => p.text)
+  }
+  return tokenize(sentence, lang).map((t) => ({
+    text: t.text,
+    hit: t.isWord && wordKey(t.text) === wordKey(word),
+  }))
 }

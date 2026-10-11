@@ -1,16 +1,44 @@
+import type { Example } from './types'
+
 /** Messages sent from content scripts / pages to the background service worker. */
-export type Request = {
-  type: 'translate-word'
-  word: string
-  sentence: string
-  studyLang: string
-  nativeLang: string
+export type Request =
+  | {
+      type: 'translate-word'
+      word: string
+      sentence: string
+      studyLang: string
+      nativeLang: string
+    }
+  | {
+      type: 'word-extras'
+      /**
+       * `sentence` = where the word was saved, if known. `have` = what the learner has
+       * already, to get more translations and examples without repeats.
+       */
+      words: { word: string; sentence: string | null; have?: Have }[]
+      studyLang: string
+      nativeLang: string
+    }
+
+export interface Have {
+  translations: string[]
+  examples: string[]
+}
+
+/** What the review card needs for one word. */
+export interface WordExtras {
+  translations: string[]
+  /** Translation of the word's sentence. */
+  sentence: string | null
+  examples: Example[]
 }
 
 export type Response<T> = { ok: true; data: T } | { ok: false; error: string }
 
 export interface ResponseMap {
   'translate-word': string[]
+  /** Same order as `words`. null = the model left the word out. */
+  'word-extras': (WordExtras | null)[]
 }
 
 export async function send<R extends Request>(req: R): Promise<ResponseMap[R['type']]> {

@@ -2,8 +2,9 @@
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { toCsv, toJson } from '@/shared/export'
 import { getSavedItems, onStorageKey, removeItems, setStage } from '@/shared/storage'
-import { dirOf, LANGUAGES, type SavedItem, type Stage } from '@/shared/types'
+import { dirOf, LANGUAGES, type SavedItem, type SavedWord, type Stage } from '@/shared/types'
 import { ignoreKey } from '../shortcuts'
+import WordDialog from '../WordDialog.vue'
 
 const items = ref<SavedItem[]>([])
 const tab = ref<'WORD' | 'PHRASE'>('WORD')
@@ -12,6 +13,11 @@ const lang = ref('')
 const stages = ref<Record<Stage, boolean>>({ KNOWN: true, LEARNING: true, SKIPPED: true })
 const picked = ref(new Set<string>())
 const search = useTemplateRef<HTMLInputElement>('search')
+/** The word that shows in the card dialog. The dialog closes when the word is deleted. */
+const cardId = ref<string | null>(null)
+const card = computed(() =>
+  items.value.find((i): i is SavedWord => i.id === cardId.value && i.itemType === 'WORD'),
+)
 
 const refresh = async () =>
   (items.value = (await getSavedItems()).sort((a, b) => b.createdAt - a.createdAt))
@@ -87,6 +93,10 @@ async function bulkDelete() {
 }
 
 function onKeydown(e: KeyboardEvent) {
+  if (card.value) {
+    if (e.key === 'Escape') cardId.value = null
+    return
+  }
   if (e.key === 'Escape' && e.target === search.value) return search.value?.blur()
   if (ignoreKey(e)) return
   const key = e.key.toLowerCase()
@@ -128,6 +138,12 @@ const watchUrl = (i: SavedItem) =>
   i.source
     ? `https://www.youtube.com/watch?v=${i.source.videoId}&t=${Math.floor(i.source.startMs / 1000)}s`
     : ''
+
+// Lucide "eye", in the style of the other icons.
+const eyeIcon = [
+  'M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0',
+  'M9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0',
+]
 
 const field =
   'rounded border border-white/10 bg-surface-deep px-3 py-1.5 text-sm outline-none focus:border-accent'
@@ -211,13 +227,14 @@ const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity
           <th class="p-2">Translation</th>
           <th class="p-2">Stage</th>
           <th class="p-2">Source</th>
+          <th class="w-10 p-2"><span class="sr-only">Card</span></th>
         </tr>
       </thead>
       <tbody>
         <tr
           v-for="i in shown"
           :key="i.id"
-          class="cursor-pointer border-t border-white/5"
+          class="group cursor-pointer border-t border-white/5"
           :class="picked.has(i.id) ? 'bg-accent/15 hover:bg-accent/20' : 'hover:bg-white/5'"
           @mousedown="(e) => e.shiftKey && e.preventDefault()"
           @click="onRowClick(i.id, $event)"
@@ -249,8 +266,31 @@ const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity
               >{{ i.source.title || 'YouTube' }}</a
             >
           </td>
+          <td class="p-2">
+            <button
+              v-if="i.itemType === 'WORD'"
+              class="grid size-7 place-items-center rounded text-neutral-400 opacity-0 transition-colors group-hover:opacity-100 hover:bg-white/10 hover:text-white focus-visible:opacity-100"
+              title="Show card"
+              :aria-label="`Show the card of ${i.text}`"
+              @click.stop="cardId = i.id"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="size-4"
+              >
+                <path v-for="d in eyeIcon" :key="d" :d="d" />
+              </svg>
+            </button>
+          </td>
         </tr>
       </tbody>
     </table>
+
+    <WordDialog v-if="card" :key="card.id" :word="card" @close="cardId = null" />
   </div>
 </template>

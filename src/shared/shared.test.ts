@@ -9,7 +9,17 @@ import {
 } from './captions'
 import { toCsv } from './export'
 import { errorMessage, extractJson, finishedLines, matchLine } from './llm-json'
-import { answer, formatSpan, isDue, learningWords, preview } from './review'
+import {
+  answer,
+  extrasPatch,
+  formatSpan,
+  isDue,
+  learningWords,
+  morePatch,
+  needsExtras,
+  preview,
+  sentenceParts,
+} from './review'
 import { tokenize } from './tokenize'
 import { dirOf, type SavedItem, type SavedWord } from './types'
 import { parseWordList, wordClass, type Vocab } from './vocab'
@@ -271,4 +281,59 @@ test('parseWordList picks the most frequent lemma for an ambiguous form', () => 
   const list = parseWordList('suis 10\nest 9\nsuivre 2\n', 'être\tsuis\nsuivre\tsuis\nêtre\test\n')
   expect(list.lemmas.get('suis')).toBe('être') // score: être 5 + 9, suivre 5
   expect([...list.ranks.keys()]).toEqual(['être', 'suivre'])
+})
+
+test('needsExtras: translation, sentence translation or two examples missing', () => {
+  const examples = [
+    { sentence: 'Ein *Haus*.', translation: 'A house.' },
+    { sentence: 'Das *Haus*.', translation: 'The house.' },
+  ]
+  expect(needsExtras(word({ examples }))).toBe(false)
+  expect(needsExtras(word())).toBe(true)
+  expect(needsExtras(word({ examples, translations: [] }))).toBe(true)
+  expect(
+    needsExtras(word({ examples, context: { sentence: 'Ein Haus', translation: null } })),
+  ).toBe(true)
+})
+
+test('extrasPatch fills only the missing fields', () => {
+  const r = {
+    translations: ['home'],
+    sentence: 'A house',
+    examples: [{ sentence: 'Ein *Haus*.', translation: 'A house.' }],
+  }
+  expect(extrasPatch(word(), r)).toEqual({ examples: r.examples })
+  expect(
+    extrasPatch(
+      word({ translations: [], context: { sentence: 'Ein Haus', translation: null } }),
+      r,
+    ),
+  ).toEqual({
+    translations: ['home'],
+    context: { sentence: 'Ein Haus', translation: 'A house' },
+    examples: r.examples,
+  })
+})
+
+test('morePatch adds new translations and examples, without repeats', () => {
+  const old = { sentence: 'Ein *Haus*.', translation: 'A house.' }
+  const neu = { sentence: 'Das *Haus* ist alt.', translation: 'The house is old.' }
+  const p = morePatch(word({ examples: [old] }), {
+    translations: ['House', 'home'],
+    sentence: null,
+    examples: [{ ...old }, neu],
+  })
+  expect(p.translations).toEqual(['house', 'home'])
+  expect(p.examples).toEqual([old, neu])
+})
+
+test('sentenceParts marks the word with * or by its written form', () => {
+  expect(sentenceParts('Wir *gingen* nach Hause.', 'gehen', 'de')).toEqual([
+    { text: 'Wir ', hit: false },
+    { text: 'gingen', hit: true },
+    { text: ' nach Hause.', hit: false },
+  ])
+  const parts = sentenceParts('Das Haus ist alt.', 'haus', 'de')
+  expect(parts.filter((p) => p.hit).map((p) => p.text)).toEqual(['Haus'])
+  expect(parts.map((p) => p.text).join('')).toBe('Das Haus ist alt.')
 })

@@ -1,4 +1,5 @@
 import { errorMessage, extractJson, finishedLines, matchLine } from '@/shared/llm-json'
+import type { Have, WordExtras } from '@/shared/messages'
 import { LANGUAGES, type Settings } from '@/shared/types'
 
 /** `onText` turns on streaming: it gets the whole answer so far after each new piece. */
@@ -297,4 +298,58 @@ export async function translateWord(
   }
   if (!Array.isArray(out.translations)) throw new Error('Bad answer from model.')
   return out.translations.map(String).slice(0, 3)
+}
+
+/** Number of new examples for a word that has `have`. */
+const MORE = 3
+
+/**
+ * Translations, the sentence translation and two example sentences for each word, in one
+ * request. Same order as `words`; null when the model leaves a word out.
+ */
+export async function wordExtras(
+  settings: Settings,
+  words: { word: string; sentence: string | null; have?: Have }[],
+  studyLang: string,
+  nativeLang: string,
+): Promise<(WordExtras | null)[]> {
+  const system =
+    `You help a learner of ${name(studyLang)} who speaks ${name(nativeLang)}. Input is a JSON ` +
+    `object that maps numbers to {"word","sentence"}. The sentence shows the meaning of the ` +
+    `word, or is empty. Answer with ONLY a JSON object with the same keys. Under each key put ` +
+    `{"translations":["best","alt"],"sentence":"<the sentence in ${name(nativeLang)}, or empty>",` +
+    `"examples":[["<example>","<its translation>"],["<example>","<its translation>"]]}. ` +
+    `Give 1 to 3 short translations of the word. Write 2 new examples in ${name(studyLang)}: ` +
+    `short (under 12 words), simple, natural, with the word in the same meaning. In each ` +
+    `example, put the word between asterisks, like *word*, also when its form changes.` +
+    (words.some((w) => w.have)
+      ? ` When an item has "have", the learner has those translations and examples already: ` +
+        `give only other translations (an empty list when there are none) and ${MORE} ` +
+        `examples that are different from them.`
+      : '')
+  const user = JSON.stringify(
+    Object.fromEntries(
+      words.map((w, i) => [i + 1, { word: w.word, sentence: w.sentence ?? '', have: w.have }]),
+    ),
+  )
+  const out = extractJson(await ask(settings, system, user)) as Record<string, unknown>
+  const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
+  return words.map((w, i) => {
+    const r = out[i + 1] as
+      { translations?: unknown; sentence?: unknown; examples?: unknown } | undefined
+    if (!r || typeof r !== 'object') return null
+    const examples = (Array.isArray(r.examples) ? r.examples : [])
+      .filter((e): e is unknown[] => Array.isArray(e))
+      .map(([s, t]) => ({ sentence: str(s), translation: str(t).replaceAll('*', '') }))
+      .filter((e) => e.sentence && e.translation)
+      .slice(0, w.have ? MORE : 2)
+    return {
+      translations: (Array.isArray(r.translations) ? r.translations : [])
+        .map(str)
+        .filter(Boolean)
+        .slice(0, 3),
+      sentence: str(r.sentence) || null,
+      examples,
+    }
+  })
 }

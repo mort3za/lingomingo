@@ -399,6 +399,7 @@ export function useYoutubeSession() {
       source: videoId.value ? videoRef(idx) : null,
       // Keep the review history when the stage changes.
       ...(old?.review && { review: { ...old.review } }),
+      ...(old?.examples && { examples: old.examples.map((e) => ({ ...e })) }),
     })
   }
 

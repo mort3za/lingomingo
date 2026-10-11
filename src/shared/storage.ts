@@ -1,5 +1,11 @@
 import { wordKey } from './tokenize'
-import { DEFAULT_SETTINGS, type ReviewCard, type SavedItem, type Settings } from './types'
+import {
+  DEFAULT_SETTINGS,
+  type ReviewCard,
+  type SavedItem,
+  type SavedWord,
+  type Settings,
+} from './types'
 
 export async function getSettings(): Promise<Settings> {
   const { settings } = await chrome.storage.local.get('settings')
@@ -70,6 +76,17 @@ export function setReview(id: string, review: ReviewCard | undefined): Promise<v
     setSavedItems(
       (await getSavedItems()).map((x) =>
         x.id === id && x.itemType === 'WORD' ? { ...x, review, updatedAt: now } : x,
+      ),
+    ),
+  )
+}
+
+/** Add fields to saved words, by id. `updatedAt` does not change: the user did not edit them. */
+export function patchWords(patches: Record<string, Partial<SavedWord>>): Promise<void> {
+  return serial(async () =>
+    setSavedItems(
+      (await getSavedItems()).map((x) =>
+        patches[x.id] && x.itemType === 'WORD' ? { ...x, ...patches[x.id] } : x,
       ),
     ),
   )
