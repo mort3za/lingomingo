@@ -9,6 +9,7 @@ LingoMingo is a free, open source Chrome extension to learn languages with YouTu
 - LingoMingo has **no server**. The developer does not get, see or keep your data.
 - LingoMingo has **no analytics, no tracking, no ads and no cookies**.
 - Your data stays **in your browser**. It goes out only to YouTube and to the AI provider that you select.
+- LingoMingo does **not sell** your data, and does not use it for a purpose other than the features on this page. The use of data follows the [Chrome Web Store User Data Policy](https://developer.chrome.com/docs/webstore/program-policies/user-data-faq), including the Limited Use requirements.
 
 ## Data in your browser
 
@@ -30,7 +31,7 @@ When you export your saved items (for example as a CSV file), LingoMingo writes 
 
 ### YouTube (Google)
 
-On YouTube pages, LingoMingo downloads the subtitles of the video that you watch. On the Media page, it downloads channel feeds, video pages and thumbnail images from `youtube.com` and `i.ytimg.com`. YouTube gets your IP address with these requests, like a usual visit to YouTube. When LingoMingo downloads subtitles on a YouTube page, the request includes your YouTube cookies, like YouTube's own player does.
+On YouTube pages, LingoMingo downloads the subtitles of the video that you watch. On the Media page, it downloads channel feeds, channel pages, video pages, thumbnail images and channel photos from `youtube.com` and the YouTube image servers (`i.ytimg.com`, `yt3.googleusercontent.com`). YouTube gets your IP address with these requests, like a usual visit to YouTube. When LingoMingo downloads subtitles on a YouTube page, the request includes your YouTube cookies, like YouTube's own player does.
 
 The [Google privacy policy](https://policies.google.com/privacy) applies.
 
@@ -41,6 +42,7 @@ AI translation is off until you add an API key or a local model. When it is on, 
 - Subtitle lines of the video, when YouTube has no human-made subtitles in your language.
 - The word that you open in the word popup, and its sentence.
 - On the Review page: your words in the Learning stage and their sentences, to get missing translations and example sentences.
+- On the Saved items page: the saved word that you open, and its sentence, for the same reason. Also when you ask for more examples.
 - Your study language and translation language.
 
 LingoMingo does not send your name, e-mail, browser history or other pages.
@@ -62,6 +64,10 @@ With a local model (Ollama, llama.cpp, LM Studio), the data goes to the address 
 | `youtube.com`                                                         | Show subtitles and the word popup on videos        |
 | `api.anthropic.com`, `api.openai.com`, `api.x.ai`, `api.deepseek.com` | Call the AI provider that you select               |
 | `localhost`, `127.0.0.1`                                              | Call a local AI model on your computer             |
+
+## Remote code
+
+LingoMingo runs only the code in its package. It does not download or run code from the internet. It downloads only data: subtitles, feeds, images and AI answers (text).
 
 ## Children
 
