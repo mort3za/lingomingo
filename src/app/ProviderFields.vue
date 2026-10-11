@@ -180,9 +180,9 @@ const { settings } = useSettings()
                 why: 'Needs about 8 GB of memory. Better with idioms and slang, and still fast.',
               },
               {
-                name: 'translategemma:27b',
+                name: 'gemma4:26b',
                 badge: 'Best',
-                why: 'Needs about 17 GB of memory. Highest quality, but slower.',
+                why: 'Needs about 20 GB of memory. Highest quality, and still fast.',
               },
             ]"
             :key="m.name"
@@ -263,6 +263,10 @@ const { settings } = useSettings()
             {{ m }}
           </button>
           — Both are fast and good at translation.
+        </p>
+        <p class="mt-1 text-xs text-neutral-500">
+          LingoMingo turns off thinking (needs LM Studio 0.4.8 or newer). Some models always think,
+          for example DeepSeek R1: they are very slow for subtitles.
         </p>
       </div>
       <div class="rounded border border-white/10 p-3 text-xs text-neutral-400">
