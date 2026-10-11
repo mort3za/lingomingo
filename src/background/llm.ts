@@ -1,4 +1,4 @@
-import { errorMessage, extractJson, finishedLines } from '@/shared/llm-json'
+import { errorMessage, extractJson, finishedLines, matchLine } from '@/shared/llm-json'
 import { LANGUAGES, type Settings } from '@/shared/types'
 
 /** `onText` turns on streaming: it gets the whole answer so far after each new piece. */
@@ -231,17 +231,23 @@ async function askLines(
   onLine: (index: number, text: string) => void,
 ): Promise<void> {
   // Numbered keys keep the model aligned. A plain array lets it merge or split lines, mostly
-  // with auto-generated captions, where a sentence runs across several lines.
+  // with auto-generated captions, where a sentence runs across several lines. The model also
+  // copies each line: small models still merge a sentence into one key and shift the next
+  // lines, and the copy shows which line a translation really belongs to.
   const system =
     `You translate subtitle lines from ${name(studyLang)} to ${name(nativeLang)}. ` +
     `Input is a JSON object that maps line numbers to lines. A sentence can start in one line ` +
-    `and end in a different line. Answer with ONLY a JSON object with the same keys, and the ` +
-    `translation of each line under its own key. Never merge or split lines. ` +
-    `Keep each translation short and natural.`
+    `and end in a different line. Answer with ONLY a JSON object with the same keys. Under ` +
+    `each key put an array: [the line copied exactly, its translation]. Never merge or split ` +
+    `lines. Keep each translation short and natural.`
   const user = JSON.stringify(Object.fromEntries(lines.map((line, i) => [i + 1, line])))
   const read = (text: string) => {
-    for (const [key, line] of finishedLines(text)) {
-      if (key >= 1 && key <= lines.length) onLine(key - 1, line)
+    for (const [key, source, line] of finishedLines(text)) {
+      // One line cannot go to a wrong place: keep it also when the copy is changed or missing.
+      if (lines.length === 1) onLine(0, line)
+      if (lines.length === 1 || source === null) continue
+      const i = matchLine(lines, key - 1, source)
+      if (i !== -1) onLine(i, line)
     }
   }
   read(await ask(settings, system, user, { signal, onText: read }))

@@ -56,7 +56,8 @@ async function translateChunk(
 ): Promise<string[]> {
   const settings = await getSettings()
   // Translations of a video are cached by chunk for 7 days, so a reload costs nothing.
-  const key = `tr:${req.videoId}:${req.studyLang}:${req.nativeLang}:${req.chunk}`
+  // `v2`: lines translated before the line copy check can be in the wrong place.
+  const key = `tr:v2:${req.videoId}:${req.studyLang}:${req.nativeLang}:${req.chunk}`
   const cached = (await chrome.storage.local.get(key))[key] as CachedChunk | undefined
   if (fresh(cached) && cached.lines.length === req.lines.length) return cached.lines
   const out = await translateLines(

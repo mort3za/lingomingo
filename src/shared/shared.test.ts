@@ -8,7 +8,7 @@ import {
   pickTrack,
 } from './captions'
 import { toCsv } from './export'
-import { errorMessage, extractJson, finishedLines } from './llm-json'
+import { errorMessage, extractJson, finishedLines, matchLine } from './llm-json'
 import { answer, formatSpan, isDue, learningWords, preview } from './review'
 import { tokenize } from './tokenize'
 import { dirOf, type SavedItem, type SavedWord } from './types'
@@ -108,12 +108,37 @@ test('extractJson reads json inside text', () => {
   expect(extractJson('{"translations":["x"]}')).toEqual({ translations: ['x'] })
 })
 
-test('finishedLines reads finished pairs from a part of an answer', () => {
-  const part = '```json\n{\n  "1": "say \\"hi\\"",\n  "2": "two",\n  "3": "thr'
-  expect([...finishedLines(part)]).toEqual([
-    [1, 'say "hi"'],
-    [2, 'two'],
+test('finishedLines reads finished items from a part of an answer', () => {
+  const part =
+    '```json\n{\n  "1": ["sag \\"hi\\"", "say \\"hi\\""],\n  "2": ["zwei", "two"],\n  "3": ["drei", "thr'
+  expect(finishedLines(part)).toEqual([
+    [1, 'sag "hi"', 'say "hi"'],
+    [2, 'zwei', 'two'],
   ])
+  // Without the source, and not closed yet.
+  expect(finishedLines('{"1": ["one"], "2": "two", "3": ["drei"')).toEqual([
+    [1, null, 'one'],
+    [2, null, 'two'],
+  ])
+})
+
+test('matchLine finds the line by its copy, not by its key', () => {
+  const lines = [
+    'Was haben ein Toilettenbecken,',
+    'ein Golfball',
+    'Na ja.',
+    'Um euch das zu erzählen,',
+    'Na ja.',
+  ]
+  expect(matchLine(lines, 0, 'Was haben ein Toilettenbecken,')).toBe(0)
+  // Small changes in the copy are fine.
+  expect(matchLine(lines, 0, 'was haben ein Toilettenbecken')).toBe(0)
+  // The model merged lines 0 and 1, then put line 3 under key 1.
+  expect(matchLine(lines, 0, 'Was haben ein Toilettenbecken, ein Golfball')).toBe(-1)
+  expect(matchLine(lines, 1, 'Um euch das zu erzählen,')).toBe(3)
+  // The same text twice: the line nearest to the key.
+  expect(matchLine(lines, 4, 'Na ja.')).toBe(4)
+  expect(matchLine(lines, 1, 'Na ja.')).toBe(2)
 })
 
 test('errorMessage reads the message from an API error body', () => {
