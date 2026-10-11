@@ -2,6 +2,7 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ShortcutsDialog from './ShortcutsDialog.vue'
+import StudyLangSwitcher from './StudyLangSwitcher.vue'
 import { ignoreKey } from './shortcuts'
 
 // Icons: SVG path data in the Lucide style (24×24, stroke).
@@ -119,6 +120,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown, true))
         <img src="/icons/icon.svg" alt="" class="size-7" />
         <span class="text-lg font-semibold">LingoMingo</span>
       </RouterLink>
+      <StudyLangSwitcher />
       <template v-for="(links, i) in [mainLinks, footerLinks]" :key="i">
         <hr v-if="i > 0" class="my-2 border-panel" />
         <RouterLink
