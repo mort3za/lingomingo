@@ -133,10 +133,12 @@ export const LANGUAGES: Record<string, string> = {
   nl: 'Dutch',
   en: 'English',
   fa: 'Persian',
+  fi: 'Finnish',
   fr: 'French',
   de: 'German',
+  he: 'Hebrew',
+  hi: 'Hindi',
   it: 'Italian',
-  ja: 'Japanese',
   ko: 'Korean',
   pl: 'Polish',
   pt: 'Portuguese',
@@ -144,6 +146,7 @@ export const LANGUAGES: Record<string, string> = {
   es: 'Spanish',
   sv: 'Swedish',
   tr: 'Turkish',
+  uk: 'Ukrainian',
 }
 
 const RTL_LANGUAGES = new Set(['ar', 'fa', 'he', 'ur'])
