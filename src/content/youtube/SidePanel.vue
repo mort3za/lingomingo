@@ -84,7 +84,7 @@ watch(
              No height, so the rows do not move. -->
         <div v-if="away" class="sticky top-0 z-10 mb-0 flex h-0 items-start justify-end">
           <button
-            class="mr-2 rounded-full bg-accent px-3 py-1 text-[13px] font-medium shadow-lg hover:brightness-110"
+            class="rounded-full bg-accent px-3 py-1 text-[13px] font-medium shadow-lg hover:brightness-110"
             title="Scroll to the current sentence"
             @click="scrollToTop(s.activeIdx.value)"
           >
