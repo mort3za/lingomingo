@@ -90,6 +90,42 @@ async function ask(
     )
   }
 
+  if (settings.provider === 'gemini') {
+    if (!settings.geminiKey) throw new Error('Add your Gemini API key in Settings.')
+    return chat(
+      'Gemini API',
+      'https://generativelanguage.googleapis.com/v1beta/openai',
+      settings.geminiModel,
+      system,
+      user,
+      call,
+      settings.geminiKey,
+      // Google recommends the default temperature for Gemini 3: lower values can make it loop.
+      // Gemini 3 cannot turn thinking off; "minimal" is the lowest level.
+      { temperature: undefined, reasoning_effort: 'minimal' },
+    )
+  }
+
+  if (settings.provider === 'openrouter') {
+    if (!settings.openrouterKey) throw new Error('Add your OpenRouter API key in Settings.')
+    const args = [
+      'OpenRouter',
+      'https://openrouter.ai/api/v1',
+      settings.openrouterModel,
+      system,
+      user,
+      call,
+      settings.openrouterKey,
+    ] as const
+    // Models that always think reject effort "none": then ask again without it.
+    try {
+      return await chat(...args, { reasoning: { effort: 'none' } })
+    } catch (e) {
+      if (!(e instanceof Error && /^OpenRouter 400/.test(e.message))) throw e
+      return chat(...args)
+    }
+  }
+
   if (settings.provider === 'ollama') {
     if (!settings.ollamaModel) throw new Error('Set the Ollama model name in Settings.')
     // Thinking models (gemma4, qwen3, ...) think by default; short translations do not need it.
@@ -132,7 +168,7 @@ async function ask(
   return chat('Local model', settings.localBaseUrl, settings.localModel, system, user, call)
 }
 
-/** OpenAI-compatible chat completion (OpenAI, xAI, DeepSeek, Ollama, llama.cpp, LM Studio). */
+/** OpenAI-compatible chat completion (OpenAI, xAI, DeepSeek, Gemini, OpenRouter, Ollama, llama.cpp, LM Studio). */
 async function chat(
   label: string,
   baseUrl: string,

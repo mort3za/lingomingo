@@ -53,17 +53,19 @@ The privacy policy of your provider applies:
 - OpenAI: <https://openai.com/policies/privacy-policy>
 - xAI (Grok): <https://x.ai/legal/privacy-policy>
 - DeepSeek: <https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html>
+- Google Gemini: <https://policies.google.com/privacy> and <https://ai.google.dev/gemini-api/terms>. On the free tier, Google uses your requests to improve its products, and people at Google can read them.
+- OpenRouter: <https://openrouter.ai/privacy>. OpenRouter sends your requests to the company that runs the model. Free models can keep your requests and use them for training.
 
 With a local model (Ollama, llama.cpp, LM Studio), the data goes to the address that you set, usually your own computer.
 
 ## Permissions
 
-| Permission                                                            | Why                                                |
-| --------------------------------------------------------------------- | -------------------------------------------------- |
-| `storage`, `unlimitedStorage`                                         | Keep settings, saved items and cached translations |
-| `youtube.com`                                                         | Show subtitles and the word popup on videos        |
-| `api.anthropic.com`, `api.openai.com`, `api.x.ai`, `api.deepseek.com` | Call the AI provider that you select               |
-| `localhost`, `127.0.0.1`                                              | Call a local AI model on your computer             |
+| Permission                                                                                                                  | Why                                                |
+| --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `storage`, `unlimitedStorage`                                                                                               | Keep settings, saved items and cached translations |
+| `youtube.com`                                                                                                               | Show subtitles and the word popup on videos        |
+| `api.anthropic.com`, `api.openai.com`, `api.x.ai`, `api.deepseek.com`, `generativelanguage.googleapis.com`, `openrouter.ai` | Call the AI provider that you select               |
+| `localhost`, `127.0.0.1`                                                                                                    | Call a local AI model on your computer             |
 
 ## Remote code
 

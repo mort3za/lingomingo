@@ -27,7 +27,7 @@ export default defineManifest({
   },
   // unlimitedStorage: subtitle translations are cached per video.
   permissions: ['storage', 'unlimitedStorage'],
-  // The background calls the Claude, OpenAI, xAI (Grok) and DeepSeek APIs, and a local model (Ollama, llama.cpp).
+  // The background calls the Claude, OpenAI, xAI (Grok), DeepSeek, Gemini and OpenRouter APIs, and a local model (Ollama, llama.cpp).
   // The Media page reads YouTube channel RSS feeds.
   host_permissions: [
     'https://www.youtube.com/*',
@@ -35,6 +35,8 @@ export default defineManifest({
     'https://api.openai.com/*',
     'https://api.x.ai/*',
     'https://api.deepseek.com/*',
+    'https://generativelanguage.googleapis.com/*',
+    'https://openrouter.ai/*',
     'http://localhost/*',
     'http://127.0.0.1/*',
   ],

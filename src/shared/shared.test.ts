@@ -157,6 +157,9 @@ test('errorMessage reads the message from an API error body', () => {
   ).toBe("model 'x' not found")
   expect(errorMessage('{"type":"error","error":{"type":"x","message":"bad key"}}')).toBe('bad key')
   expect(errorMessage('{"error":"no model"}')).toBe('no model')
+  expect(errorMessage('[{"error":{"code":400,"message":"Please pass a valid API key"}}]')).toBe(
+    'Please pass a valid API key',
+  )
   expect(errorMessage('Bad Gateway')).toBe('Bad Gateway')
 })
 

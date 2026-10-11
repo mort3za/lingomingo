@@ -73,7 +73,16 @@ export interface VideoRef {
   endMs: number
 }
 
-export type Provider = 'claude' | 'openai' | 'grok' | 'deepseek' | 'ollama' | 'lmstudio' | 'local'
+export type Provider =
+  | 'claude'
+  | 'openai'
+  | 'grok'
+  | 'deepseek'
+  | 'gemini'
+  | 'openrouter'
+  | 'ollama'
+  | 'lmstudio'
+  | 'local'
 
 export interface Settings {
   studyLang: string
@@ -87,6 +96,10 @@ export interface Settings {
   grokModel: string
   deepseekKey: string
   deepseekModel: string
+  geminiKey: string
+  geminiModel: string
+  openrouterKey: string
+  openrouterModel: string
   ollamaBaseUrl: string
   ollamaModel: string
   lmstudioBaseUrl: string
@@ -119,6 +132,10 @@ export const DEFAULT_SETTINGS: Settings = {
   grokModel: 'grok-4.3',
   deepseekKey: '',
   deepseekModel: 'deepseek-flash',
+  geminiKey: '',
+  geminiModel: 'gemini-3.5-flash-lite',
+  openrouterKey: '',
+  openrouterModel: 'google/gemma-4-31b-it:free',
   ollamaBaseUrl: 'http://localhost:11434/v1',
   ollamaModel: '',
   lmstudioBaseUrl: 'http://localhost:1234/v1',

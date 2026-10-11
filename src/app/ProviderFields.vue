@@ -1,7 +1,57 @@
 <script setup lang="ts">
+import type { Provider } from '@/shared/types'
 import { INPUT as input, LABEL as label, useSettings } from './settings'
 
 const { settings } = useSettings()
+
+// Cost, limits and privacy of each provider. `warn` items are shown in a warning color.
+const PER_REQUEST =
+  'One request translates about 40 subtitle lines. Each word that you open in the word popup is one more request.'
+const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
+  claude: [
+    { text: 'Paid: you pay for each request. You can set a spend limit in the Anthropic Console.' },
+    { text: 'Anthropic does not train its models on API data.' },
+  ],
+  openai: [
+    { text: 'Paid: you pay for each request. You can set a budget in the OpenAI dashboard.' },
+    { text: 'OpenAI does not train its models on API data, unless you allow it.' },
+  ],
+  grok: [
+    { text: 'Paid: you pay for each request. You can set a spend limit in the xAI Console.' },
+    {
+      text: 'xAI does not train on API data without your permission. It keeps requests for 30 days.',
+    },
+  ],
+  deepseek: [
+    { text: 'Paid: you pay for each request. The price is low.' },
+    { text: 'DeepSeek keeps your data on servers in China.', warn: true },
+  ],
+  gemini: [
+    {
+      text: 'Free tier: no cost, but with daily limits. Google shows your limits in Google AI Studio. When you get error 429, wait, or try again tomorrow.',
+    },
+    { text: PER_REQUEST },
+    {
+      text: 'On the free tier, Google uses your requests to improve its products, and people at Google can read them. To stop this, turn on billing in Google AI Studio. Then you pay for each request.',
+      warn: true,
+    },
+    {
+      text: 'In the EU (EEA), Switzerland and the UK, the Google terms allow only the paid tier.',
+      warn: true,
+    },
+  ],
+  openrouter: [
+    {
+      text: 'Free models (names that end in ":free") have no cost. Limits: 20 requests per minute and 50 per day. After you buy 10 USD of credit one time: 1000 per day. Other models are paid.',
+    },
+    { text: PER_REQUEST },
+    {
+      text: 'Free models can keep your requests and use them for training. You must allow this in your OpenRouter privacy settings, or free models do not work.',
+      warn: true,
+    },
+    { text: 'Free models change often. If a model stops working, select a different model.' },
+  ],
+}
 </script>
 
 <template>
@@ -13,6 +63,8 @@ const { settings } = useSettings()
         <option value="openai">OpenAI API (ChatGPT)</option>
         <option value="grok">xAI API (Grok)</option>
         <option value="deepseek">DeepSeek API</option>
+        <option value="gemini">Google Gemini API (free tier)</option>
+        <option value="openrouter">OpenRouter (free models)</option>
         <option value="ollama">Ollama (local)</option>
         <option value="lmstudio">LM Studio (local)</option>
         <option value="local">Other local server (llama.cpp, vLLM, ...)</option>
@@ -139,6 +191,88 @@ const { settings } = useSettings()
             {{ m }}
           </button>
           — Flash is the cheapest and fastest.
+        </p>
+      </div>
+    </template>
+
+    <template v-else-if="settings.provider === 'gemini'">
+      <div>
+        <label :class="label" for="gekey">API key</label>
+        <input
+          id="gekey"
+          v-model="settings.geminiKey"
+          type="password"
+          :class="input"
+          placeholder="AIza..."
+        />
+        <p class="mt-1 text-xs text-neutral-500">
+          Stored only in this browser. Get a free key in
+          <a
+            href="https://aistudio.google.com/apikey"
+            target="_blank"
+            class="underline hover:text-white"
+            >Google AI Studio</a
+          >.
+        </p>
+      </div>
+      <div>
+        <label :class="label" for="gemodel">Model</label>
+        <input id="gemodel" v-model="settings.geminiModel" :class="input" />
+        <p class="mt-1 text-xs text-neutral-500">
+          Examples:
+          <button
+            v-for="m in ['gemini-3.5-flash-lite', 'gemini-3.5-flash']"
+            :key="m"
+            type="button"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            @click="settings.geminiModel = m"
+          >
+            {{ m }}
+          </button>
+          — Flash-Lite is the fastest, and has the highest free limits.
+        </p>
+      </div>
+    </template>
+
+    <template v-else-if="settings.provider === 'openrouter'">
+      <div>
+        <label :class="label" for="orkey">API key</label>
+        <input
+          id="orkey"
+          v-model="settings.openrouterKey"
+          type="password"
+          :class="input"
+          placeholder="sk-or-..."
+        />
+        <p class="mt-1 text-xs text-neutral-500">
+          Stored only in this browser. Get a key on
+          <a href="https://openrouter.ai/keys" target="_blank" class="underline hover:text-white"
+            >openrouter.ai</a
+          >.
+        </p>
+      </div>
+      <div>
+        <label :class="label" for="ormodel">Model</label>
+        <input id="ormodel" v-model="settings.openrouterModel" :class="input" />
+        <p class="mt-1 text-xs text-neutral-500">
+          Examples:
+          <button
+            v-for="m in ['google/gemma-4-31b-it:free', 'openrouter/free']"
+            :key="m"
+            type="button"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            @click="settings.openrouterModel = m"
+          >
+            {{ m }}
+          </button>
+          — <span class="font-mono">openrouter/free</span> selects a free model at random. See all
+          free models on
+          <a
+            href="https://openrouter.ai/models?max_price=0"
+            target="_blank"
+            class="underline hover:text-white"
+            >openrouter.ai</a
+          >.
         </p>
       </div>
     </template>
@@ -353,6 +487,19 @@ const { settings } = useSettings()
         </p>
       </div>
     </template>
+
+    <ul
+      v-if="NOTES[settings.provider]"
+      class="list-disc space-y-1 rounded border border-white/10 p-3 pl-7 text-xs text-neutral-400"
+    >
+      <li
+        v-for="n in NOTES[settings.provider]"
+        :key="n.text"
+        :class="n.warn ? 'text-yellow-300' : undefined"
+      >
+        {{ n.text }}
+      </li>
+    </ul>
 
     <p
       v-if="!['ollama', 'lmstudio', 'local'].includes(settings.provider)"

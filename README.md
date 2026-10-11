@@ -14,7 +14,7 @@ It is inspired by Language Reactor. LingoMingo is not affiliated with Language R
 5. Click the LingoMingo toolbar icon to open the app. In **Settings**, set your study language and your native language.
 6. Open a YouTube video with subtitles.
 
-You need **your own API key** to enable subtitle translation and the word dictionary. Get a key from [Claude](https://console.anthropic.com/), [OpenAI (ChatGPT)](https://platform.openai.com/api-keys), [xAI (Grok)](https://console.x.ai/) or [DeepSeek](https://platform.deepseek.com/), and add it in **Settings**. Or use a local model (Ollama, llama.cpp server, LM Studio) without a key.
+You need **your own API key** to enable subtitle translation and the word dictionary. Get a key from [Claude](https://console.anthropic.com/), [OpenAI (ChatGPT)](https://platform.openai.com/api-keys), [xAI (Grok)](https://console.x.ai/), [DeepSeek](https://platform.deepseek.com/), [Google Gemini](https://aistudio.google.com/apikey) (free tier) or [OpenRouter](https://openrouter.ai/keys) (free models), and add it in **Settings**. Or use a local model (Ollama, llama.cpp server, LM Studio) without a key.
 
 To update: download the new zip, replace the files in the same folder, then click the reload icon of LingoMingo on `chrome://extensions`.
 
