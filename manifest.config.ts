@@ -26,7 +26,7 @@ export default defineManifest({
     type: 'module',
   },
   // unlimitedStorage: subtitle translations are cached per video.
-  permissions: ['contextMenus', 'storage', 'unlimitedStorage'],
+  permissions: ['storage', 'unlimitedStorage'],
   // The background calls the Claude, OpenAI, xAI (Grok) and DeepSeek APIs, and a local model (Ollama, llama.cpp).
   // The Media page reads YouTube channel RSS feeds.
   host_permissions: [

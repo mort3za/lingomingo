@@ -55,13 +55,12 @@ With a local model (Ollama, llama.cpp, LM Studio), the data goes to the address 
 
 ## Permissions
 
-| Permission                                                            | Why                                                       |
-| --------------------------------------------------------------------- | --------------------------------------------------------- |
-| `storage`, `unlimitedStorage`                                         | Keep settings, saved items and cached translations        |
-| `contextMenus`                                                        | The "Read in LingoMingo" and "Open LingoMingo" menu items |
-| `youtube.com`                                                         | Show subtitles and the word popup on videos               |
-| `api.anthropic.com`, `api.openai.com`, `api.x.ai`, `api.deepseek.com` | Call the AI provider that you select                      |
-| `localhost`, `127.0.0.1`                                              | Call a local AI model on your computer                    |
+| Permission                                                            | Why                                                |
+| --------------------------------------------------------------------- | -------------------------------------------------- |
+| `storage`, `unlimitedStorage`                                         | Keep settings, saved items and cached translations |
+| `youtube.com`                                                         | Show subtitles and the word popup on videos        |
+| `api.anthropic.com`, `api.openai.com`, `api.x.ai`, `api.deepseek.com` | Call the AI provider that you select               |
+| `localhost`, `127.0.0.1`                                              | Call a local AI model on your computer             |
 
 ## Children
 
