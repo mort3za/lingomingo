@@ -233,7 +233,6 @@ export function useYoutubeSession() {
         nativeTrack,
       )
       if (token !== loadToken) return
-      human.value = nativeCues ? alignTranslation(studyCues, nativeCues) : []
       // YouTube gave no lines: the same as no subtitles, so the extension stays hidden.
       if (!studyCues.length) {
         showSubs.value = false
@@ -242,6 +241,7 @@ export function useYoutubeSession() {
         return
       }
       machine.value = studyCues.map(() => null)
+      human.value = nativeCues ? alignTranslation(studyCues, nativeCues) : []
       cues.value = studyCues
       status.value = 'ready'
       ensureTranslations(0)
