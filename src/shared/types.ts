@@ -123,10 +123,10 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
+  enabled: true,
   studyLang: 'de',
   nativeLang: 'en',
   provider: 'claude',
-  enabled: true,
   claudeKey: '',
   claudeModel: 'claude-haiku-5-5',
   openaiKey: '',
