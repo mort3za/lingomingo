@@ -1,4 +1,4 @@
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch, type Ref } from 'vue'
 import { alignTranslation, audioLang, findCueIndex, parseJson3, pickTrack } from '@/shared/captions'
 import { translateChunk as requestChunk } from '@/shared/messages'
 import {
@@ -196,7 +196,7 @@ export function useYoutubeSession() {
     cancels.clear()
     showSubs.value = false
     showPanel.value = false
-    if (!id) {
+    if (!id || !settings.value.enabled) {
       status.value = 'idle'
       return
     }
@@ -215,10 +215,11 @@ export function useYoutubeSession() {
       // No auto-generated track: the spoken language is unknown, so use the study language.
       const code = audioLang(info.tracks) ?? studyLang
       lang.value = code
-      // A video in the native language needs no dual subtitles.
-      showSubs.value = code !== nativeLang
+      // A video in the native language needs no dual subtitles. Others get the last user choice.
+      const study = code !== nativeLang
+      showSubs.value = study && settings.value.showSubtitles
       // The list covers half of a Shorts player, so it starts closed there.
-      showPanel.value = showSubs.value && !isShorts()
+      showPanel.value = study && settings.value.showSubtitlesList && !isShorts()
       const studyTrack = pickTrack(info.tracks, code)
       if (!studyTrack) {
         status.value = 'no-subs'
@@ -347,6 +348,17 @@ export function useYoutubeSession() {
   const toggleSubtitlesOnTop = () =>
     patchSettings({ subtitlesOnTop: !settings.value.subtitlesOnTop })
 
+  // The user toggles: a change is saved and used for the next videos. On Shorts the list
+  // always starts closed, so a change there is not saved.
+  const remembered = (on: Ref<boolean>, key: 'showSubtitles' | 'showSubtitlesList') =>
+    computed({
+      get: () => on.value,
+      set: (value) => {
+        on.value = value
+        if (key === 'showSubtitles' || !isShorts()) void patchSettings({ [key]: value })
+      },
+    })
+
   // ---- saving ----
   function videoRef(idx: number) {
     const cue = cues.value[idx]
@@ -422,6 +434,7 @@ export function useYoutubeSession() {
     const before = settings.value
     settings.value = await getSettings()
     if (
+      before.enabled !== settings.value.enabled ||
       before.studyLang !== settings.value.studyLang ||
       before.nativeLang !== settings.value.nativeLang
     ) {
@@ -458,8 +471,8 @@ export function useYoutubeSession() {
     cues,
     activeIdx,
     cueVisible,
-    showSubs,
-    showPanel,
+    showSubs: remembered(showSubs, 'showSubtitles'),
+    showPanel: remembered(showPanel, 'showSubtitlesList'),
     studying,
     translationError,
     translationOf,
