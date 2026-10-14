@@ -112,6 +112,9 @@ export interface Settings {
   autoPause: boolean
   /** Show the YouTube subtitle bar at the top of the video, not the bottom. */
   subtitlesOnTop: boolean
+  /** Last state of the YouTube player toggles. Videos in the native language start with both off. */
+  showSubtitles: boolean
+  showSubtitlesList: boolean
   hideTranslation: boolean
   /** Vocabulary level by study language: words up to this frequency rank count as known. */
   vocabLevels: Record<string, number>
@@ -147,6 +150,8 @@ export const DEFAULT_SETTINGS: Settings = {
   localModel: '',
   autoPause: false,
   subtitlesOnTop: false,
+  showSubtitles: true,
+  showSubtitlesList: true,
   hideTranslation: false,
   vocabLevels: {},
   showKnownGreen: true,

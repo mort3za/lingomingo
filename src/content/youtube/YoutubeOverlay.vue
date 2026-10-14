@@ -13,7 +13,9 @@ const s = useYoutubeSession()
 // `inDock`: the word is in the docked subtitles list. The player clips its children, so the popup
 // for such a word must show in the dock too.
 const selected = ref<{ word: string; idx: number; rect: DOMRect; inDock: boolean } | null>(null)
-const active = computed(() => s.status.value !== 'idle')
+// No subtitles on the video: hide our toggles too. A click would only show an empty bar and
+// change the saved choice for the next videos.
+const active = computed(() => s.status.value !== 'idle' && s.status.value !== 'no-subs')
 watch(s.videoId, () => (selected.value = null))
 watch(s.showSubs, () => (selected.value = null))
 

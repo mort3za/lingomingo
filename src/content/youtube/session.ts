@@ -130,7 +130,7 @@ export function useYoutubeSession() {
   const translationError = ref('')
   const activeIdx = ref(-1)
   const cueVisible = ref(false)
-  // What the user sees. Both start off, and turn on when the video is not in the native language.
+  // What the user sees. Both start off, and turn on with the last user choice when subtitles load.
   const showSubs = ref(false)
   const showPanel = ref(false)
   // Language of the video: the spoken language, else the study language. Words and phrases
@@ -217,17 +217,16 @@ export function useYoutubeSession() {
       // No auto-generated track: the spoken language is unknown, so use the study language.
       const code = audioLang(info.tracks) ?? studyLang
       lang.value = code
-      // A video in the native language needs no dual subtitles. Others get the last user choice.
-      const study = code !== nativeLang
-      showSubs.value = study && settings.value.showSubtitles
-      // The list covers half of a Shorts player, so it starts closed there.
-      showPanel.value = study && settings.value.showSubtitlesList && !isShorts()
       const studyTrack = pickTrack(info.tracks, code)
+      // Nothing to show: the subtitles and the list stay off. The saved choice does not change.
       if (!studyTrack) {
         status.value = 'no-subs'
         message.value = `No ${LANGUAGES[code] ?? code} subtitles on this video.`
         return
       }
+      showSubs.value = settings.value.showSubtitles
+      // The list covers half of a Shorts player, so it starts closed there.
+      showPanel.value = settings.value.showSubtitlesList && !isShorts()
       const nativeTrack = translates.value ? pickTrack(info.tracks, nativeLang) : null
       const { study: studyCues, native: nativeCues } = await videoCaptions(
         id,
