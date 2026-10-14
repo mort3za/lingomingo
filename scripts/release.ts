@@ -1,7 +1,7 @@
 // Makes a new release: offers to commit uncommitted changes, bumps the version in package.json,
 // asks Claude Code to write release notes from the commits since the last tag, then commits,
-// tags and pushes. The tag push starts .github/workflows/release.yml, which builds the zip and
-// makes the GitHub release.
+// tags and pushes. It also builds a local lingomingo-vX.Y.Z.zip to upload to the Chrome Web Store.
+// The tag push starts .github/workflows/release.yml, which builds the zip and makes the GitHub release.
 // Run: bun run release patch|minor|major
 import { $ } from 'bun'
 import { tmpdir } from 'node:os'
@@ -63,6 +63,10 @@ pkg.version = version
 await Bun.write('package.json', JSON.stringify(pkg, null, 2) + '\n')
 const notesFile = `${tmpdir()}/lingomingo-${tag}.md`
 await Bun.write(notesFile, notes + '\n')
+
+// Same zip as CI makes, for the Chrome Web Store. The GPL text must ship with the extension.
+await $`bun run build && cp LICENSE dist/`
+await $`zip -qr ../lingomingo-${tag}.zip .`.cwd('dist')
 
 await $`git commit -m ${`Release ${tag}`} package.json`
 // verbatim: the default cleanup removes lines that start with "#", which are Markdown headings here.
