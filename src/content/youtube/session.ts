@@ -137,6 +137,8 @@ export function useYoutubeSession() {
   // saved from this video get this language, so the study language does not need to match.
   const lang = ref(DEFAULT_SETTINGS.studyLang)
   const studying = () => showSubs.value || showPanel.value
+  // A video in the translation language: show its subtitles only, with no translation.
+  const translates = computed(() => lang.value !== settings.value.nativeLang)
 
   const translationOf = (i: number): string | null => human.value[i] ?? machine.value[i] ?? null
 
@@ -226,7 +228,7 @@ export function useYoutubeSession() {
         message.value = `No ${LANGUAGES[code] ?? code} subtitles on this video.`
         return
       }
-      const nativeTrack = nativeLang === code ? null : pickTrack(info.tracks, nativeLang)
+      const nativeTrack = translates.value ? pickTrack(info.tracks, nativeLang) : null
       const { study: studyCues, native: nativeCues } = await videoCaptions(
         id,
         studyTrack,
@@ -298,7 +300,7 @@ export function useYoutubeSession() {
   }
 
   function ensureTranslations(idx: number) {
-    if (status.value !== 'ready' || !studying()) return
+    if (status.value !== 'ready' || !studying() || !translates.value) return
     // A human translation track exists: never use AI for this video.
     if (human.value.length) return
     const chunk = Math.floor(Math.max(idx, 0) / CHUNK)
@@ -480,6 +482,7 @@ export function useYoutubeSession() {
     cueVisible,
     showSubs: remembered(showSubs, 'showSubtitles'),
     showPanel: remembered(showPanel, 'showSubtitlesList'),
+    translates,
     studying,
     translationError,
     translationOf,

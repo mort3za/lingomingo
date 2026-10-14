@@ -48,7 +48,7 @@ const round =
               @mark="(w) => emit('mark', w)"
             />
           </div>
-          <template v-if="!s.settings.value.hideTranslation">
+          <template v-if="s.translates.value && !s.settings.value.hideTranslation">
             <hr class="my-1 border-white/20" />
             <div
               v-if="translation"
