@@ -19,6 +19,7 @@ DUAL SUBTITLES ON YOUTUBE
 • Go to the previous line, repeat the line, or go to the next line with one click, or with the keys A, S and D.
 • Auto-pause stops the video after each line, so you have time to read it.
 • The subtitle list next to the video shows all lines. Click a line to go to it.
+• Show or hide the subtitles with Shift+C, and the subtitle list with Shift+S.
 
 WORD POPUP
 • Click a word in the subtitles to see its meaning in that sentence.

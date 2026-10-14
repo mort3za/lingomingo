@@ -21,8 +21,8 @@ watch(s.showSubs, () => (selected.value = null))
 
 usePlayerToggles(
   [
-    { label: 'LingoMingo subtitles', icon: ICONS.subtitles, on: s.showSubs },
-    { label: 'LingoMingo subtitles list', icon: ICONS.sidebar, on: s.showPanel },
+    { label: 'LingoMingo subtitles (Shift+C)', icon: ICONS.subtitles, on: s.showSubs },
+    { label: 'LingoMingo subtitles list (Shift+S)', icon: ICONS.sidebar, on: s.showPanel },
   ],
   () => active.value,
 )
@@ -117,6 +117,15 @@ function onKeydown(e: KeyboardEvent) {
     e.altKey
   )
     return
+  // Shift+C / Shift+S: the same as a click on our toggles in the player bar.
+  const toggle =
+    e.shiftKey && active.value && { c: s.showSubs, s: s.showPanel }[e.key.toLowerCase()]
+  if (toggle) {
+    e.preventDefault()
+    e.stopImmediatePropagation()
+    toggle.value = !toggle.value
+    return
+  }
   if (s.status.value !== 'ready' || !s.studying()) return
   const actions: Record<string, () => void> = {
     a: s.prev,
