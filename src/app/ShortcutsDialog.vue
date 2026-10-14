@@ -14,14 +14,14 @@ const groups = computed(() =>
 
 <template>
   <div
-    class="fixed inset-0 z-50 grid place-items-center bg-black/60 p-6"
+    class="fixed inset-0 z-50 grid place-items-center bg-black/60 p-2 sm:p-6"
     @click.self="emit('close')"
   >
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="shortcuts-title"
-      class="flex max-h-full w-full max-w-3xl flex-col gap-4 rounded-lg bg-panel p-6 shadow-xl"
+      class="flex max-h-full w-full max-w-3xl flex-col gap-4 rounded-lg bg-panel p-4 shadow-xl sm:p-6"
     >
       <div class="flex items-center justify-between">
         <h2 id="shortcuts-title" class="text-xl font-semibold">Keyboard shortcuts</h2>

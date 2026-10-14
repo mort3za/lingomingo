@@ -28,7 +28,7 @@ onMounted(load)
 
 <template>
   <div
-    class="fixed inset-0 z-50 grid place-items-center bg-black/60 p-6"
+    class="fixed inset-0 z-50 grid place-items-center bg-black/60 p-2 sm:p-6"
     @click.self="emit('close')"
   >
     <div

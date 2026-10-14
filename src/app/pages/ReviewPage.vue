@@ -198,7 +198,7 @@ const skeleton = 'animate-pulse rounded bg-white/10'
 
 <template>
   <div class="mx-auto max-w-3xl space-y-6">
-    <div class="flex items-center gap-3">
+    <div class="flex flex-wrap items-center gap-3">
       <h1 class="text-2xl font-semibold">Review</h1>
       <span :class="[chip, queue.length ? 'text-orange-300' : 'text-neutral-400']">
         {{ queue.length }} due
@@ -234,7 +234,7 @@ const skeleton = 'animate-pulse rounded bg-white/10'
       />
 
       <!-- Same height for both states, so the buttons do not jump. -->
-      <div class="h-16">
+      <div class="h-34 sm:h-16">
         <button
           v-if="!revealed"
           :class="btn + 'w-full flex-row gap-2 bg-accent hover:brightness-110'"
@@ -242,7 +242,7 @@ const skeleton = 'animate-pulse rounded bg-white/10'
         >
           Show answer <kbd :class="kbd + ' opacity-70'">Space</kbd>
         </button>
-        <div v-else class="grid h-full grid-cols-5 gap-2">
+        <div v-else class="grid h-full grid-cols-3 gap-2 sm:grid-cols-5">
           <button
             v-for="g in GRADES"
             :key="g.grade"
@@ -289,7 +289,7 @@ const skeleton = 'animate-pulse rounded bg-white/10'
             <th class="p-2 font-medium">Word</th>
             <th class="p-2 font-medium">Translation</th>
             <th class="p-2 font-medium">Next review</th>
-            <th class="p-2 text-right font-medium">Reviews</th>
+            <th class="hidden p-2 text-right font-medium sm:table-cell">Reviews</th>
           </tr>
         </thead>
         <tbody>
@@ -307,7 +307,9 @@ const skeleton = 'animate-pulse rounded bg-white/10'
             >
               {{ w.review ? nextIn(dueAt(w)) : 'New' }}
             </td>
-            <td class="p-2 text-right text-neutral-400 tabular-nums">{{ w.review?.reps ?? 0 }}</td>
+            <td class="hidden p-2 text-right text-neutral-400 tabular-nums sm:table-cell">
+              {{ w.review?.reps ?? 0 }}
+            </td>
           </tr>
         </tbody>
       </table>

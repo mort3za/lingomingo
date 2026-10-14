@@ -225,8 +225,8 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
 </script>
 
 <template>
-  <div class="flex gap-6">
-    <aside class="w-72 shrink-0 space-y-5">
+  <div class="flex flex-col gap-6 lg:flex-row">
+    <aside class="w-full shrink-0 space-y-5 lg:w-72">
       <div>
         <div class="mb-1 text-xs text-neutral-400">Sort by</div>
         <div class="flex overflow-hidden rounded border border-white/10">
@@ -261,7 +261,10 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
         Hide Shorts
       </label>
 
-      <div class="border-t border-white/10 pt-4">
+      <!-- Narrow windows: the list scrolls, so the videos stay near the top of the page. -->
+      <div
+        class="max-h-72 [scrollbar-width:thin] [scrollbar-gutter:stable] overflow-y-auto border-t border-white/10 pt-4 lg:max-h-none lg:overflow-visible"
+      >
         <!-- Same height in both states, so the list does not move when the search opens. -->
         <div class="mb-2 flex h-8 items-center gap-2 ps-2">
           <input
@@ -355,17 +358,17 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
         :key="v.videoId"
         :href="watchUrl(v)"
         target="_blank"
-        class="flex gap-5 rounded p-1 hover:bg-white/5"
+        class="flex flex-col gap-2 rounded p-1 hover:bg-white/5 sm:flex-row sm:gap-5"
         v-visible="() => loadTracks(v.videoId)"
       >
         <img
           :src="thumbUrl(v)"
           alt=""
           loading="lazy"
-          class="aspect-video w-54 shrink-0 rounded object-cover"
+          class="aspect-video w-full shrink-0 rounded object-cover sm:w-54"
         />
-        <div class="min-w-0 space-y-1 pt-1">
-          <div class="truncate text-lg text-white">{{ v.title }}</div>
+        <div class="min-w-0 space-y-1 px-1 sm:px-0 sm:pt-1">
+          <div class="line-clamp-2 text-white sm:truncate sm:text-lg">{{ v.title }}</div>
           <div class="text-sm text-neutral-400">{{ v.channelName }}</div>
           <div class="text-sm text-neutral-400">
             {{ ago(v.published) }} • {{ compact.format(v.views) }} views

@@ -56,10 +56,12 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
 
 <template>
   <div
-    class="fixed inset-0 z-50 grid place-items-center bg-black/60 p-6"
+    class="fixed inset-0 z-50 grid place-items-center bg-black/60 p-2 sm:p-6"
     @click.self="emit('close')"
   >
-    <div class="flex max-h-full w-full max-w-5xl flex-col gap-4 rounded-lg bg-panel p-6 shadow-xl">
+    <div
+      class="flex max-h-full w-full max-w-5xl flex-col gap-4 rounded-lg bg-panel p-4 shadow-xl sm:p-6"
+    >
       <div class="flex items-center justify-between">
         <h2 class="text-2xl font-semibold">Set Vocabulary Level</h2>
         <button class="text-xl text-white/60 hover:text-white" title="Close" @click="emit('close')">

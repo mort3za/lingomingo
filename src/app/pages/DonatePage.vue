@@ -87,7 +87,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 <template>
   <div class="max-w-2xl space-y-10">
     <section
-      class="relative overflow-hidden rounded-xl border border-accent/25 bg-linear-to-br from-accent/20 via-accent/5 to-transparent p-8"
+      class="relative overflow-hidden rounded-xl border border-accent/25 bg-linear-to-br from-accent/20 via-accent/5 to-transparent p-5 sm:p-8"
     >
       <svg
         v-bind="iconAttrs"
@@ -151,7 +151,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
     <section class="space-y-3">
       <h2 class="text-lg font-medium">Your support pays for</h2>
-      <div class="grid grid-cols-3 gap-3">
+      <div class="grid gap-3 sm:grid-cols-3">
         <div
           v-for="item in helps"
           :key="item.label"
@@ -172,7 +172,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
     <section class="space-y-3">
       <h2 class="text-lg font-medium">Other ways to help</h2>
       <p class="text-sm text-neutral-400">No money? These help a lot too.</p>
-      <div class="grid grid-cols-3 gap-3">
+      <div class="grid gap-3 sm:grid-cols-3">
         <a :href="repo" target="_blank" :class="tileClass">
           <svg
             v-bind="iconAttrs"
@@ -209,14 +209,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
     </section>
     <div
       v-if="cryptoOpen"
-      class="fixed inset-0 z-50 grid place-items-center bg-black/60 p-6"
+      class="fixed inset-0 z-50 grid place-items-center bg-black/60 p-2 sm:p-6"
       @click.self="cryptoOpen = false"
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="crypto-title"
-        class="flex max-h-full flex-col gap-4 overflow-y-auto rounded-lg bg-panel p-6 shadow-xl"
+        class="flex max-h-full max-w-full flex-col gap-4 overflow-auto rounded-lg bg-panel p-4 shadow-xl sm:p-6"
       >
         <div class="flex items-center justify-between">
           <h2 id="crypto-title" class="text-xl font-semibold">Donate with crypto</h2>

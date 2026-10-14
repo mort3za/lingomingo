@@ -153,7 +153,7 @@ const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity
 
 <template>
   <div class="space-y-4">
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
       <button
         v-for="t in [
           ['WORD', 'Saved Words'],
@@ -188,7 +188,7 @@ const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity
 
     <!-- Always shown, so selecting a row does not move the table. -->
     <div
-      class="sticky top-0 z-10 flex items-center gap-2 rounded px-3 py-2 text-sm transition-colors"
+      class="sticky top-14 z-10 flex flex-wrap items-center gap-2 rounded px-3 py-2 text-sm transition-colors md:top-0"
       :class="picked.size ? 'bg-accent' : 'bg-panel text-neutral-400'"
     >
       <span class="mr-2 tabular-nums">
@@ -225,8 +225,8 @@ const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity
           </th>
           <th class="p-2">{{ tab === 'WORD' ? 'Word' : 'Phrase' }}</th>
           <th class="p-2">Translation</th>
-          <th class="p-2">Stage</th>
-          <th class="p-2">Source</th>
+          <th class="hidden p-2 sm:table-cell">Stage</th>
+          <th class="hidden p-2 md:table-cell">Source</th>
           <th class="w-10 p-2"><span class="sr-only">Card</span></th>
         </tr>
       </thead>
@@ -256,8 +256,10 @@ const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity
           <td class="p-2 text-start text-neutral-300" :dir="dirOf(i.translationLang)">
             {{ translationOf(i) }}
           </td>
-          <td class="p-2" :class="stageColor[i.stage]">{{ stageLabel[i.stage] }}</td>
-          <td class="p-2">
+          <td class="hidden p-2 sm:table-cell" :class="stageColor[i.stage]">
+            {{ stageLabel[i.stage] }}
+          </td>
+          <td class="hidden p-2 md:table-cell">
             <a
               v-if="i.source"
               :href="watchUrl(i)"
