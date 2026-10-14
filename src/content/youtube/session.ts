@@ -241,8 +241,8 @@ export function useYoutubeSession() {
         return
       }
       human.value = nativeCues ? alignTranslation(studyCues, nativeCues) : []
-      cues.value = studyCues
       machine.value = studyCues.map(() => null)
+      cues.value = studyCues
       status.value = 'ready'
       ensureTranslations(0)
     } catch (e) {
