@@ -12,45 +12,47 @@ Copy the text between the lines. The store shows plain text (no Markdown), and i
 
 ---
 
-LingoMingo helps you learn a language with YouTube videos. It shows two subtitles at the same time: one in the language that you learn, and one in your own language. Click a word to see what it means. Save it, and review it later.
+Learn a language with the YouTube videos that you like. 📚
 
-DUAL SUBTITLES ON YOUTUBE
+LingoMingo shows two subtitles at the same time: one in the language that you learn, and one in your own language. Click a word to see what it means. Save it, and review it later.
+
+🎬 DUAL SUBTITLES ON YOUTUBE
 • See the subtitles in your study language and in your own language together.
 • Go to the previous line, repeat the line, or go to the next line with one click, or with the keys A, S and D.
 • Auto-pause stops the video after each line, so you have time to read it.
 • The subtitle list next to the video shows all lines. Click a line to go to it.
 • Show or hide the subtitles with Shift+C, and the subtitle list with Shift+S.
 
-WORD POPUP
+💬 WORD POPUP
 • Click a word in the subtitles to see its meaning in that sentence.
 • Mark the word as Known, Learn or Skip.
 
-VOCABULARY COLORS
+🎨 VOCABULARY COLORS
 • Set your vocabulary level one time. LingoMingo then shows the words that you know in green, the words to learn next in orange, and rare words in a darker color.
 
-SAVE AND REVIEW
+🧠 SAVE AND REVIEW
 • Save words and full subtitle lines (phrases). Each word keeps its sentence and its video.
 • Review your words with flashcards. The FSRS spaced-repetition scheduler shows each word again at the right time.
 • Export your saved items as a CSV or JSON file, for example to use them in other flashcard apps.
 
-FIND VIDEOS
+📺 FIND VIDEOS
 • The Media page shows the newest videos of YouTube channels in 18 study languages.
 • Badges show which videos have human-made subtitles.
 • Pin your favorite channels to the top of the list.
 
-LANGUAGES
+🌍 LANGUAGES
 Arabic, Chinese, Dutch, English, Finnish, French, German, Hebrew, Hindi, Italian, Korean, Persian, Polish, Portuguese, Russian, Spanish, Swedish, Turkish and Ukrainian. Right-to-left languages show correctly.
 
-AI TRANSLATION
-The word popup uses AI. When a video has no human-made subtitles in your language, AI also translates the subtitles. Add your own API key from Claude (Anthropic), OpenAI (ChatGPT), xAI (Grok) or DeepSeek. Or use a local model on your computer (Ollama, LM Studio, llama.cpp) without a key. Your AI provider can charge you for its use.
+🤖 AI TRANSLATION
+The word popup uses AI. When a video has no human-made subtitles in your language, AI also translates the subtitles. Add your own API key from a supported AI provider, or use a local AI model on your computer without a key. The Settings page shows the list of supported providers. Your AI provider can charge you for its use.
 
-PRIVACY
+🔒 PRIVACY
 • No account, no server, no analytics, no ads.
 • Your settings, saved words and API keys stay in your browser.
 • Subtitle lines and the words that you open go only to the AI provider that you select.
 Privacy policy: https://github.com/mort3za/lingomingo/blob/main/PRIVACY.md
 
-FREE AND OPEN SOURCE
+❤️ FREE AND OPEN SOURCE
 LingoMingo is free and open source (GNU GPL v3).
 Source code: https://github.com/mort3za/lingomingo
 
