@@ -72,8 +72,8 @@ async function fetchCues(track: CaptionTrack, extra: [string, string][]): Promis
   const res = await fetch(url, { credentials: 'include' })
   if (!res.ok) throw new Error(`Caption download failed (${res.status}).`)
   const text = await res.text()
-  if (!text) throw new Error('YouTube returned empty captions.')
-  return parseJson3(JSON.parse(text))
+  // Empty answer: the video has no subtitles we can use. The caller hides the extension.
+  return text ? parseJson3(JSON.parse(text)) : []
 }
 
 const CAPTIONS_TTL = 7 * 86400_000
@@ -108,8 +108,8 @@ async function videoCaptions(
   const study = await fetchCues(studyTrack, extra)
   // If the human translation track fails, fall back to AI translation.
   const native = nativeTrack ? await fetchCues(nativeTrack, extra).catch(() => null) : null
-  // Do not keep a failed human track: the next load tries it again.
-  if (!nativeTrack || native) {
+  // Do not keep empty subtitles or a failed human track: the next load tries again.
+  if (study.length && (!nativeTrack || native)) {
     await chrome.storage.local.set({ [key]: { study, native, at: Date.now() } })
   }
   return { study, native }
@@ -234,6 +234,13 @@ export function useYoutubeSession() {
       )
       if (token !== loadToken) return
       human.value = nativeCues ? alignTranslation(studyCues, nativeCues) : []
+      // YouTube gave no lines: the same as no subtitles, so the extension stays hidden.
+      if (!studyCues.length) {
+        showSubs.value = false
+        showPanel.value = false
+        status.value = 'no-subs'
+        return
+      }
       machine.value = studyCues.map(() => null)
       cues.value = studyCues
       status.value = 'ready'
