@@ -85,6 +85,8 @@ export type Provider =
   | 'local'
 
 export interface Settings {
+  /** Off: LingoMingo shows nothing on YouTube. */
+  enabled: boolean
   studyLang: string
   nativeLang: string
   provider: Provider
@@ -124,6 +126,7 @@ export const DEFAULT_SETTINGS: Settings = {
   studyLang: 'de',
   nativeLang: 'en',
   provider: 'claude',
+  enabled: true,
   claudeKey: '',
   claudeModel: 'claude-haiku-5-5',
   openaiKey: '',

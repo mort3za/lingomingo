@@ -5,14 +5,22 @@ import {
   type Request,
   type Response,
 } from '@/shared/messages'
-import { getSettings } from '@/shared/storage'
+import { getSettings, onStorageKey } from '@/shared/storage'
 import { translateLines, translateWord, wordExtras } from './llm'
 
 const APP_URL = chrome.runtime.getURL('src/app/index.html')
 
-chrome.action.onClicked.addListener(() => {
-  chrome.tabs.create({ url: APP_URL })
-})
+/** "off" on the toolbar button while LingoMingo is off, so the user sees it without the popup. */
+async function showOnOff() {
+  const { enabled } = await getSettings()
+  await chrome.action.setBadgeText({ text: enabled ? '' : 'off' })
+}
+// `--color-panel` theme token. The CSS variable is not available here.
+void chrome.action.setBadgeBackgroundColor({ color: '#2b2d31' })
+void chrome.action.setBadgeTextColor({ color: '#ffffff' })
+onStorageKey('settings', () => void showOnOff())
+chrome.runtime.onStartup.addListener(() => void showOnOff())
+chrome.runtime.onInstalled.addListener(() => void showOnOff())
 
 chrome.runtime.onInstalled.addListener(({ reason }) => {
   // First install: walk the user through the initial setup.

@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { getSavedItems, onStorageKey } from '@/shared/storage'
 import { LANGUAGES } from '@/shared/types'
 import { useSettings } from './settings'
+
+/** `inline`: the list opens in the page flow, not as a popover (the toolbar popup does not grow
+ * for a popover). */
+const { inline = false } = defineProps<{ inline?: boolean }>()
+const open = ref(false)
 
 const { settings } = useSettings()
 const current = computed(() => settings.value.studyLang)
@@ -34,25 +39,46 @@ const groups = computed(() => {
 })
 
 const menu = useTemplateRef<HTMLElement>('menu')
+const trigger = useTemplateRef<HTMLElement>('trigger')
 const options = () => [...(menu.value?.querySelectorAll<HTMLElement>('[role=option]') ?? [])]
 
 function pick(code: string) {
   settings.value.studyLang = code
+  if (inline) {
+    open.value = false
+    trigger.value?.focus()
+    return
+  }
   menu.value?.hidePopover()
   // Page keys (Space on the review page) must not open the menu again.
   ;(document.activeElement as HTMLElement | null)?.blur()
 }
 
-function onToggle(e: Event) {
-  if ((e as ToggleEvent).newState !== 'open') return
+const focusSelected = () =>
   options()
     .find((o) => o.ariaSelected === 'true')
     ?.focus({ preventScroll: false })
+
+function onToggle(e: Event) {
+  if ((e as ToggleEvent).newState === 'open') focusSelected()
+}
+
+async function toggleInline() {
+  if (!inline) return
+  open.value = !open.value
+  await nextTick()
+  if (open.value) focusSelected()
 }
 
 // Arrow keys move between the languages. Keys stay in the menu, away from the page shortcuts.
 function onMenuKeydown(e: KeyboardEvent) {
   e.stopPropagation()
+  if (inline && e.key === 'Escape') {
+    e.preventDefault()
+    open.value = false
+    trigger.value?.focus()
+    return
+  }
   const list = options()
   const i = list.indexOf(document.activeElement as HTMLElement)
   const to = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: list.length - 1 }[e.key]
@@ -62,14 +88,21 @@ function onMenuKeydown(e: KeyboardEvent) {
 }
 
 const badge = 'grid shrink-0 place-items-center rounded-md font-semibold uppercase'
+const menuClass =
+  '[scrollbar-width:thin] overflow-y-auto rounded-lg border border-white/10 bg-panel p-1.5 text-white [color-scheme:dark]'
+const popoverClass =
+  'top-[anchor(bottom)] right-auto bottom-auto left-[anchor(left)] m-0 mt-1.5 max-h-[min(70vh,30rem)] w-[anchor-size(width)] -translate-y-1 opacity-0 shadow-xl shadow-black/40 transition-[opacity,translate,display,overlay] transition-discrete duration-150 [position-anchor:--study-lang] open:translate-y-0 open:opacity-100 starting:open:-translate-y-1 starting:open:opacity-0'
 </script>
 
 <template>
   <button
-    popovertarget="study-lang-menu"
+    ref="trigger"
+    :popovertarget.attr="inline ? null : 'study-lang-menu'"
+    :aria-expanded="inline ? open : undefined"
     aria-haspopup="listbox"
     class="group mb-2 flex w-full items-center gap-3 rounded-lg border border-white/5 bg-panel/50 px-2.5 py-2 text-start transition-colors [anchor-name:--study-lang] hover:border-white/15 hover:bg-panel focus-visible:border-accent focus-visible:outline-none"
     title="Change the study language"
+    @click="toggleInline"
     @keydown.enter.space.stop
   >
     <span :class="badge + ' size-9 bg-accent text-sm text-white'">{{ current }}</span>
@@ -96,12 +129,13 @@ const badge = 'grid shrink-0 place-items-center rounded-md font-semibold upperca
   </button>
 
   <div
+    v-show="!inline || open"
     id="study-lang-menu"
     ref="menu"
-    popover
+    :popover.attr="inline ? null : ''"
     role="listbox"
     aria-label="Study language"
-    class="top-[anchor(bottom)] right-auto bottom-auto left-[anchor(left)] m-0 mt-1.5 max-h-[min(70vh,30rem)] w-[anchor-size(width)] -translate-y-1 [scrollbar-width:thin] overflow-y-auto rounded-lg border border-white/10 bg-panel p-1.5 text-white [color-scheme:dark] opacity-0 shadow-xl shadow-black/40 transition-[opacity,translate,display,overlay] transition-discrete duration-150 [position-anchor:--study-lang] open:translate-y-0 open:opacity-100 starting:open:-translate-y-1 starting:open:opacity-0"
+    :class="[menuClass, inline ? 'mb-2 max-h-64' : popoverClass]"
     @toggle="onToggle"
     @keydown="onMenuKeydown"
   >

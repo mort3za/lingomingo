@@ -17,9 +17,10 @@ export default defineManifest(({ command, mode }) => {
       48: `${icons}/icon-48.png`,
       128: `${icons}/icon-128.png`,
     },
-    // No default_popup: a click on the toolbar button opens the app page (see background).
+    // A click on the toolbar button opens the popup: on/off switch, study language, app links.
     action: {
-      default_title: 'Open LingoMingo',
+      default_title: 'LingoMingo',
+      default_popup: 'src/popup/index.html',
       default_icon: {
         16: `${icons}/icon-16.png`,
         32: `${icons}/icon-32.png`,

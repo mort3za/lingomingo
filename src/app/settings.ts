@@ -16,31 +16,41 @@ async function refresh() {
 }
 
 let timer: ReturnType<typeof setTimeout> | undefined
+/** Edit not saved yet. */
+let pending: string | null = null
 watch(
   settings,
   (value) => {
     const json = JSON.stringify(value)
     if (json === stored) return
     stored = json
+    pending = json
     clearTimeout(timer)
-    timer = setTimeout(async () => {
-      // A plain copy: chrome.storage saves a nested Vue proxy array as an object.
-      await patchSettings(JSON.parse(json))
-      saved.value = true
-      setTimeout(() => (saved.value = false), 1200)
-    }, 300)
+    timer = setTimeout(() => void saveNow(), 300)
   },
   { deep: true },
 )
 
-let started = false
+/** Save the last edit now, not after the delay. The toolbar popup can close before the delay ends. */
+export async function saveNow() {
+  clearTimeout(timer)
+  if (pending === null) return
+  const json = pending
+  pending = null
+  // A plain copy: chrome.storage saves a nested Vue proxy array as an object.
+  await patchSettings(JSON.parse(json))
+  saved.value = true
+  setTimeout(() => (saved.value = false), 1200)
+}
+
+/** Resolves when the settings are loaded from storage. */
+let loaded: Promise<void> | undefined
 export function useSettings() {
-  if (!started) {
-    started = true
-    void refresh()
+  if (!loaded) {
+    loaded = refresh()
     onStorageKey('settings', refresh)
   }
-  return { settings, saved }
+  return { settings, saved, loaded }
 }
 
 export const INPUT =
