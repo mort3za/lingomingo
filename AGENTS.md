@@ -70,18 +70,7 @@ Branded Chrome ignores `--load-extension`. Use Chrome for Testing:
 
 1. Download it into a temp folder (not the repo): `bunx @puppeteer/browsers install chrome@stable --path <temp>/cft`
 2. Build: `bun run build`
-3. Start it with the extension:
-
-   ```sh
-   agent-browser --session lm --headed \
-     --executable-path "<path to Google Chrome for Testing binary>" \
-     --extension "$PWD/dist" \
-     --args "--disable-blink-features=AutomationControlled" \
-     open "https://www.youtube.com/watch?v=jNQXAC9IVRw"
-   ```
-
-   Without `--disable-blink-features=AutomationControlled`, YouTube returns empty captions.
-
+3. Use /my-headless-browser-verify by default, unless asked
 4. Get the extension ID on `chrome://extensions` with `chrome.management.getAll`. The app page is `chrome-extension://<id>/src/app/index.html#/settings`.
 5. To set the API key, run this on the app page (the key is not shown in the output):
 
