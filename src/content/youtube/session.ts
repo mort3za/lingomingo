@@ -240,9 +240,9 @@ export function useYoutubeSession() {
         status.value = 'no-subs'
         return
       }
-      machine.value = studyCues.map(() => null)
       human.value = nativeCues ? alignTranslation(studyCues, nativeCues) : []
       cues.value = studyCues
+      machine.value = studyCues.map(() => null)
       status.value = 'ready'
       ensureTranslations(0)
     } catch (e) {
