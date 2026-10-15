@@ -37,7 +37,7 @@ async function handle(req: Request): Promise<unknown> {
     return translateLines(settings, req.lines, req.studyLang, req.nativeLang)
   }
   if (req.type === 'word-extras') {
-    return wordExtras(settings, req.words, req.studyLang, req.nativeLang)
+    return wordExtras(settings, req.words, req.studyLang, req.nativeLang, req.examples)
   }
   return translateWord(settings, req.word, req.sentence, req.studyLang, req.nativeLang)
 }

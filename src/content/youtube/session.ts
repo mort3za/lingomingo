@@ -16,6 +16,7 @@ import {
   LANGUAGES,
   type CaptionTrack,
   type Cue,
+  type Example,
   type SavedItem,
   type SavedWord,
   type Settings,
@@ -400,8 +401,15 @@ export function useYoutubeSession() {
     })
   }
 
-  async function markWord(word: string, idx: number, stage: Stage, translations: string[]) {
+  async function markWord(
+    word: string,
+    idx: number,
+    stage: Stage,
+    translations: string[],
+    examples: Example[] = [],
+  ) {
     const old = savedWordOf(word)
+    const keep = old?.examples ?? examples
     // One saved item per lemma: marking "ging" updates a saved "gehe".
     const id = old?.id ?? wordId(lang.value, lemma(word))
     const now = Date.now()
@@ -422,7 +430,7 @@ export function useYoutubeSession() {
       source: videoId.value ? videoRef(idx) : null,
       // Keep the review history when the stage changes.
       ...(old?.review && { review: { ...old.review } }),
-      ...(old?.examples && { examples: old.examples.map((e) => ({ ...e })) }),
+      ...(keep.length ? { examples: keep.map((e) => ({ ...e })) } : {}),
     })
   }
 

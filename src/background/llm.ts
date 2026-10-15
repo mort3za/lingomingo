@@ -340,7 +340,7 @@ export async function translateWord(
 const MORE = 3
 
 /**
- * Translations, the sentence translation and two example sentences for each word, in one
+ * Translations, the sentence translation and `count` example sentences for each word, in one
  * request. Same order as `words`; null when the model leaves a word out.
  */
 export async function wordExtras(
@@ -348,6 +348,7 @@ export async function wordExtras(
   words: { word: string; sentence: string | null; have?: Have }[],
   studyLang: string,
   nativeLang: string,
+  count = 2,
 ): Promise<(WordExtras | null)[]> {
   const system =
     `You help a learner of ${name(studyLang)} who speaks ${name(nativeLang)}. Input is a JSON ` +
@@ -355,7 +356,7 @@ export async function wordExtras(
     `word, or is empty. Answer with ONLY a JSON object with the same keys. Under each key put ` +
     `{"translations":["best","alt"],"sentence":"<the sentence in ${name(nativeLang)}, or empty>",` +
     `"examples":[["<example>","<its translation>"],["<example>","<its translation>"]]}. ` +
-    `Give 1 to 3 short translations of the word. Write 2 new examples in ${name(studyLang)}: ` +
+    `Give 1 to 3 short translations of the word. Write ${count} new examples in ${name(studyLang)}: ` +
     `short (under 12 words), simple, natural, with the word in the same meaning. In each ` +
     `example, put the word between asterisks, like *word*, also when its form changes.` +
     (words.some((w) => w.have)
@@ -378,7 +379,7 @@ export async function wordExtras(
       .filter((e): e is unknown[] => Array.isArray(e))
       .map(([s, t]) => ({ sentence: str(s), translation: str(t).replaceAll('*', '') }))
       .filter((e) => e.sentence && e.translation)
-      .slice(0, w.have ? MORE : 2)
+      .slice(0, w.have ? MORE : count)
     return {
       translations: (Array.isArray(r.translations) ? r.translations : [])
         .map(str)

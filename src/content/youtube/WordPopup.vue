@@ -1,12 +1,15 @@
 <script lang="ts">
-// Word translations of this tab, so a second click on the same word sends no new request.
+// Word translations and examples of this tab, so a second click on the same word sends no new
+// request.
 const cache = new Map<string, string[]>()
+const exampleCache = new Map<string, Example[]>()
 </script>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { send } from '@/shared/messages'
-import { dirOf, type SavedItem, type Stage } from '@/shared/types'
+import { dirOf, type Example, type SavedItem, type Stage } from '@/shared/types'
+import SpeakButton from '@/shared/SpeakButton.vue'
 
 const props = defineProps<{
   word: string
@@ -17,7 +20,7 @@ const props = defineProps<{
   savedItem: SavedItem | null
 }>()
 const emit = defineEmits<{
-  stage: [stage: Stage, translations: string[]]
+  stage: [stage: Stage, translations: string[], examples: Example[]]
   remove: []
   close: []
 }>()
@@ -27,9 +30,17 @@ const translations = ref<string[]>(
 )
 const loading = ref(false)
 const error = ref('')
+const examples = ref<Example[]>(
+  props.savedItem?.itemType === 'WORD' ? (props.savedItem.examples ?? []) : [],
+)
+const examplesLoading = ref(false)
+const examplesError = ref('')
 
 const cacheKey = `${props.studyLang}:${props.nativeLang}:${props.word}`
-onMounted(async () => {
+onMounted(loadTranslations)
+onMounted(loadExamples)
+
+async function loadTranslations() {
   if (translations.value.length) return
   const cached = cache.get(cacheKey)
   if (cached) {
@@ -51,24 +62,57 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
+}
+
+// A separate request, so the translations show before the slower examples.
+async function loadExamples() {
+  if (examples.value.length) return
+  const cached = exampleCache.get(cacheKey)
+  if (cached) {
+    examples.value = cached
+    return
+  }
+  examplesLoading.value = true
+  try {
+    const [r] = await send({
+      type: 'word-extras',
+      words: [{ word: props.word, sentence: props.sentence }],
+      studyLang: props.studyLang,
+      nativeLang: props.nativeLang,
+      examples: 3,
+    })
+    examples.value = r?.examples ?? []
+    exampleCache.set(cacheKey, examples.value)
+  } catch (e) {
+    examplesError.value = e instanceof Error ? e.message : String(e)
+  } finally {
+    examplesLoading.value = false
+  }
+}
+
+// The AI marks the word in an example with `*`.
+const parts = (sentence: string) =>
+  sentence
+    .split(/\*([^*]+)\*/)
+    .map((text, i) => ({ text, hit: i % 2 === 1 }))
+    .filter((p) => p.text)
 
 const stage = computed(() => props.savedItem?.stage)
 // A click on the active stage button removes the word from the saved items.
 function pick(s: Stage) {
   if (stage.value === s) emit('remove')
-  else emit('stage', s, translations.value)
+  else emit('stage', s, translations.value, examples.value)
 }
-// Show above the word (below it near the top of the screen); centered on it, kept inside the screen.
-const below = props.rect.top < 240
+// Show on the side of the word with more room; centered on it, kept inside the screen.
+const below = props.rect.top < innerHeight - props.rect.bottom
 const center = props.rect.left + props.rect.width / 2
-const x = Math.min(Math.max(center, 138), innerWidth - 138)
+const x = Math.min(Math.max(center, 170), innerWidth - 170)
 const style = computed(() => {
   const y = below ? props.rect.bottom + 10 : props.rect.top - 10
   return { left: `${x}px`, top: `${y}px` }
 })
 // The arrow points at the word, also when the popup is pushed in from the screen edge.
-const arrowLeft = `calc(50% + ${Math.min(Math.max(center - x, -112), 112)}px)`
+const arrowLeft = `calc(50% + ${Math.min(Math.max(center - x, -144), 144)}px)`
 // A little lighter than the side panel, so the popup stands out on it.
 const bg = 'bg-[color-mix(in_srgb,white_5%,var(--color-panel))]'
 
@@ -147,6 +191,40 @@ const stages: { stage: Stage; label: string }[] = [
         </div>
       </div>
     </div>
+    <div v-if="examplesError" class="border-t border-white/10 px-4 py-3 text-xs text-red-300">
+      {{ examplesError }}
+    </div>
+    <ol
+      v-else-if="examplesLoading || examples.length"
+      class="space-y-2.5 border-t border-white/10 px-4 py-3"
+    >
+      <template v-if="examplesLoading">
+        <li v-for="i in 3" :key="i" class="animate-pulse" aria-hidden="true">
+          <div class="flex h-5 items-center"><div class="h-3 w-5/6 rounded bg-white/10" /></div>
+          <div class="mt-0.5 flex h-4 items-center">
+            <div class="h-2.5 w-2/3 rounded bg-white/10" />
+          </div>
+        </li>
+      </template>
+      <li v-for="(e, i) in examples" v-else :key="i" class="group flex items-start gap-1">
+        <div class="min-w-0 flex-1">
+          <p class="text-sm leading-5 text-white/90" :dir="dirOf(studyLang)">
+            <template v-for="(t, j) in parts(e.sentence)" :key="j">
+              <mark
+                v-if="t.hit"
+                class="rounded-sm bg-orange-300/15 px-0.5 font-medium text-orange-300"
+                >{{ t.text }}</mark
+              >
+              <template v-else>{{ t.text }}</template>
+            </template>
+          </p>
+          <p class="mt-0.5 text-xs leading-4 text-white/50" :dir="dirOf(nativeLang)">
+            {{ e.translation }}
+          </p>
+        </div>
+        <SpeakButton class="-mt-0.5 -mr-1.5" :text="e.sentence" :lang="studyLang" on-hover />
+      </li>
+    </ol>
     <div class="flex gap-1 border-t border-white/10 p-1.5">
       <button
         v-for="b in stages"

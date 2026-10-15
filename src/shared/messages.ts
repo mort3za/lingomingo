@@ -18,6 +18,8 @@ export type Request =
       words: { word: string; sentence: string | null; have?: Have }[]
       studyLang: string
       nativeLang: string
+      /** New examples per word without `have`. Default 2. */
+      examples?: number
     }
   | { type: 'speak'; text: string; lang: string }
   /** Subtitle lines without the cache, to test the AI provider. */

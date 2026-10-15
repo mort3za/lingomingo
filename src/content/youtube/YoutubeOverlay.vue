@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
-import type { Stage } from '@/shared/types'
+import type { Example, Stage } from '@/shared/types'
 import { shadowHost } from '../mount'
 import { currentPlayer, fullBleedRow, relatedColumn } from './page'
 import SidePanel from './SidePanel.vue'
@@ -98,9 +98,9 @@ const savedItem = computed(() =>
   selected.value ? (s.savedWordOf(selected.value.word) ?? null) : null,
 )
 
-async function setStage(stage: Stage, translations: string[]) {
+async function setStage(stage: Stage, translations: string[], examples: Example[]) {
   if (!selected.value) return
-  await s.markWord(selected.value.word, selected.value.idx, stage, translations)
+  await s.markWord(selected.value.word, selected.value.idx, stage, translations, examples)
 }
 
 // Right-click = mark as Learning without a popup.
