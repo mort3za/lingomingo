@@ -70,6 +70,7 @@ async function refreshLang() {
   const settings = await getSettings()
   // Older versions of the settings page saved this list as an object ({0: id, 1: id}).
   pinned.value = Object.values(settings.pinnedChannels)
+  hideShorts.value = settings.hideShorts
   const lang = settings.studyLang
   // Cached photos show together with their rows, not after the rows come into view.
   const cached = await cachedChannelPhotos((CHANNELS[lang] ?? []).map((c) => c.id))
@@ -257,7 +258,12 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
         <input v-model="query" :class="field + ' w-full ps-9'" placeholder="Search videos" />
       </div>
       <label class="flex items-center gap-2 text-sm">
-        <input v-model="hideShorts" type="checkbox" class="accent-accent" />
+        <input
+          v-model="hideShorts"
+          type="checkbox"
+          class="accent-accent"
+          @change="patchSettings({ hideShorts })"
+        />
         Hide Shorts
       </label>
 

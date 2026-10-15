@@ -123,6 +123,8 @@ export interface Settings {
   darkenRare: boolean
   /** Channel IDs shown at the top of the channel list on the Media page. */
   pinnedChannels: string[]
+  /** Media page: hide YouTube Shorts from the video list. */
+  hideShorts: boolean
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -158,6 +160,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showSuggested: true,
   darkenRare: true,
   pinnedChannels: [],
+  hideShorts: false,
 }
 
 export const LANGUAGES: Record<string, string> = {
