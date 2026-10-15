@@ -85,7 +85,7 @@ export type Provider =
   | 'local'
 
 /** Voice for the play buttons. */
-export type Voice = 'auto' | 'browser' | 'openai' | 'gemini' | 'local'
+export type Voice = 'browser' | 'openai' | 'gemini' | 'local'
 
 export interface Settings {
   /** Off: LingoMingo shows nothing on YouTube. */
@@ -112,7 +112,6 @@ export interface Settings {
   /** Other OpenAI-compatible endpoint (llama.cpp server, vLLM, ...). */
   localBaseUrl: string
   localModel: string
-  /** 'auto' = OpenAI or Gemini when there is a key (the translation provider first), else browser. */
   voice: Voice
   openaiVoiceModel: string
   openaiVoice: string

@@ -22,11 +22,6 @@ const NOTES: Record<Voice, { text: string; warn?: boolean }[]> = {
       warn: true,
     },
   ],
-  auto: [
-    {
-      text: 'Uses OpenAI or Gemini when you added a key for one of them, with your AI translation provider first. Without a key, it uses the browser voice.',
-    },
-  ],
   openai: [
     { text: 'Paid: you pay for each new text. There is no free tier.' },
     { text: CACHE },
@@ -130,7 +125,6 @@ const code = 'font-mono break-all text-neutral-300'
       <label :class="label" for="voice">Voice</label>
       <select id="voice" v-model="settings.voice" :class="input">
         <option value="browser">Browser voice (free)</option>
-        <option value="auto">Auto</option>
         <option value="openai">OpenAI</option>
         <option value="gemini">Google Gemini (free tier)</option>
         <option value="local">Local speech server</option>

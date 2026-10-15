@@ -9,7 +9,10 @@ import {
 
 export async function getSettings(): Promise<Settings> {
   const { settings } = await chrome.storage.local.get('settings')
-  return { ...DEFAULT_SETTINGS, ...(settings as Partial<Settings> | undefined) }
+  const s = { ...DEFAULT_SETTINGS, ...(settings as Partial<Settings> | undefined) }
+  // The old voice 'auto' is gone: use the browser voice.
+  if ((s.voice as string) === 'auto') s.voice = 'browser'
+  return s
 }
 
 export function patchSettings(patch: Partial<Settings>): Promise<void> {

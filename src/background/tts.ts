@@ -1,5 +1,5 @@
 import { errorMessage } from '@/shared/llm-json'
-import { LANGUAGES, type Settings, type Voice } from '@/shared/types'
+import { LANGUAGES, type Settings } from '@/shared/types'
 
 /** Audio not played for this long is removed. */
 export const TTS_TTL = 30 * 86400_000
@@ -8,13 +8,6 @@ export interface CachedAudio {
   audio: string
   /** Last play. */
   at: number
-}
-
-/** The voice that `settings` select. `auto` picks OpenAI or Gemini when there is a key. */
-function voiceOf(s: Settings): Exclude<Voice, 'auto'> {
-  if (s.voice !== 'auto') return s.voice
-  if (s.geminiKey && (s.provider === 'gemini' || !s.openaiKey)) return 'gemini'
-  return s.openaiKey ? 'openai' : 'browser'
 }
 
 /**
@@ -27,7 +20,7 @@ export async function speak(
   text: string,
   lang: string,
 ): Promise<string | null> {
-  const voice = voiceOf(settings)
+  const voice = settings.voice
   if (voice === 'browser') return null
   const s = settings
   const id =
