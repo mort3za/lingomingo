@@ -6,6 +6,8 @@ out
 dist
 *.tgz
 lingomingo-*.zip
+lingomingo-*.crx
+crx-key.pem
 
 # code coverage
 coverage
@@ -34,8 +36,8 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Finder (MacOS) folder config
 .DS_Store
 
-# Language Reactor reference docs and screenshots
-docs/origin/
+*.crx
+*~
 
 
 TOKEN_CLAUDE

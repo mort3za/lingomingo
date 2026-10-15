@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "license": "GPL-3.0-or-later",
+  "homepage": "https://chromewebstore.google.com/detail/lingomingo/ecodbdmdfdpodfiifnacmnahkdaijkln",
   "author": "Morteza Ziyaeimehr <morteza.zym@gmail.com>",
   "repository": {
     "type": "git",

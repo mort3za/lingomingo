@@ -12,14 +12,18 @@ It is inspired by Language Reactor. LingoMingo is not affiliated with Language R
 
 ## Install
 
+Install LingoMingo from the [Chrome Web Store](https://chromewebstore.google.com/detail/lingomingo/ecodbdmdfdpodfiifnacmnahkdaijkln). Chrome updates it automatically.
+
+After the install, the setup page opens. Set your study language and your native language there. Then open a YouTube video with subtitles. The LingoMingo toolbar button opens a popup: an on/off switch, the study language and links to the app pages (media, review, saved items, settings).
+
+You need **your own API key** to enable subtitle translation and the word dictionary. Get a key from [Claude](https://console.anthropic.com/), [OpenAI (ChatGPT)](https://platform.openai.com/api-keys), [xAI (Grok)](https://console.x.ai/), [DeepSeek](https://platform.deepseek.com/), [Google Gemini](https://aistudio.google.com/api-keys) (free tier) or [OpenRouter](https://openrouter.ai/keys) (free models), and add it in **Settings**. Or use a local model (Ollama, LM Studio, llama.cpp server or another OpenAI-compatible server) without a key.
+
+### Install from a zip (manual)
+
 1. Download the zip file (`lingomingo-***.zip`) from the [latest release](https://github.com/mort3za/lingomingo/releases/latest).
 2. Unzip it into a folder that you keep (Chrome loads the extension from this folder).
 3. Open `chrome://extensions` and turn on **Developer mode** (top right).
 4. Click **Load unpacked** and select the unzipped folder.
-5. Click the LingoMingo toolbar icon to open the app. In **Settings**, set your study language and your native language.
-6. Open a YouTube video with subtitles.
-
-You need **your own API key** to enable subtitle translation and the word dictionary. Get a key from [Claude](https://console.anthropic.com/), [OpenAI (ChatGPT)](https://platform.openai.com/api-keys), [xAI (Grok)](https://console.x.ai/), [DeepSeek](https://platform.deepseek.com/), [Google Gemini](https://aistudio.google.com/api-keys) (free tier) or [OpenRouter](https://openrouter.ai/keys) (free models), and add it in **Settings**. Or use a local model (Ollama, llama.cpp server, LM Studio) without a key.
 
 To update: download the new zip, replace the files in the same folder, then click the reload icon of LingoMingo on `chrome://extensions`.
 
@@ -32,7 +36,7 @@ bun run dev
 
 `bun run dev` writes a dev build to `dist/` and reloads on change. Keep it running. To load it in Chrome: open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and select the `dist/` folder.
 
-To make a release, run `bun run release patch|minor|major` on `main`. It bumps the version, tags and pushes. GitHub Actions then builds the zip and makes the release.
+To make a release, run `bun run release patch|minor|major` on `main`. It bumps the version, writes the release notes, tags and pushes. It also builds a signed `lingomingo-vX.Y.Z.crx` to upload to the Chrome Web Store. The signing key `crx-key.pem` must be in the repo root (it is not in git). GitHub Actions then builds the zip and makes the GitHub release.
 
 ### Scripts
 
@@ -40,11 +44,13 @@ To make a release, run `bun run release patch|minor|major` on `main`. It bumps t
 | ---------------------- | ----------------------------------------------- |
 | `bun run dev`          | Dev build in `dist/` with HMR (keep it running) |
 | `bun run build`        | Production build in `dist/`                     |
+| `bun run build:dev`    | Dev build in `dist/` (blue icon), no HMR        |
 | `bun run typecheck`    | Type check with `vue-tsc`                       |
 | `bun run lint`         | ESLint                                          |
 | `bun run format`       | Prettier (write)                                |
 | `bun run format:check` | Prettier (check only)                           |
 | `bun run test`         | `bun test`                                      |
+| `bun run release`      | New release (see above)                         |
 
 ## Privacy
 
