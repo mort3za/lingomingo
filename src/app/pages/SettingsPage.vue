@@ -4,6 +4,7 @@ import { LEVEL_LANGS, WORD_STYLE } from '@/shared/vocab'
 import LanguageFields from '../LanguageFields.vue'
 import ProviderFields from '../ProviderFields.vue'
 import VocabLevelField from '../VocabLevelField.vue'
+import VoiceFields from '../VoiceFields.vue'
 import { useSettings } from '../settings'
 
 const { settings, saved } = useSettings()
@@ -128,6 +129,16 @@ const check = 'flex items-center gap-2 text-sm'
         </p>
       </div>
       <ProviderFields />
+    </section>
+    <section :class="card">
+      <div>
+        <h2 class="text-lg font-medium">Voice</h2>
+        <p :class="hint">
+          Reads words and example sentences aloud when you click a play button, in the word popup
+          and on the Review and Saved pages.
+        </p>
+      </div>
+      <VoiceFields />
     </section>
   </div>
 </template>

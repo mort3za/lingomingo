@@ -19,6 +19,7 @@ export type Request =
       studyLang: string
       nativeLang: string
     }
+  | { type: 'speak'; text: string; lang: string }
   /** Subtitle lines without the cache, to test the AI provider. */
   | { type: 'translate-lines'; lines: string[]; studyLang: string; nativeLang: string }
 
@@ -41,6 +42,8 @@ export interface ResponseMap {
   'translate-word': string[]
   /** Same order as `words`. null = the model left the word out. */
   'word-extras': (WordExtras | null)[]
+  /** Base64 audio. null = no AI voice: use a browser voice. */
+  speak: string | null
   'translate-lines': string[]
 }
 

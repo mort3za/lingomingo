@@ -7,6 +7,7 @@ import {
 } from '@/shared/messages'
 import { getSettings, onStorageKey } from '@/shared/storage'
 import { translateLines, translateWord, wordExtras } from './llm'
+import { speak, TTS_TTL, type CachedAudio } from './tts'
 
 const APP_URL = chrome.runtime.getURL('src/app/index.html')
 
@@ -31,6 +32,7 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
 
 async function handle(req: Request): Promise<unknown> {
   const settings = await getSettings()
+  if (req.type === 'speak') return speak(settings, req.text, req.lang)
   if (req.type === 'translate-lines') {
     return translateLines(settings, req.lines, req.studyLang, req.nativeLang)
   }
@@ -74,11 +76,16 @@ interface CachedChunk {
 const fresh = (c: CachedChunk | undefined): c is CachedChunk =>
   !!c && Date.now() - c.at < TRANSLATION_TTL
 
-/** Remove cached translations and captions (`cues:`, from the content script) older than 7 days. */
+/**
+ * Remove cached translations and captions (`cues:`, from the content script) older than 7 days,
+ * and AI audio not played for 30 days.
+ */
 async function pruneTranslations() {
   const all = await chrome.storage.local.get(null)
   const old = Object.keys(all).filter(
-    (k) => (k.startsWith('tr:') || k.startsWith('cues:')) && !fresh(all[k] as CachedChunk),
+    (k) =>
+      ((k.startsWith('tr:') || k.startsWith('cues:')) && !fresh(all[k] as CachedChunk)) ||
+      (k.startsWith('tts:') && !(Date.now() - (all[k] as CachedAudio).at < TTS_TTL)),
   )
   if (old.length) await chrome.storage.local.remove(old)
 }

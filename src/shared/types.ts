@@ -84,6 +84,9 @@ export type Provider =
   | 'lmstudio'
   | 'local'
 
+/** Voice for the play buttons. */
+export type Voice = 'auto' | 'browser' | 'openai' | 'gemini' | 'local'
+
 export interface Settings {
   /** Off: LingoMingo shows nothing on YouTube. */
   enabled: boolean
@@ -109,6 +112,16 @@ export interface Settings {
   /** Other OpenAI-compatible endpoint (llama.cpp server, vLLM, ...). */
   localBaseUrl: string
   localModel: string
+  /** 'auto' = OpenAI or Gemini when there is a key (the translation provider first), else browser. */
+  voice: Voice
+  openaiVoiceModel: string
+  openaiVoice: string
+  geminiVoiceModel: string
+  geminiVoice: string
+  /** OpenAI-compatible speech server, for `voice: 'local'` (Kokoro-FastAPI, Speaches, ...). */
+  voiceBaseUrl: string
+  voiceModel: string
+  voiceName: string
   autoPause: boolean
   /** Show the YouTube subtitle bar at the top of the video, not the bottom. */
   subtitlesOnTop: boolean
@@ -150,6 +163,14 @@ export const DEFAULT_SETTINGS: Settings = {
   lmstudioModel: '',
   localBaseUrl: 'http://localhost:8080/v1',
   localModel: '',
+  voice: 'browser',
+  openaiVoiceModel: 'gpt-4o-mini-tts',
+  openaiVoice: 'marin',
+  geminiVoiceModel: 'gemini-3.8-flash-lite-tts',
+  geminiVoice: 'Kore',
+  voiceBaseUrl: 'http://localhost:8880/v1',
+  voiceModel: '',
+  voiceName: '',
   autoPause: false,
   subtitlesOnTop: false,
   showSubtitles: true,

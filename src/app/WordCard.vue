@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { sentenceParts } from '@/shared/review'
+import SpeakButton from '@/shared/SpeakButton.vue'
 import { dirOf, type SavedWord } from '@/shared/types'
 import { fetchExtras } from './extras'
 
@@ -92,7 +93,15 @@ const hide = computed(() =>
         class="text-5xl leading-tight font-semibold tracking-tight break-words text-orange-300"
         :dir="dirOf(word.langCode)"
       >
-        {{ word.text }}
+        <!-- The button sits beside the word, so the word stays in the center. -->
+        <span class="relative">
+          {{ word.text }}
+          <SpeakButton
+            class="absolute top-1/2 ms-2 -translate-y-1/2 p-1.5! *:size-6"
+            :text="word.text"
+            :lang="word.langCode"
+          />
+        </span>
       </div>
       <!-- Before the answer shows, the text is blurred: nothing moves on reveal. -->
       <div
@@ -110,7 +119,7 @@ const hide = computed(() =>
       v-if="sentences.length || skeletons"
       class="divide-y divide-white/5 border-t border-white/5"
     >
-      <li v-for="(s, i) in sentences" :key="i" class="flex gap-4 px-8 py-3">
+      <li v-for="(s, i) in sentences" :key="i" class="group flex gap-4 px-8 py-3">
         <svg
           v-bind="iconAttrs"
           class="mt-1.5 size-4 shrink-0"
@@ -148,6 +157,12 @@ const hide = computed(() =>
             >{{ word.source.title || 'YouTube' }}</a
           >
         </div>
+        <SpeakButton
+          class="-me-1.5 mt-0.5 self-start"
+          :text="s.sentence"
+          :lang="word.langCode"
+          on-hover
+        />
       </li>
       <li v-for="i in skeletons" :key="`s${i}`" class="flex gap-4 px-8 py-3" aria-hidden="true">
         <svg v-bind="iconAttrs" class="mt-1.5 size-4 shrink-0 animate-pulse text-neutral-600">
