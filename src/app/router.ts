@@ -13,4 +13,6 @@ export const router = createRouter({
     { path: '/donate', component: () => import('./pages/DonatePage.vue') },
     { path: '/setup', component: () => import('./pages/SetupPage.vue') },
   ],
+  // `#/settings#ai` scrolls to the section with id "ai".
+  scrollBehavior: (to) => (to.hash ? { el: to.hash, top: 16 } : undefined),
 })

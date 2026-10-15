@@ -117,7 +117,7 @@ const check = 'flex items-center gap-2 text-sm'
       </div>
     </section>
 
-    <section :class="card">
+    <section id="ai" :class="card">
       <div>
         <h2 class="text-lg font-medium">AI translation</h2>
         <p :class="hint">

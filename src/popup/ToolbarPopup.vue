@@ -5,9 +5,13 @@ import { saveNow, useSettings } from '@/app/settings'
 import StudyLangSwitcher from '@/app/StudyLangSwitcher.vue'
 import { isDue, learningWords } from '@/shared/review'
 import { getSavedItems, onStorageKey } from '@/shared/storage'
-import type { SavedItem } from '@/shared/types'
+import { aiConfigured, type SavedItem } from '@/shared/types'
 
-const { settings } = useSettings()
+const { settings, loaded } = useSettings()
+// Wait for the stored settings: the defaults have no API key and would show the warning.
+const ready = ref(false)
+void loaded.then(() => (ready.value = true))
+const aiMissing = computed(() => ready.value && !aiConfigured(settings.value))
 // The popup closes on any click outside it, before the usual save delay ends: save at once.
 watch(settings, () => void saveNow(), { deep: true, flush: 'post' })
 const on = computed(() => settings.value.enabled)
@@ -81,7 +85,27 @@ async function openPage(path: string) {
       </button>
     </header>
 
-    <StudyLangSwitcher inline />
+    <StudyLangSwitcher inline field="nativeLang" />
+
+    <a
+      v-if="aiMissing"
+      :href="`${APP_URL}#/settings#ai`"
+      class="mb-2 flex items-start gap-3 rounded-lg border border-yellow-300/20 bg-yellow-300/10 px-3 py-2 text-yellow-300 outline-none hover:border-yellow-300/40 focus-visible:border-yellow-300/60"
+      @click.prevent="openPage('/settings#ai')"
+    >
+      <svg v-bind="iconAttrs" aria-hidden="true">
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+        <path d="M12 9v4" />
+        <path d="M12 17h.01" />
+      </svg>
+      <span class="min-w-0 flex-1 leading-tight">
+        <span class="block text-sm font-medium">AI translation is not set up</span>
+        <span class="block text-xs text-yellow-300/70">
+          Without it, videos with no subtitles in your language show no translation. Add an API key
+          or a local model.
+        </span>
+      </span>
+    </a>
 
     <nav class="flex flex-col gap-0.5">
       <template v-for="link in links" :key="link.to">

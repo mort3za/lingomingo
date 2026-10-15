@@ -5,16 +5,30 @@ import { LANGUAGES } from '@/shared/types'
 import { useSettings } from './settings'
 
 /** `inline`: the list opens in the page flow, not as a popover (the toolbar popup does not grow
- * for a popover). */
-const { inline = false } = defineProps<{ inline?: boolean }>()
+ * for a popover). `field`: the setting it changes, the study language or the translation language. */
+const { inline = false, field = 'studyLang' } = defineProps<{
+  inline?: boolean
+  field?: 'studyLang' | 'nativeLang'
+}>()
 const open = ref(false)
 
-const { settings } = useSettings()
-const current = computed(() => settings.value.studyLang)
+const TEXT = {
+  studyLang: { label: 'Studying', name: 'Study language', title: 'Change the study language' },
+  nativeLang: {
+    label: 'Translating to',
+    name: 'Translation language',
+    title: 'Change the translation language',
+  },
+}
+const text = computed(() => TEXT[field])
 
-/** Words in the Learning stage, by language. */
+const { settings } = useSettings()
+const current = computed(() => settings.value[field])
+
+/** Words in the Learning stage, by language. Only for the study language. */
 const counts = ref<Record<string, number>>({})
 async function refreshCounts() {
+  if (field !== 'studyLang') return
   const c: Record<string, number> = {}
   for (const i of await getSavedItems()) {
     if (i.itemType === 'WORD' && i.stage === 'LEARNING') c[i.langCode] = (c[i.langCode] ?? 0) + 1
@@ -43,7 +57,7 @@ const trigger = useTemplateRef<HTMLElement>('trigger')
 const options = () => [...(menu.value?.querySelectorAll<HTMLElement>('[role=option]') ?? [])]
 
 function pick(code: string) {
-  settings.value.studyLang = code
+  settings.value[field] = code
   if (inline) {
     open.value = false
     trigger.value?.focus()
@@ -101,14 +115,14 @@ const popoverClass =
     :aria-expanded="inline ? open : undefined"
     aria-haspopup="listbox"
     class="group mb-2 flex w-full items-center gap-3 rounded-lg border border-white/5 bg-panel/50 px-2.5 py-2 text-start transition-colors [anchor-name:--study-lang] hover:border-white/15 hover:bg-panel focus-visible:border-accent focus-visible:outline-none"
-    title="Change the study language"
+    :title="text.title"
     @click="toggleInline"
     @keydown.enter.space.stop
   >
     <span :class="badge + ' size-9 bg-accent text-sm text-white'">{{ current }}</span>
     <span class="min-w-0 flex-1 leading-tight">
       <span class="block text-[11px] font-medium tracking-wider text-neutral-500 uppercase">
-        Studying
+        {{ text.label }}
       </span>
       <span class="block truncate text-[15px] font-medium text-white">
         {{ LANGUAGES[current] ?? current }}
@@ -134,7 +148,7 @@ const popoverClass =
     ref="menu"
     :popover.attr="inline ? null : ''"
     role="listbox"
-    aria-label="Study language"
+    :aria-label="text.name"
     :class="[menuClass, inline ? 'mb-2 max-h-64' : popoverClass]"
     @toggle="onToggle"
     @keydown="onMenuKeydown"

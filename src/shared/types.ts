@@ -163,6 +163,22 @@ export const DEFAULT_SETTINGS: Settings = {
   hideShorts: false,
 }
 
+/** The AI provider has what it needs to send a request: an API key, or a local model name. */
+export function aiConfigured(s: Settings): boolean {
+  const need: Record<Provider, string> = {
+    claude: s.claudeKey,
+    openai: s.openaiKey,
+    grok: s.grokKey,
+    deepseek: s.deepseekKey,
+    gemini: s.geminiKey,
+    openrouter: s.openrouterKey,
+    ollama: s.ollamaModel,
+    lmstudio: s.lmstudioModel,
+    local: s.localModel,
+  }
+  return !!need[s.provider]?.trim()
+}
+
 export const LANGUAGES: Record<string, string> = {
   ar: 'Arabic',
   zh: 'Chinese',
