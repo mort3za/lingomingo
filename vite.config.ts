@@ -1,12 +1,28 @@
+import { rm } from 'node:fs/promises'
+import { resolve } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
 import { crx } from '@crxjs/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import manifest from './manifest.config.ts'
 
+// public/ is copied into dist as a whole. The store build does not use the blue dev icons,
+// so remove them to keep them out of the release zip.
+function removeDevIcons(): Plugin {
+  let devIcons = ''
+  return {
+    name: 'remove-dev-icons',
+    apply: (_, { command, mode }) => command === 'build' && mode !== 'development',
+    configResolved(config) {
+      devIcons = resolve(config.root, config.build.outDir, 'icons/dev')
+    },
+    closeBundle: () => rm(devIcons, { recursive: true, force: true }),
+  }
+}
+
 export default defineConfig({
-  plugins: [vue(), tailwindcss(), crx({ manifest })],
+  plugins: [vue(), tailwindcss(), crx({ manifest }), removeDevIcons()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
