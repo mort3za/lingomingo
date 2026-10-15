@@ -156,9 +156,7 @@ export function useYoutubeSession() {
   const lemma = (word: string) => lemmaOf(word, list.value?.lemmas)
 
   const savedWords = computed(() =>
-    saved.value.filter(
-      (i): i is SavedWord => i.itemType === 'WORD' && i.langCode === lang.value,
-    ),
+    saved.value.filter((i): i is SavedWord => i.itemType === 'WORD' && i.langCode === lang.value),
   )
   /** The saved word with the same lemma ("ging" finds a saved "gehe"). */
   const savedWordOf = (word: string) => savedWords.value.find((i) => lemma(i.text) === lemma(word))

@@ -130,6 +130,7 @@ const check = 'flex items-center gap-2 text-sm'
       </div>
       <ProviderFields />
     </section>
+
     <section :class="card">
       <div>
         <h2 class="text-lg font-medium">Voice</h2>
