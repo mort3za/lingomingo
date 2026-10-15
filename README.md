@@ -1,9 +1,14 @@
-# LingoMingo
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.svg" />
+    <img src="docs/logo.svg" alt="LingoMingo" height="56" />
+  </picture>
+</h1>
 
 A Chrome extension (Manifest V3) to learn languages with YouTube.
 It is inspired by Language Reactor. LingoMingo is not affiliated with Language Reactor, YouTube or Google.
 
-![LingoMingo on YouTube: dual subtitles, word colors by level, word popup and subtitle list](docs/screenshot.jpg)
+![LingoMingo on YouTube: dual subtitles, word colors by level, word popup with example sentences and subtitle list](docs/screenshot.jpg)
 
 ## Install
 

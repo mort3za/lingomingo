@@ -1,14 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#e5534b"/>
-      <stop offset="1" stop-color="#a8232a"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#e2503f"/>
+      <stop offset="1" stop-color="#ac202b"/>
     </linearGradient>
   </defs>
-  <rect x="4" y="4" width="120" height="120" rx="30" fill="url(#bg)"/>
-  <!-- Speech bubble with a tail at the bottom left -->
-  <path fill="#fff" d="M40 26h48a16 16 0 0 1 16 16v32a16 16 0 0 1-16 16H60l-20 14a3 3 0 0 1-4.7-2.5V90A16 16 0 0 1 24 74V42a16 16 0 0 1 16-16z"/>
-  <!-- Two subtitle lines -->
-  <rect x="40" y="46" width="48" height="10" rx="5" fill="#cc3333"/>
-  <rect x="40" y="62" width="30" height="10" rx="5" fill="#cc3333" fill-opacity="0.45"/>
+  <path fill="url(#bg)" d="M4.1 45.7L4.2 39.2L4.5 34.5L4.9 30.7L5.4 27.4L6.0 24.5L6.8 21.9L7.6 19.6L8.6 17.5L9.7 15.6L11.0 13.9L12.4 12.4L13.9 11.0L15.6 9.7L17.5 8.6L19.6 7.6L21.9 6.8L24.5 6.0L27.4 5.4L30.7 4.9L34.5 4.5L39.2 4.2L45.7 4.1L64.0 4.0L82.3 4.1L88.8 4.2L93.5 4.5L97.3 4.9L100.6 5.4L103.5 6.0L106.1 6.8L108.4 7.6L110.5 8.6L112.4 9.7L114.1 11.0L115.6 12.4L117.0 13.9L118.3 15.6L119.4 17.5L120.4 19.6L121.2 21.9L122.0 24.5L122.6 27.4L123.1 30.7L123.5 34.5L123.8 39.2L123.9 45.7L124.0 64.0L123.9 82.3L123.8 88.8L123.5 93.5L123.1 97.3L122.6 100.6L122.0 103.5L121.2 106.1L120.4 108.4L119.4 110.5L118.3 112.4L117.0 114.1L115.6 115.6L114.1 117.0L112.4 118.3L110.5 119.4L108.4 120.4L106.1 121.2L103.5 122.0L100.6 122.6L97.3 123.1L93.5 123.5L88.8 123.8L82.3 123.9L64.0 124.0L45.7 123.9L39.2 123.8L34.5 123.5L30.7 123.1L27.4 122.6L24.5 122.0L21.9 121.2L19.6 120.4L17.5 119.4L15.6 118.3L13.9 117.0L12.4 115.6L11.0 114.1L9.7 112.4L8.6 110.5L7.6 108.4L6.8 106.1L6.0 103.5L5.4 100.6L4.9 97.3L4.5 93.5L4.2 88.8L4.1 82.3L4.0 64.0Z"/>
+  <!-- Word popup: the meaning of the word below -->
+  <path fill="#000" fill-opacity="0.14" d="M36 25h56a12 12 0 0 1 12 12v20a12 12 0 0 1-12 12H74l-10 10-10-10H36a12 12 0 0 1-12-12V37a12 12 0 0 1 12-12z"/>
+  <path fill="#fff" d="M36 22h56a12 12 0 0 1 12 12v20a12 12 0 0 1-12 12H74l-10 10-10-10H36a12 12 0 0 1-12-12V34a12 12 0 0 1 12-12z"/>
+  <rect x="37" y="34" width="36" height="11" rx="5.5" fill="#cc3333"/>
+  <rect x="37" y="49" width="52" height="7" rx="3.5" fill="#cc3333" fill-opacity="0.32"/>
+  <!-- Subtitle line: the clicked word is bright, the words around it are dim -->
+  <rect x="16" y="86" width="26" height="16" rx="8" fill="#fff" fill-opacity="0.45"/>
+  <rect x="46" y="84" width="36" height="20" rx="8" fill="#fff"/>
+  <rect x="86" y="86" width="26" height="16" rx="8" fill="#fff" fill-opacity="0.45"/>
 </svg>
