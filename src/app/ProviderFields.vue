@@ -223,7 +223,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
         <p class="mt-1 text-xs text-neutral-500">
           Stored only in this browser. Get a free key in
           <a
-            href="https://aistudio.google.com/apikey"
+            href="https://aistudio.google.com/api-keys"
             target="_blank"
             class="underline hover:text-white"
             >Google AI Studio</a
