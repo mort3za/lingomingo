@@ -39,11 +39,29 @@ jobs:
       - name: Zip dist
         run: cp LICENSE dist/ && cd dist && zip -r "../lingomingo-$GITHUB_REF_NAME.zip" .
 
+      # The Chrome Web Store uses verified CRX uploads: the crx must be signed with the key whose
+      # public key is in the dashboard. The private key is the CRX_KEY secret (PEM text).
+      # Chrome needs a display to pack, so it runs under xvfb. Chrome writes dist.crx next to dist.
+      - name: Sign crx
+        env:
+          CRX_KEY: ${{ secrets.CRX_KEY }}
+        run: |
+          if [ -z "$CRX_KEY" ]; then
+            echo "::error::Secret CRX_KEY is not set"
+            exit 1
+          fi
+          key="$RUNNER_TEMP/crx-key.pem"
+          printf '%s\n' "$CRX_KEY" > "$key"
+          xvfb-run -a google-chrome --user-data-dir="$RUNNER_TEMP/chrome-profile" --no-message-box \
+            --pack-extension="$PWD/dist" --pack-extension-key="$key"
+          rm "$key"
+          mv dist.crx "lingomingo-$GITHUB_REF_NAME.crx"
+
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" "lingomingo-$GITHUB_REF_NAME.zip" \
+          gh release create "$GITHUB_REF_NAME" "lingomingo-$GITHUB_REF_NAME.zip" "lingomingo-$GITHUB_REF_NAME.crx" \
             --title "$GITHUB_REF_NAME" \
             --notes-from-tag \
             --verify-tag

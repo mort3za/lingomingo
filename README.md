@@ -36,7 +36,7 @@ bun run dev
 
 `bun run dev` writes a dev build to `dist/` and reloads on change. Keep it running. To load it in Chrome: open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and select the `dist/` folder.
 
-To make a release, run `bun run release patch|minor|major` on `main`. It bumps the version, writes the release notes, tags and pushes. It also builds a signed `lingomingo-vX.Y.Z.crx` to upload to the Chrome Web Store. The signing key `crx-key.pem` must be in the repo root (it is not in git). GitHub Actions then builds the zip and makes the GitHub release.
+To make a release, run `bun run release patch|minor|major` on `main`. It bumps the version, writes the release notes, tags and pushes. GitHub Actions then builds the zip and a signed `lingomingo-vX.Y.Z.crx`, and makes the GitHub release. Upload the crx to the Chrome Web Store. The signing key is the `CRX_KEY` repository secret.
 
 ### Scripts
 
