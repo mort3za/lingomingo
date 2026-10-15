@@ -82,7 +82,7 @@ const check = 'flex items-center gap-2 text-sm'
           <input
             v-model="settings[opt.key]"
             type="checkbox"
-            class="mt-1 accent-accent"
+            class="mt-1"
             :disabled="opt.needsLevel && !hasLevel"
           />
           <span class="flex-1">
@@ -107,11 +107,11 @@ const check = 'flex items-center gap-2 text-sm'
       </div>
       <div class="space-y-2">
         <label :class="check">
-          <input v-model="settings.autoPause" type="checkbox" class="accent-accent" />
+          <input v-model="settings.autoPause" type="checkbox" />
           Auto-pause after each subtitle
         </label>
         <label :class="check">
-          <input v-model="settings.hideTranslation" type="checkbox" class="accent-accent" />
+          <input v-model="settings.hideTranslation" type="checkbox" />
           Hide translation line
         </label>
       </div>

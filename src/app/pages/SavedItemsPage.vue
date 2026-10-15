@@ -181,7 +181,7 @@ const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity
         :key="s"
         class="flex items-center gap-1 text-sm"
       >
-        <input v-model="stages[s]" type="checkbox" class="accent-accent" />
+        <input v-model="stages[s]" type="checkbox" />
         <span :class="stageColor[s]">{{ stageLabel[s] }} ({{ count(s) }})</span>
       </label>
     </div>
@@ -221,7 +221,7 @@ const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity
       <thead class="text-xs text-neutral-400 uppercase">
         <tr>
           <th class="w-8 p-2">
-            <input type="checkbox" class="accent-accent" :checked="allPicked" @change="toggleAll" />
+            <input type="checkbox" :checked="allPicked" @change="toggleAll" />
           </th>
           <th class="p-2">{{ tab === 'WORD' ? 'Word' : 'Phrase' }}</th>
           <th class="p-2">Translation</th>
@@ -240,12 +240,7 @@ const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity
           @click="onRowClick(i.id, $event)"
         >
           <td class="p-2">
-            <input
-              type="checkbox"
-              class="accent-accent"
-              :checked="picked.has(i.id)"
-              :aria-label="`Select ${i.text}`"
-            />
+            <input type="checkbox" :checked="picked.has(i.id)" :aria-label="`Select ${i.text}`" />
           </td>
           <td class="p-2 text-start" :class="stageColor[i.stage]" :dir="dirOf(i.langCode)">
             {{ i.text }}

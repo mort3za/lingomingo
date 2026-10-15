@@ -115,11 +115,11 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
             </template>
           </div>
           <label class="flex items-center gap-2 text-sm text-emerald-300">
-            <input v-model="showKnownGreen" type="checkbox" class="accent-accent" />
+            <input v-model="showKnownGreen" type="checkbox" />
             Show Known words in green
           </label>
           <label class="flex items-center gap-2 text-sm text-white/45">
-            <input v-model="darkenRare" type="checkbox" class="accent-accent" />
+            <input v-model="darkenRare" type="checkbox" />
             Darken rare words
           </label>
           <p class="mt-auto text-xs text-neutral-500">
