@@ -31,6 +31,9 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
 
 async function handle(req: Request): Promise<unknown> {
   const settings = await getSettings()
+  if (req.type === 'translate-lines') {
+    return translateLines(settings, req.lines, req.studyLang, req.nativeLang)
+  }
   if (req.type === 'word-extras') {
     return wordExtras(settings, req.words, req.studyLang, req.nativeLang)
   }

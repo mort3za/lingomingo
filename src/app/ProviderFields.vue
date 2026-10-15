@@ -1,8 +1,52 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+import { send } from '@/shared/messages'
 import type { Provider } from '@/shared/types'
-import { INPUT as input, LABEL as label, useSettings } from './settings'
+import { INPUT as input, LABEL as label, saveNow, useSettings } from './settings'
+import { VOCAB_SAMPLES } from './vocab-samples'
 
 const { settings } = useSettings()
+
+// Translates the first sentence of the vocabulary sample, from the study language to the
+// translation language. Without a sample for the study language, an English one.
+const sample = computed(() => {
+  const lang = VOCAB_SAMPLES[settings.value.studyLang] ? settings.value.studyLang : 'en'
+  return { lang, text: VOCAB_SAMPLES[lang]!.split(/(?<=[.!?。])\s*/)[0]! }
+})
+const testing = ref(false)
+const testResult = ref<{ source: string; text: string } | null>(null)
+const testError = ref('')
+async function testTranslation() {
+  const { lang, text } = sample.value
+  testing.value = true
+  // The box shows at once, with a skeleton for the translation.
+  testResult.value = { source: text, text: '' }
+  testError.value = ''
+  try {
+    await saveNow()
+    const [line] = await send({
+      type: 'translate-lines',
+      lines: [text],
+      studyLang: lang,
+      nativeLang: settings.value.nativeLang,
+    })
+    testResult.value = { source: text, text: line ?? '' }
+  } catch (e) {
+    testResult.value = null
+    testError.value = e instanceof Error ? e.message : String(e)
+  } finally {
+    testing.value = false
+  }
+}
+// Lucide "languages".
+const languagesIcon = [
+  'm5 8 6 6',
+  'm4 14 6-6 2-3',
+  'M2 5h12',
+  'M7 2h1',
+  'm22 22-5-10-5 10',
+  'M14 18h6',
+]
 
 // Cost, limits and privacy of each provider. `warn` items are shown in a warning color.
 const PER_REQUEST =
@@ -508,5 +552,40 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
       LingoMingo sends subtitle lines, and the words and sentences that you open in the word popup,
       to this provider. The privacy policy of the provider applies.
     </p>
+    <div class="space-y-2">
+      <button
+        type="button"
+        class="flex w-fit items-center gap-2 rounded border px-4 py-2 text-sm font-medium"
+        :class="
+          testing
+            ? 'border-accent/40 bg-accent/15 text-accent'
+            : 'border-white/20 hover:bg-white/10'
+        "
+        :disabled="testing"
+        @click="testTranslation"
+      >
+        <svg
+          class="size-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          :class="{ 'animate-pulse': testing }"
+        >
+          <path v-for="d in languagesIcon" :key="d" :d="d" />
+        </svg>
+        Test translation
+      </button>
+      <p v-if="testError" class="text-xs text-red-300">{{ testError }}</p>
+      <div v-else-if="testResult" class="space-y-1 rounded border border-white/10 p-3 text-xs">
+        <p class="text-neutral-500" dir="auto">{{ testResult.source }}</p>
+        <p class="min-h-4 text-neutral-200" dir="auto">
+          <span v-if="testing" class="inline-block h-3 w-2/3 animate-pulse rounded bg-white/10" />
+          <template v-else>{{ testResult.text }}</template>
+        </p>
+      </div>
+    </div>
   </div>
 </template>

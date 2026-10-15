@@ -19,6 +19,8 @@ export type Request =
       studyLang: string
       nativeLang: string
     }
+  /** Subtitle lines without the cache, to test the AI provider. */
+  | { type: 'translate-lines'; lines: string[]; studyLang: string; nativeLang: string }
 
 export interface Have {
   translations: string[]
@@ -39,6 +41,7 @@ export interface ResponseMap {
   'translate-word': string[]
   /** Same order as `words`. null = the model left the word out. */
   'word-extras': (WordExtras | null)[]
+  'translate-lines': string[]
 }
 
 export async function send<R extends Request>(req: R): Promise<ResponseMap[R['type']]> {
