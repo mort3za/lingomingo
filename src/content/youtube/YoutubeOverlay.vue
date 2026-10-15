@@ -65,7 +65,7 @@ function placeDock() {
     const height = Math.min(currentPlayer()?.offsetHeight ?? 0, innerHeight - 80)
     dockHost.style.cssText =
       `display:${show ? 'block' : 'none'};height:${height}px;` +
-      'position:sticky;top:72px;z-index:100;margin-bottom:12px;'
+      'position:relative;z-index:100;margin-bottom:12px;'
   } else {
     dockHost.style.cssText =
       `display:${show ? 'block' : 'none'};flex:none;width:${BESIDE_WIDTH}px;` +

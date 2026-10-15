@@ -135,7 +135,7 @@ const stages: { stage: Stage; label: string }[] = [
 <template>
   <div
     data-lm-popup
-    class="fixed z-10 w-64 -translate-x-1/2 rounded-xl border border-t-2 border-white/10 border-t-accent font-sans text-white shadow-2xl shadow-black/60"
+    class="fixed z-10 w-80 -translate-x-1/2 rounded-xl border border-t-2 border-white/10 border-t-accent font-sans text-white shadow-2xl shadow-black/60"
     :class="[bg, below ? '' : '-translate-y-full']"
     :style="style"
     @click.stop
@@ -152,8 +152,11 @@ const stages: { stage: Stage; label: string }[] = [
       :style="{ left: arrowLeft }"
     />
     <div class="flex items-start justify-between gap-2 px-4 pt-3">
-      <div class="min-w-0 text-lg leading-snug font-semibold break-words" :dir="dirOf(studyLang)">
-        {{ word }}
+      <div class="flex min-w-0 items-start gap-1">
+        <div class="min-w-0 text-lg leading-snug font-semibold break-words" :dir="dirOf(studyLang)">
+          {{ word }}
+        </div>
+        <SpeakButton :text="word" :lang="studyLang" />
       </div>
       <button
         class="-mr-1.5 shrink-0 rounded-md p-1 text-white/40 hover:bg-white/10 hover:text-white"
