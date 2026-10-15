@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { send } from '@/shared/messages'
 import type { Provider } from '@/shared/types'
+import SecretInput from './SecretInput.vue'
 import { INPUT as input, LABEL as label, saveNow, useSettings } from './settings'
 import { VOCAB_SAMPLES } from './vocab-samples'
 
@@ -118,13 +119,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
     <template v-if="settings.provider === 'claude'">
       <div>
         <label :class="label" for="key">API key</label>
-        <input
-          id="key"
-          v-model="settings.claudeKey"
-          type="password"
-          :class="input"
-          placeholder="sk-ant-..."
-        />
+        <SecretInput id="key" v-model="settings.claudeKey" placeholder="sk-ant-..." />
         <p class="mt-1 text-xs text-neutral-500">Stored only in this browser.</p>
       </div>
       <div>
@@ -149,13 +144,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
     <template v-else-if="settings.provider === 'openai'">
       <div>
         <label :class="label" for="okey">API key</label>
-        <input
-          id="okey"
-          v-model="settings.openaiKey"
-          type="password"
-          :class="input"
-          placeholder="sk-..."
-        />
+        <SecretInput id="okey" v-model="settings.openaiKey" placeholder="sk-..." />
         <p class="mt-1 text-xs text-neutral-500">Stored only in this browser.</p>
       </div>
       <div>
@@ -180,13 +169,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
     <template v-else-if="settings.provider === 'grok'">
       <div>
         <label :class="label" for="gkey">API key</label>
-        <input
-          id="gkey"
-          v-model="settings.grokKey"
-          type="password"
-          :class="input"
-          placeholder="xai-..."
-        />
+        <SecretInput id="gkey" v-model="settings.grokKey" placeholder="xai-..." />
         <p class="mt-1 text-xs text-neutral-500">Stored only in this browser.</p>
       </div>
       <div>
@@ -211,13 +194,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
     <template v-else-if="settings.provider === 'deepseek'">
       <div>
         <label :class="label" for="dkey">API key</label>
-        <input
-          id="dkey"
-          v-model="settings.deepseekKey"
-          type="password"
-          :class="input"
-          placeholder="sk-..."
-        />
+        <SecretInput id="dkey" v-model="settings.deepseekKey" placeholder="sk-..." />
         <p class="mt-1 text-xs text-neutral-500">Stored only in this browser.</p>
       </div>
       <div>
@@ -242,13 +219,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
     <template v-else-if="settings.provider === 'gemini'">
       <div>
         <label :class="label" for="gekey">API key</label>
-        <input
-          id="gekey"
-          v-model="settings.geminiKey"
-          type="password"
-          :class="input"
-          placeholder="AIza..."
-        />
+        <SecretInput id="gekey" v-model="settings.geminiKey" placeholder="AQ... or AIza..." />
         <p class="mt-1 text-xs text-neutral-500">
           Stored only in this browser. Get a free key in
           <a
@@ -281,13 +252,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
     <template v-else-if="settings.provider === 'openrouter'">
       <div>
         <label :class="label" for="orkey">API key</label>
-        <input
-          id="orkey"
-          v-model="settings.openrouterKey"
-          type="password"
-          :class="input"
-          placeholder="sk-or-..."
-        />
+        <SecretInput id="orkey" v-model="settings.openrouterKey" placeholder="sk-or-..." />
         <p class="mt-1 text-xs text-neutral-500">
           Stored only in this browser. Get a key on
           <a href="https://openrouter.ai/keys" target="_blank" class="underline hover:text-white"
@@ -552,6 +517,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
       LingoMingo sends subtitle lines, and the words and sentences that you open in the word popup,
       to this provider. The privacy policy of the provider applies.
     </p>
+
     <div class="space-y-2">
       <button
         type="button"
