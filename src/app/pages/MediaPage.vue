@@ -12,6 +12,7 @@ import {
 import { getSettings, onStorageKey, patchSettings } from '@/shared/storage'
 import { LANGUAGES } from '@/shared/types'
 import { pickTrack } from '@/shared/captions'
+import { ignoreKey } from '../shortcuts'
 import {
   CHANNELS,
   cachedChannelPhotos,
@@ -77,12 +78,25 @@ async function refreshLang() {
   photos.value = { ...photos.value, ...cached }
   studyLang.value = lang
 }
+// "/" puts the cursor in the video search. Esc takes it out.
+const search = useTemplateRef<HTMLInputElement>('search')
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape' && e.target === search.value) return search.value?.blur()
+  if (ignoreKey(e) || e.key !== '/') return
+  search.value?.focus()
+  e.preventDefault()
+}
+
 let stop = () => {}
 onMounted(() => {
   void refreshLang()
   stop = onStorageKey('settings', refreshLang)
+  window.addEventListener('keydown', onKeydown)
 })
-onBeforeUnmount(() => stop())
+onBeforeUnmount(() => {
+  stop()
+  window.removeEventListener('keydown', onKeydown)
+})
 
 watch(channels, async (list) => {
   channelId.value = ''
@@ -99,6 +113,9 @@ function pickChannel(id: string) {
   window.scrollTo({ top: 0 })
 }
 const countOf = (id: string) => visible.value.filter((v) => v.channelId === id).length
+const channelName = computed(
+  () => channels.value.find((c) => c.id === channelId.value)?.name ?? 'All channels',
+)
 const shown = computed(() => {
   const q = query.value.toLowerCase()
   return visible.value
@@ -227,49 +244,10 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
 
 <template>
   <div class="flex flex-col gap-6 lg:flex-row">
-    <aside class="w-full shrink-0 space-y-5 lg:w-72">
-      <div>
-        <div class="mb-1 text-xs text-neutral-400">Sort by</div>
-        <div class="flex overflow-hidden rounded border border-white/10">
-          <button
-            v-for="s in [
-              ['date', 'Date', calendarIcon],
-              ['views', 'Views', eyeIcon],
-            ] as const"
-            :key="s[0]"
-            class="flex flex-1 items-center justify-center gap-1.5 py-1.5 text-sm"
-            :class="sort === s[0] ? 'bg-panel text-white' : 'text-neutral-400 hover:bg-white/5'"
-            @click="sort = s[0]"
-          >
-            <svg v-bind="iconAttrs">
-              <path v-for="d in s[2]" :key="d" :d="d" />
-            </svg>
-            {{ s[1] }}
-          </button>
-        </div>
-      </div>
-      <div class="relative">
-        <svg
-          v-bind="iconAttrs"
-          class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400"
-        >
-          <path v-for="d in searchIcon" :key="d" :d="d" />
-        </svg>
-        <input v-model="query" :class="field + ' w-full ps-9'" placeholder="Search videos" />
-      </div>
-      <label class="flex items-center gap-2 text-sm">
-        <input
-          v-model="hideShorts"
-          type="checkbox"
-          class="accent-accent"
-          @change="patchSettings({ hideShorts })"
-        />
-        Hide Shorts
-      </label>
-
+    <aside class="w-full shrink-0 lg:w-72">
       <!-- Narrow windows: the list scrolls, so the videos stay near the top of the page. -->
       <div
-        class="max-h-72 [scrollbar-width:thin] [scrollbar-gutter:stable] overflow-y-auto border-t border-white/10 pt-4 lg:max-h-none lg:overflow-visible"
+        class="max-h-72 [scrollbar-width:thin] [scrollbar-gutter:stable] overflow-y-auto lg:max-h-none lg:overflow-visible"
       >
         <!-- Same height in both states, so the list does not move when the search opens. -->
         <div class="mb-2 flex h-8 items-center gap-2 ps-2">
@@ -350,6 +328,56 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
     </aside>
 
     <section class="min-w-0 flex-1 space-y-4">
+      <!-- Controls for the video list: search, sort, Hide Shorts. They stay on top when the list
+        scrolls (below the header bar on narrow windows). -->
+      <div class="sticky top-14 z-20 -mt-3 space-y-2 bg-surface-deep py-3 md:top-0">
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="relative min-w-48 flex-1">
+            <svg
+              v-bind="iconAttrs"
+              class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400"
+            >
+              <path v-for="d in searchIcon" :key="d" :d="d" />
+            </svg>
+            <input
+              ref="search"
+              v-model="query"
+              :class="field + ' w-full ps-9'"
+              placeholder="Search videos"
+              title="Search videos (/)"
+            />
+          </div>
+          <div class="flex overflow-hidden rounded border border-white/10" title="Sort by">
+            <button
+              v-for="s in [
+                ['date', 'Date', calendarIcon],
+                ['views', 'Views', eyeIcon],
+              ] as const"
+              :key="s[0]"
+              class="flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm"
+              :class="sort === s[0] ? 'bg-panel text-white' : 'text-neutral-400 hover:bg-white/5'"
+              @click="sort = s[0]"
+            >
+              <svg v-bind="iconAttrs">
+                <path v-for="d in s[2]" :key="d" :d="d" />
+              </svg>
+              {{ s[1] }}
+            </button>
+          </div>
+          <label class="flex items-center gap-2 text-sm whitespace-nowrap">
+            <input v-model="hideShorts" type="checkbox" @change="patchSettings({ hideShorts })" />
+            Hide Shorts
+          </label>
+        </div>
+        <!-- Fixed height, so the list does not move when the count appears. -->
+        <div class="h-5 truncate text-sm text-neutral-400">
+          {{ channelName
+          }}<template v-if="!loading && channels.length">
+            · {{ shown.length }} {{ shown.length === 1 ? 'video' : 'videos' }}</template
+          >
+        </div>
+      </div>
+
       <p v-for="e in errors" :key="e" class="rounded bg-red-900/40 px-3 py-2 text-sm text-red-200">
         Could not load channel. {{ e }}
       </p>

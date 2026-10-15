@@ -24,6 +24,11 @@ export const SHORTCUTS: ShortcutGroup[] = [
     ],
   },
   {
+    title: 'Media',
+    route: '/media',
+    items: [{ keys: [['/']], label: 'Search videos' }],
+  },
+  {
     title: 'Review',
     route: '/review',
     items: [
