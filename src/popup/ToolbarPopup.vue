@@ -74,8 +74,8 @@ async function openPage(path: string) {
         :aria-checked="on"
         aria-label="LingoMingo on YouTube"
         :title="on ? 'Turn off on YouTube' : 'Turn on for YouTube'"
-        class="relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 outline-none hover:ring-2 hover:ring-white/15 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-        :class="on ? 'bg-accent' : 'bg-white/15'"
+        class="relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 outline-none hover:ring-2 hover:ring-fg/15 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        :class="on ? 'bg-accent' : 'bg-fg/15'"
         @click="settings.enabled = !on"
       >
         <span
@@ -112,7 +112,7 @@ async function openPage(path: string) {
         <hr v-if="link.to === '/settings'" class="my-1.5 border-panel" />
         <a
           :href="`${APP_URL}#${link.to}`"
-          class="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-neutral-300 outline-none hover:bg-panel hover:text-white focus-visible:bg-panel focus-visible:text-white"
+          class="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-neutral-300 outline-none hover:bg-panel hover:text-fg focus-visible:bg-panel focus-visible:text-fg"
           @click.prevent="openPage(link.to)"
         >
           <svg v-bind="iconAttrs">

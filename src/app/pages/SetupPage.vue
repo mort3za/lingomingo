@@ -27,8 +27,8 @@ const btn = 'rounded border border-transparent px-5 py-2 text-sm font-medium'
 
     <ol class="flex gap-2">
       <li v-for="(name, i) in steps" :key="name" class="flex-1">
-        <div :class="['h-1 rounded', i <= step ? 'bg-accent' : 'bg-white/10']" />
-        <span :class="['mt-1 block text-xs', i === step ? 'text-white' : 'text-neutral-500']">
+        <div :class="['h-1 rounded', i <= step ? 'bg-accent' : 'bg-fg/10']" />
+        <span :class="['mt-1 block text-xs', i === step ? 'text-fg' : 'text-neutral-500']">
           {{ i + 1 }}. {{ name }}
         </span>
       </li>
@@ -71,11 +71,11 @@ const btn = 'rounded border border-transparent px-5 py-2 text-sm font-medium'
           <a
             href="https://www.youtube.com"
             target="_blank"
-            :class="[btn, 'bg-accent hover:brightness-110']"
+            :class="[btn, 'bg-accent text-white hover:brightness-110']"
           >
             Open YouTube
           </a>
-          <RouterLink to="/media" :class="[btn, 'border border-white/20 hover:bg-white/10']">
+          <RouterLink to="/media" :class="[btn, 'border border-fg/20 hover:bg-fg/10']">
             Browse media
           </RouterLink>
         </div>
@@ -86,15 +86,19 @@ const btn = 'rounded border border-transparent px-5 py-2 text-sm font-medium'
       <button
         v-if="step > 0"
         type="button"
-        :class="[btn, 'border border-white/20 hover:bg-white/10']"
+        :class="[btn, 'border border-fg/20 hover:bg-fg/10']"
         @click="step--"
       >
         Back
       </button>
-      <RouterLink to="/media" class="ml-auto text-sm text-neutral-400 hover:text-white">
+      <RouterLink to="/media" class="ml-auto text-sm text-neutral-400 hover:text-fg">
         Skip setup
       </RouterLink>
-      <button type="button" :class="[btn, 'bg-accent hover:brightness-110']" @click="step++">
+      <button
+        type="button"
+        :class="[btn, 'bg-accent text-white hover:brightness-110']"
+        @click="step++"
+      >
         Next
       </button>
     </div>

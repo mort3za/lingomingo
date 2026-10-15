@@ -64,7 +64,7 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
     >
       <div class="flex items-center justify-between">
         <h2 class="text-2xl font-semibold">Set Vocabulary Level</h2>
-        <button class="text-xl text-white/60 hover:text-white" title="Close" @click="emit('close')">
+        <button class="text-xl text-fg/60 hover:text-fg" title="Close" @click="emit('close')">
           ✕
         </button>
       </div>
@@ -81,10 +81,10 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
               v-for="row in rows"
               :key="row.rank"
               :class="
-                'flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-white/5 ' +
+                'flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-fg/5 ' +
                 (row.rank === picked
                   ? 'border-b-2 border-dashed border-emerald-300'
-                  : 'border-b border-white/5')
+                  : 'border-b border-fg/5')
               "
               @click="picked = row.rank"
             >
@@ -106,7 +106,7 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
         <div class="flex min-h-0 flex-col gap-3">
           <h3 class="text-center font-medium">Example Text:</h3>
           <div
-            class="max-h-[40vh] overflow-y-auto rounded border border-white/10 p-4 leading-relaxed"
+            class="max-h-[40vh] overflow-y-auto rounded border border-fg/10 p-4 leading-relaxed"
             :dir="dirOf(lang)"
           >
             <template v-for="(t, i) in sample" :key="i">
@@ -118,7 +118,7 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
             <input v-model="showKnownGreen" type="checkbox" />
             Show Known words in green
           </label>
-          <label class="flex items-center gap-2 text-sm text-white/45">
+          <label class="flex items-center gap-2 text-sm text-fg/45">
             <input v-model="darkenRare" type="checkbox" />
             Darken rare words
           </label>
@@ -127,7 +127,7 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
             <a
               href="https://github.com/hermitdave/FrequencyWords"
               target="_blank"
-              class="underline hover:text-white"
+              class="underline hover:text-fg"
               >FrequencyWords</a
             >
             (OpenSubtitles), CC BY-SA 4.0.
@@ -137,7 +137,7 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
 
       <div class="flex justify-center">
         <button
-          class="rounded bg-accent px-6 py-2 font-medium tracking-wide uppercase hover:brightness-110 disabled:opacity-50"
+          class="rounded bg-accent px-6 py-2 font-medium tracking-wide text-white uppercase hover:brightness-110 disabled:opacity-50"
           :disabled="!list"
           @click="emit('set', picked)"
         >

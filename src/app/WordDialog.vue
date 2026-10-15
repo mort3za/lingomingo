@@ -39,7 +39,7 @@ onMounted(load)
     >
       <WordCard :word="word" revealed :waiting="waiting" :error="error" @retry="load" />
       <button
-        class="absolute top-3 right-4 text-xl text-white/60 hover:text-white"
+        class="absolute top-3 right-4 text-xl text-fg/60 hover:text-fg"
         title="Close (Esc)"
         @click="emit('close')"
       >

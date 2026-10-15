@@ -209,7 +209,7 @@ const watchUrl = (v: CatalogueVideo) => `https://www.youtube.com/watch?v=${v.vid
 const thumbUrl = (v: CatalogueVideo) => `https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`
 
 const field =
-  'rounded border border-white/10 bg-surface-deep px-3 py-1.5 text-sm outline-none focus:border-accent'
+  'rounded border border-fg/10 bg-surface-deep px-3 py-1.5 text-sm outline-none focus:border-accent'
 // Tabler "pin" icon (a tilted push pin), drawn like the icons in the app nav.
 const pinIcon = [
   'M15 4.5l-4 4l-4 1.5l-1.5 1.5l7 7l1.5 -1.5l1.5 -4l4 -4',
@@ -239,7 +239,7 @@ const iconAttrs = {
   'stroke-linecap': 'round',
   'stroke-linejoin': 'round',
 } as const
-const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm hover:bg-white/5 '
+const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm hover:bg-fg/5 '
 </script>
 
 <template>
@@ -261,7 +261,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           />
           <span v-else class="flex-1 text-neutral-400">Channel</span>
           <button
-            class="rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white"
+            class="rounded p-1 text-neutral-400 hover:bg-fg/10 hover:text-fg"
             :title="channelSearch ? 'Close search' : 'Search channels'"
             :aria-label="channelSearch ? 'Close search' : 'Search channels'"
             @click="channelSearch ? closeChannelSearch() : openChannelSearch()"
@@ -272,7 +272,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           </button>
         </div>
         <button :class="row + (channelId === '' ? 'bg-panel' : '')" @click="pickChannel('')">
-          <span class="grid size-9 place-items-center rounded bg-accent font-semibold">
+          <span class="grid size-9 place-items-center rounded bg-accent font-semibold text-white">
             {{ studyLang.toUpperCase() }}
           </span>
           <span class="flex-1">All channels</span>
@@ -297,16 +297,19 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
             alt=""
             class="size-9 shrink-0 rounded-full object-cover"
           />
-          <span v-else class="grid size-9 place-items-center rounded-full bg-accent font-semibold">
+          <span
+            v-else
+            class="grid size-9 place-items-center rounded-full bg-accent font-semibold text-white"
+          >
             {{ c.name[0] }}
           </span>
           <span class="flex-1 truncate">{{ c.name }}</span>
           <button
-            class="relative z-10 rounded p-0.5 hover:bg-white/10"
+            class="relative z-10 rounded p-0.5 hover:bg-fg/10"
             :class="
               pinned.includes(c.id)
                 ? 'text-accent'
-                : 'text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-white focus-visible:opacity-100'
+                : 'text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-fg focus-visible:opacity-100'
             "
             :title="pinned.includes(c.id) ? 'Unpin channel' : 'Pin channel to top'"
             :aria-label="pinned.includes(c.id) ? 'Unpin channel' : 'Pin channel to top'"
@@ -317,9 +320,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
               <path v-for="d in pinIcon" :key="d" :d="d" />
             </svg>
           </button>
-          <span class="rounded bg-white/10 px-1.5 text-xs text-neutral-300">{{
-            countOf(c.id)
-          }}</span>
+          <span class="rounded bg-fg/10 px-1.5 text-xs text-neutral-300">{{ countOf(c.id) }}</span>
         </div>
         <p v-if="channelQuery && !foundChannels.length" class="px-2 py-2 text-sm text-neutral-500">
           No channels found.
@@ -347,7 +348,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
               title="Search videos (/)"
             />
           </div>
-          <div class="flex overflow-hidden rounded border border-white/10" title="Sort by">
+          <div class="flex overflow-hidden rounded border border-fg/10" title="Sort by">
             <button
               v-for="s in [
                 ['date', 'Date', calendarIcon],
@@ -355,7 +356,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
               ] as const"
               :key="s[0]"
               class="flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm"
-              :class="sort === s[0] ? 'bg-panel text-white' : 'text-neutral-400 hover:bg-white/5'"
+              :class="sort === s[0] ? 'bg-panel text-fg' : 'text-neutral-400 hover:bg-fg/5'"
               @click="sort = s[0]"
             >
               <svg v-bind="iconAttrs">
@@ -392,7 +393,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
         :key="v.videoId"
         :href="watchUrl(v)"
         target="_blank"
-        class="flex flex-col gap-2 rounded p-1 hover:bg-white/5 sm:flex-row sm:gap-5"
+        class="flex flex-col gap-2 rounded p-1 hover:bg-fg/5 sm:flex-row sm:gap-5"
         v-visible="() => loadTracks(v.videoId)"
       >
         <img
@@ -402,13 +403,13 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           class="aspect-video w-full shrink-0 rounded object-cover sm:w-54"
         />
         <div class="min-w-0 space-y-1 px-1 sm:px-0 sm:pt-1">
-          <div class="line-clamp-2 text-white sm:truncate sm:text-lg">{{ v.title }}</div>
+          <div class="line-clamp-2 text-fg sm:truncate sm:text-lg">{{ v.title }}</div>
           <div class="text-sm text-neutral-400">{{ v.channelName }}</div>
           <div class="text-sm text-neutral-400">
             {{ ago(v.published) }} • {{ compact.format(v.views) }} views
             <span
               v-if="v.isShort"
-              class="ms-2 rounded border border-white/20 px-1.5 text-xs text-neutral-300"
+              class="ms-2 rounded border border-fg/20 px-1.5 text-xs text-neutral-300"
               >Short</span
             >
             <span
@@ -419,7 +420,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
             >
             <span
               v-else-if="subsOf(v.videoId) === 'auto'"
-              class="ms-2 rounded border border-white/20 px-1.5 text-xs text-neutral-300"
+              class="ms-2 rounded border border-fg/20 px-1.5 text-xs text-neutral-300"
               title="Only auto-generated subtitles"
               >Auto CC</span
             >

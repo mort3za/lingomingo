@@ -184,16 +184,16 @@ const iconAttrs = {
 } as const
 
 const gradeColor: Record<number, string> = {
-  1: 'bg-red-500/70 hover:bg-red-500',
-  2: 'bg-orange-500/70 hover:bg-orange-500',
-  3: 'bg-emerald-600/70 hover:bg-emerald-600',
-  4: 'bg-sky-600/70 hover:bg-sky-600',
+  1: 'bg-red-500/70 text-white hover:bg-red-500',
+  2: 'bg-orange-500/70 text-white hover:bg-orange-500',
+  3: 'bg-emerald-600/70 text-white hover:bg-emerald-600',
+  4: 'bg-sky-600/70 text-white hover:bg-sky-600',
 }
 const btn =
   'flex h-full flex-col items-center justify-center gap-1 rounded-lg text-[15px] font-semibold transition-colors disabled:opacity-50 '
 const kbd = 'rounded border border-current/40 px-1 font-sans text-[11px] leading-4 font-medium'
-const chip = 'rounded-full bg-white/5 px-2.5 py-0.5 text-sm tabular-nums'
-const skeleton = 'animate-pulse rounded bg-white/10'
+const chip = 'rounded-full bg-fg/5 px-2.5 py-0.5 text-sm tabular-nums'
+const skeleton = 'animate-pulse rounded bg-fg/10'
 </script>
 
 <template>
@@ -206,7 +206,7 @@ const skeleton = 'animate-pulse rounded bg-white/10'
       <span :class="[chip, 'text-neutral-400']">{{ words.length }} learning</span>
       <!-- Always in the layout, so it does not move the header when it shows. -->
       <button
-        class="ml-auto flex items-center gap-2 rounded-md border border-white/15 py-1.5 ps-2.5 pe-2 text-sm text-neutral-300 transition-colors hover:border-white/30 hover:bg-white/5 hover:text-white disabled:opacity-50"
+        class="ml-auto flex items-center gap-2 rounded-md border border-fg/15 py-1.5 ps-2.5 pe-2 text-sm text-neutral-300 transition-colors hover:border-fg/30 hover:bg-fg/5 hover:text-fg disabled:opacity-50"
         :class="{ invisible: !last }"
         :disabled="busy || !last"
         :title="last ? `Undo the answer for “${last.text}”` : ''"
@@ -237,7 +237,7 @@ const skeleton = 'animate-pulse rounded bg-white/10'
       <div class="h-34 sm:h-16">
         <button
           v-if="!revealed"
-          :class="btn + 'w-full flex-row gap-2 bg-accent hover:brightness-110'"
+          :class="btn + 'w-full flex-row gap-2 bg-accent text-white hover:brightness-110'"
           @click="revealed = true"
         >
           Show answer <kbd :class="kbd + ' opacity-70'">Space</kbd>
@@ -293,7 +293,7 @@ const skeleton = 'animate-pulse rounded bg-white/10'
           </tr>
         </thead>
         <tbody>
-          <tr v-for="w in words" :key="w.id" class="border-t border-white/5 hover:bg-white/5">
+          <tr v-for="w in words" :key="w.id" class="border-t border-fg/5 hover:bg-fg/5">
             <td class="p-2 text-start text-[15px] text-orange-300" :dir="dirOf(w.langCode)">
               {{ w.text }}
             </td>

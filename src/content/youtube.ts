@@ -8,6 +8,8 @@ function mountWhenReady() {
   const player = currentPlayer()
   if (!player) return false
   const host = mountInShadow(YoutubeOverlay, {}, player)
+  // On the video, our UI is always dark. The list docked beside the video follows the system.
+  host.dataset.theme = 'dark'
   host.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:60;'
   // Keep clicks, keys and scrolling on our UI away from the YouTube player.
   for (const type of [

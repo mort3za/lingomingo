@@ -53,6 +53,7 @@ This project is a Chrome extension (Manifest V3). The build uses **Vite + `@crxj
 - Hover style must never override the active/toggled style. Check both states together.
 - Nothing may shift layout when it appears (scrollbar, hover buttons, loading state). Reserve the space.
 - Brand color is Persian red (not blue, not purple). Use the project color token; do not add a new hex.
+- Colors follow the system theme (light or dark), see `src/shared/styles/main.css`. Use `fg` (not `white`) for text, lines and tints; `white` only on the accent or other solid colors. Check both themes.
 - Check every UI change in the browser (see "Testing the extension in a browser") before you say it is done.
 
 ## Claude API key for testing AI mode

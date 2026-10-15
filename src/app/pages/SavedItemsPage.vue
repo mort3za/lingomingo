@@ -146,9 +146,9 @@ const eyeIcon = [
 ]
 
 const field =
-  'rounded border border-white/10 bg-surface-deep px-3 py-1.5 text-sm outline-none focus:border-accent'
-const btn = 'rounded px-3 py-1.5 text-sm hover:bg-white/10 '
-const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity-40'
+  'rounded border border-fg/10 bg-surface-deep px-3 py-1.5 text-sm outline-none focus:border-accent'
+const btn = 'rounded px-3 py-1.5 text-sm hover:bg-fg/10 '
+const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40'
 </script>
 
 <template>
@@ -160,14 +160,16 @@ const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity
           ['PHRASE', 'Saved Phrases'],
         ] as const"
         :key="t[0]"
-        :class="btn + (tab === t[0] ? 'bg-panel text-white' : 'text-neutral-400')"
+        :class="btn + (tab === t[0] ? 'bg-panel text-fg' : 'text-neutral-400')"
         @click="tab = t[0]"
       >
         {{ t[1] }}
       </button>
       <div class="flex-1" />
-      <button :class="btn + 'border border-white/20'" @click="exportCsv">Export CSV</button>
-      <button :class="btn + 'bg-accent'" @click="exportJson">Export JSON</button>
+      <button :class="btn + 'border border-fg/20'" @click="exportCsv">Export CSV</button>
+      <button :class="btn + 'bg-accent text-white [--color-fg:white]'" @click="exportJson">
+        Export JSON
+      </button>
     </div>
 
     <div class="flex flex-wrap items-center gap-4">
@@ -189,7 +191,7 @@ const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity
     <!-- Always shown, so selecting a row does not move the table. -->
     <div
       class="sticky top-14 z-10 flex flex-wrap items-center gap-2 rounded px-3 py-2 text-sm transition-colors md:top-0"
-      :class="picked.size ? 'bg-accent' : 'bg-panel text-neutral-400'"
+      :class="picked.size ? 'bg-accent text-white [--color-fg:white]' : 'bg-panel text-neutral-400'"
     >
       <span class="mr-2 tabular-nums">
         {{
@@ -234,8 +236,8 @@ const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity
         <tr
           v-for="i in shown"
           :key="i.id"
-          class="group cursor-pointer border-t border-white/5"
-          :class="picked.has(i.id) ? 'bg-accent/15 hover:bg-accent/20' : 'hover:bg-white/5'"
+          class="group cursor-pointer border-t border-fg/5"
+          :class="picked.has(i.id) ? 'bg-accent/15 hover:bg-accent/20' : 'hover:bg-fg/5'"
           @mousedown="(e) => e.shiftKey && e.preventDefault()"
           @click="onRowClick(i.id, $event)"
         >
@@ -259,14 +261,14 @@ const bulkBtn = btn + 'bg-white/15 disabled:pointer-events-none disabled:opacity
               v-if="i.source"
               :href="watchUrl(i)"
               target="_blank"
-              class="text-accent hover:underline"
+              class="text-neutral-500 hover:text-fg hover:underline"
               >{{ i.source.title || 'YouTube' }}</a
             >
           </td>
           <td class="p-2">
             <button
               v-if="i.itemType === 'WORD'"
-              class="grid size-7 place-items-center rounded text-neutral-400 opacity-0 transition-colors group-hover:opacity-100 hover:bg-white/10 hover:text-white focus-visible:opacity-100"
+              class="grid size-7 place-items-center rounded text-neutral-400 opacity-0 transition-colors group-hover:opacity-100 hover:bg-fg/10 hover:text-fg focus-visible:opacity-100"
               title="Show card"
               :aria-label="`Show the card of ${i.text}`"
               @click.stop="cardId = i.id"

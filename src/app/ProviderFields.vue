@@ -131,7 +131,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
             v-for="m in ['claude-haiku-5-5', 'claude-sonnet-5-5', 'claude-opus-5-5']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
             @click="settings.claudeModel = m"
           >
             {{ m }}
@@ -156,7 +156,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
             v-for="m in ['gpt-6-luna', 'gpt-6.1-sol']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
             @click="settings.openaiModel = m"
           >
             {{ m }}
@@ -181,7 +181,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
             v-for="m in ['grok-4.3', 'grok-4.20-0309-non-reasoning', 'grok-4.7']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
             @click="settings.grokModel = m"
           >
             {{ m }}
@@ -206,7 +206,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
             v-for="m in ['deepseek-flash', 'deepseek-v4-pro']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
             @click="settings.deepseekModel = m"
           >
             {{ m }}
@@ -225,7 +225,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
           <a
             href="https://aistudio.google.com/api-keys"
             target="_blank"
-            class="underline hover:text-white"
+            class="underline hover:text-fg"
             >Google AI Studio</a
           >.
         </p>
@@ -239,7 +239,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
             v-for="m in ['gemini-3.5-flash-lite', 'gemini-3.5-flash']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
             @click="settings.geminiModel = m"
           >
             {{ m }}
@@ -255,7 +255,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
         <SecretInput id="orkey" v-model="settings.openrouterKey" placeholder="sk-or-..." />
         <p class="mt-1 text-xs text-neutral-500">
           Stored only in this browser. Get a key on
-          <a href="https://openrouter.ai/keys" target="_blank" class="underline hover:text-white"
+          <a href="https://openrouter.ai/keys" target="_blank" class="underline hover:text-fg"
             >openrouter.ai</a
           >.
         </p>
@@ -269,7 +269,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
             v-for="m in ['google/gemma-4-31b-it:free', 'openrouter/free']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
             @click="settings.openrouterModel = m"
           >
             {{ m }}
@@ -279,7 +279,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
           <a
             href="https://openrouter.ai/models?max_price=0"
             target="_blank"
-            class="underline hover:text-white"
+            class="underline hover:text-fg"
             >openrouter.ai</a
           >.
         </p>
@@ -294,7 +294,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
           Default:
           <button
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
             @click="settings.ollamaBaseUrl = 'http://localhost:11434/v1'"
           >
             http://localhost:11434/v1
@@ -332,24 +332,22 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
           >
             <button
               type="button"
-              class="font-mono text-neutral-400 underline hover:text-white"
+              class="font-mono text-neutral-400 underline hover:text-fg"
               @click="settings.ollamaModel = m.name"
             >
               {{ m.name }}
             </button>
-            <span class="ml-1 rounded bg-white/10 px-1.5 py-0.5 text-neutral-300">{{
-              m.badge
-            }}</span>
+            <span class="ml-1 rounded bg-fg/10 px-1.5 py-0.5 text-neutral-300">{{ m.badge }}</span>
             — {{ m.why }}
           </p>
         </div>
       </div>
-      <div class="rounded border border-white/10 p-3 text-xs text-neutral-400">
+      <div class="rounded border border-fg/10 p-3 text-xs text-neutral-400">
         <p class="font-medium text-neutral-300">Set up Ollama</p>
         <ol class="mt-2 list-decimal space-y-1 pl-4">
           <li>
             Install Ollama from
-            <a href="https://ollama.com/download" target="_blank" class="underline hover:text-white"
+            <a href="https://ollama.com/download" target="_blank" class="underline hover:text-fg"
               >ollama.com</a
             >.
           </li>
@@ -379,7 +377,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
           Default:
           <button
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
             @click="settings.lmstudioBaseUrl = 'http://localhost:1234/v1'"
           >
             http://localhost:1234/v1
@@ -400,7 +398,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
             v-for="m in ['google/gemma-4-26b-a4b', 'qwen/qwen3.6-35b-a3b']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-white"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
             @click="settings.lmstudioModel = m"
           >
             {{ m }}
@@ -412,15 +410,12 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
           for example DeepSeek R1: they are very slow for subtitles.
         </p>
       </div>
-      <div class="rounded border border-white/10 p-3 text-xs text-neutral-400">
+      <div class="rounded border border-fg/10 p-3 text-xs text-neutral-400">
         <p class="font-medium text-neutral-300">Set up LM Studio</p>
         <ol class="mt-2 list-decimal space-y-1 pl-4">
           <li>
             Install LM Studio from
-            <a
-              href="https://lmstudio.ai/download"
-              target="_blank"
-              class="underline hover:text-white"
+            <a href="https://lmstudio.ai/download" target="_blank" class="underline hover:text-fg"
               >lmstudio.ai</a
             >.
           </li>
@@ -456,7 +451,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
             {{ name }}:
             <button
               type="button"
-              class="font-mono text-neutral-400 underline hover:text-white"
+              class="font-mono text-neutral-400 underline hover:text-fg"
               @click="settings.localBaseUrl = url"
             >
               {{ url }}
@@ -469,7 +464,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
         <input id="lmodel" v-model="settings.localModel" :class="input" placeholder="gemma4" />
         <p class="mt-1 text-xs text-neutral-500">The model name that your server uses.</p>
       </div>
-      <div class="rounded border border-white/10 p-3 text-xs text-neutral-400">
+      <div class="rounded border border-fg/10 p-3 text-xs text-neutral-400">
         <p class="font-medium text-neutral-300">Set up llama.cpp</p>
         <ol class="mt-2 list-decimal space-y-1 pl-4">
           <li>
@@ -478,7 +473,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
             <a
               href="https://github.com/ggml-org/llama.cpp/releases"
               target="_blank"
-              class="underline hover:text-white"
+              class="underline hover:text-fg"
               >GitHub</a
             >.
           </li>
@@ -499,7 +494,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
 
     <ul
       v-if="NOTES[settings.provider]"
-      class="list-disc space-y-1 rounded border border-white/10 p-3 pl-7 text-xs text-neutral-400"
+      class="list-disc space-y-1 rounded border border-fg/10 p-3 pl-7 text-xs text-neutral-400"
     >
       <li
         v-for="n in NOTES[settings.provider]"
@@ -523,9 +518,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
         type="button"
         class="flex w-fit items-center gap-2 rounded border px-4 py-2 text-sm font-medium"
         :class="
-          testing
-            ? 'border-accent/40 bg-accent/15 text-accent'
-            : 'border-white/20 hover:bg-white/10'
+          testing ? 'border-accent/40 bg-accent/15 text-accent' : 'border-fg/20 hover:bg-fg/10'
         "
         :disabled="testing"
         @click="testTranslation"
@@ -545,10 +538,10 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
         Test translation
       </button>
       <p v-if="testError" class="text-xs text-red-300">{{ testError }}</p>
-      <div v-else-if="testResult" class="space-y-1 rounded border border-white/10 p-3 text-xs">
+      <div v-else-if="testResult" class="space-y-1 rounded border border-fg/10 p-3 text-xs">
         <p class="text-neutral-500" dir="auto">{{ testResult.source }}</p>
         <p class="min-h-4 text-neutral-200" dir="auto">
-          <span v-if="testing" class="inline-block h-3 w-2/3 animate-pulse rounded bg-white/10" />
+          <span v-if="testing" class="inline-block h-3 w-2/3 animate-pulse rounded bg-fg/10" />
           <template v-else>{{ testResult.text }}</template>
         </p>
       </div>

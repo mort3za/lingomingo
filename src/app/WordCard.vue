@@ -79,7 +79,7 @@ const iconAttrs = {
   'stroke-linecap': 'round',
   'stroke-linejoin': 'round',
 } as const
-const skeleton = 'animate-pulse rounded bg-white/10'
+const skeleton = 'animate-pulse rounded bg-fg/10'
 /** Hidden answer: blurred, so its place shows, but it cannot be read. */
 const hide = computed(() =>
   props.revealed ? 'transition-[filter]' : 'blur-[6px] opacity-60 select-none transition-[filter]',
@@ -115,10 +115,7 @@ const hide = computed(() =>
       </div>
     </div>
 
-    <ol
-      v-if="sentences.length || skeletons"
-      class="divide-y divide-white/5 border-t border-white/5"
-    >
+    <ol v-if="sentences.length || skeletons" class="divide-y divide-fg/5 border-t border-fg/5">
       <li v-for="(s, i) in sentences" :key="i" class="group flex gap-4 px-8 py-3">
         <svg
           v-bind="iconAttrs"
@@ -153,7 +150,7 @@ const hide = computed(() =>
             v-if="s.video && word.source"
             :href="watchUrl(word)"
             target="_blank"
-            class="mt-0.5 inline-block max-w-full truncate text-xs text-neutral-500 hover:text-white hover:underline"
+            class="mt-0.5 inline-block max-w-full truncate text-xs text-neutral-500 hover:text-fg hover:underline"
             >{{ word.source.title || 'YouTube' }}</a
           >
         </div>
@@ -176,17 +173,17 @@ const hide = computed(() =>
     </ol>
 
     <!-- Always shown, so the card does not grow when an error comes. -->
-    <div class="flex h-11 items-center gap-4 border-t border-white/5 px-8 text-sm text-neutral-400">
+    <div class="flex h-11 items-center gap-4 border-t border-fg/5 px-8 text-sm text-neutral-400">
       <template v-if="error">
         <svg v-bind="iconAttrs" class="size-4 shrink-0 text-neutral-500">
           <path v-for="d in icons.ai" :key="d" :d="d" />
         </svg>
         <span class="min-w-0 flex-1 truncate" :title="error">{{ error }}</span>
-        <button class="shrink-0 text-white hover:underline" @click="retry">Retry</button>
+        <button class="shrink-0 text-fg hover:underline" @click="retry">Retry</button>
       </template>
       <button
         v-else
-        class="flex items-center gap-4 transition-colors hover:text-white disabled:pointer-events-none disabled:opacity-50"
+        class="flex items-center gap-4 transition-colors hover:text-fg disabled:pointer-events-none disabled:opacity-50"
         :disabled="loading"
         @click="more"
       >

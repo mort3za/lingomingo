@@ -11,7 +11,7 @@ const keyboardIcon = [
   'M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10',
 ]
 const linkClass =
-  'flex items-center gap-3 rounded border-l-2 border-transparent px-3 py-2.5 text-[15px] text-neutral-300 hover:bg-panel hover:text-white'
+  'flex items-center gap-3 rounded border-l-2 border-transparent px-3 py-2.5 text-[15px] text-neutral-300 hover:bg-panel hover:text-fg'
 
 const menuIcon = ['M4 6h16', 'M4 12h16', 'M4 18h16']
 
@@ -68,7 +68,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown, true))
     <template v-if="route.path !== '/setup'">
       <header class="sticky top-0 z-30 flex h-14 items-center gap-1 bg-surface px-2 md:hidden">
         <button
-          class="rounded p-2 text-neutral-300 hover:bg-panel hover:text-white"
+          class="rounded p-2 text-neutral-300 hover:bg-panel hover:text-fg"
           title="Menu"
           aria-label="Open the menu"
           @click="menuOpen = true"
@@ -105,7 +105,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown, true))
           :key="link.to"
           :to="link.to"
           :class="linkClass"
-          active-class="bg-panel !border-accent !text-white"
+          active-class="bg-panel !border-accent !text-fg"
         >
           <svg v-bind="iconAttrs">
             <path v-for="d in link.icon" :key="d" :d="d" />
@@ -118,7 +118,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown, true))
           <path v-for="d in keyboardIcon" :key="d" :d="d" />
         </svg>
         Shortcuts
-        <kbd class="ml-auto rounded border border-white/20 px-1.5 font-sans text-xs">?</kbd>
+        <kbd class="ml-auto rounded border border-fg/20 px-1.5 font-sans text-xs">?</kbd>
       </button>
     </nav>
     <main class="min-w-0 flex-1 p-4 md:p-6">

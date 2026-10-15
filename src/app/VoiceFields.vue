@@ -115,7 +115,7 @@ const playIcon =
   'M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z'
 const stopIcon = 'M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'
 
-const example = 'ml-1 font-mono text-neutral-400 underline hover:text-white'
+const example = 'ml-1 font-mono text-neutral-400 underline hover:text-fg'
 const code = 'font-mono break-all text-neutral-300'
 </script>
 
@@ -140,7 +140,7 @@ const code = 'font-mono break-all text-neutral-300'
           <a
             href="https://platform.openai.com/api-keys"
             target="_blank"
-            class="underline hover:text-white"
+            class="underline hover:text-fg"
             >platform.openai.com</a
           >.
         </p>
@@ -177,7 +177,7 @@ const code = 'font-mono break-all text-neutral-300'
             {{ v }}
           </button>
           — marin and cedar have the best quality, but only with gpt-4o-mini-tts. Hear all voices on
-          <a href="https://www.openai.fm" target="_blank" class="underline hover:text-white"
+          <a href="https://www.openai.fm" target="_blank" class="underline hover:text-fg"
             >openai.fm</a
           >.
         </p>
@@ -194,7 +194,7 @@ const code = 'font-mono break-all text-neutral-300'
           <a
             href="https://aistudio.google.com/api-keys"
             target="_blank"
-            class="underline hover:text-white"
+            class="underline hover:text-fg"
             >Google AI Studio</a
           >.
         </p>
@@ -234,7 +234,7 @@ const code = 'font-mono break-all text-neutral-300'
           <a
             href="https://aistudio.google.com/generate-speech"
             target="_blank"
-            class="underline hover:text-white"
+            class="underline hover:text-fg"
             >Google AI Studio</a
           >.
         </p>
@@ -258,7 +258,7 @@ const code = 'font-mono break-all text-neutral-300'
         <p v-for="s in SERVERS" :key="s.name">
           <button
             type="button"
-            class="font-mono text-neutral-400 underline hover:text-white"
+            class="font-mono text-neutral-400 underline hover:text-fg"
             @click="useServer(s)"
           >
             {{ s.name }}
@@ -266,7 +266,7 @@ const code = 'font-mono break-all text-neutral-300'
           — {{ s.langs }}
         </p>
       </div>
-      <div class="rounded border border-white/10 p-3 text-xs text-neutral-400">
+      <div class="rounded border border-fg/10 p-3 text-xs text-neutral-400">
         <p class="font-medium text-neutral-300">Set up Kokoro-FastAPI</p>
         <ol class="mt-2 list-decimal space-y-1 pl-4">
           <li>
@@ -274,7 +274,7 @@ const code = 'font-mono break-all text-neutral-300'
             <a
               href="https://www.docker.com/products/docker-desktop/"
               target="_blank"
-              class="underline hover:text-white"
+              class="underline hover:text-fg"
               >Docker Desktop</a
             >.
           </li>
@@ -294,7 +294,7 @@ const code = 'font-mono break-all text-neutral-300'
             <a
               href="https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md"
               target="_blank"
-              class="underline hover:text-white"
+              class="underline hover:text-fg"
               >Hugging Face</a
             >.
           </li>
@@ -306,12 +306,12 @@ const code = 'font-mono break-all text-neutral-300'
           <a
             href="https://github.com/remsky/Kokoro-FastAPI"
             target="_blank"
-            class="underline hover:text-white"
+            class="underline hover:text-fg"
             >Kokoro-FastAPI guide</a
           >.
         </p>
       </div>
-      <div class="rounded border border-white/10 p-3 text-xs text-neutral-400">
+      <div class="rounded border border-fg/10 p-3 text-xs text-neutral-400">
         <p class="font-medium text-neutral-300">Set up Speaches with Piper (German and more)</p>
         <ol class="mt-2 list-decimal space-y-1 pl-4">
           <li>
@@ -334,7 +334,7 @@ const code = 'font-mono break-all text-neutral-300'
             <a
               href="https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md"
               target="_blank"
-              class="underline hover:text-white"
+              class="underline hover:text-fg"
               >Piper voice list</a
             >, and download it as in step 2. The model name is
             <code :class="code">speaches-ai/piper-</code> + the voice, like
@@ -347,16 +347,14 @@ const code = 'font-mono break-all text-neutral-300'
           <a
             href="https://github.com/speaches-ai/speaches/blob/master/docs/usage/text-to-speech.md"
             target="_blank"
-            class="underline hover:text-white"
+            class="underline hover:text-fg"
             >Speaches guide</a
           >.
         </p>
       </div>
     </template>
 
-    <ul
-      class="list-disc space-y-1 rounded border border-white/10 p-3 pl-7 text-xs text-neutral-400"
-    >
+    <ul class="list-disc space-y-1 rounded border border-fg/10 p-3 pl-7 text-xs text-neutral-400">
       <li
         v-for="n in NOTES[settings.voice]"
         :key="n.text"
@@ -380,7 +378,7 @@ const code = 'font-mono break-all text-neutral-300'
         type="button"
         class="flex shrink-0 items-center gap-2 rounded border px-4 py-2 text-sm font-medium"
         :class="
-          testOn ? 'border-accent/40 bg-accent/15 text-accent' : 'border-white/20 hover:bg-white/10'
+          testOn ? 'border-accent/40 bg-accent/15 text-accent' : 'border-fg/20 hover:bg-fg/10'
         "
         @click="testVoice"
       >

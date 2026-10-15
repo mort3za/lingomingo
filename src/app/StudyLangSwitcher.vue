@@ -103,7 +103,7 @@ function onMenuKeydown(e: KeyboardEvent) {
 
 const badge = 'grid shrink-0 place-items-center rounded-md font-semibold uppercase'
 const menuClass =
-  '[scrollbar-width:thin] overflow-y-auto rounded-lg border border-white/10 bg-panel p-1.5 text-white [color-scheme:dark]'
+  '[scrollbar-width:thin] overflow-y-auto rounded-lg border border-fg/10 bg-panel p-1.5 text-fg'
 const popoverClass =
   'top-[anchor(bottom)] right-auto bottom-auto left-[anchor(left)] m-0 mt-1.5 max-h-[min(70vh,30rem)] w-[anchor-size(width)] -translate-y-1 opacity-0 shadow-xl shadow-black/40 transition-[opacity,translate,display,overlay] transition-discrete duration-150 [position-anchor:--study-lang] open:translate-y-0 open:opacity-100 starting:open:-translate-y-1 starting:open:opacity-0'
 </script>
@@ -114,7 +114,7 @@ const popoverClass =
     :popovertarget.attr="inline ? null : 'study-lang-menu'"
     :aria-expanded="inline ? open : undefined"
     aria-haspopup="listbox"
-    class="group mb-2 flex w-full items-center gap-3 rounded-lg border border-white/5 bg-panel/50 px-2.5 py-2 text-start transition-colors [anchor-name:--study-lang] hover:border-white/15 hover:bg-panel focus-visible:border-accent focus-visible:outline-none"
+    class="group mb-2 flex w-full items-center gap-3 rounded-lg border border-fg/5 bg-panel/50 px-2.5 py-2 text-start transition-colors [anchor-name:--study-lang] hover:border-fg/15 hover:bg-panel focus-visible:border-accent focus-visible:outline-none"
     :title="text.title"
     @click="toggleInline"
     @keydown.enter.space.stop
@@ -124,7 +124,7 @@ const popoverClass =
       <span class="block text-[11px] font-medium tracking-wider text-neutral-500 uppercase">
         {{ text.label }}
       </span>
-      <span class="block truncate text-[15px] font-medium text-white">
+      <span class="block truncate text-[15px] font-medium text-fg">
         {{ LANGUAGES[current] ?? current }}
       </span>
     </span>
@@ -165,8 +165,8 @@ const popoverClass =
         class="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-start text-sm outline-none"
         :class="
           code === current
-            ? 'bg-white/5 text-white'
-            : 'text-neutral-300 hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:text-white'
+            ? 'bg-fg/5 text-fg'
+            : 'text-neutral-300 hover:bg-fg/10 hover:text-fg focus-visible:bg-fg/10 focus-visible:text-fg'
         "
         @click="pick(code)"
       >
@@ -174,7 +174,7 @@ const popoverClass =
           :class="[
             badge,
             'size-6 text-[10px]',
-            code === current ? 'bg-accent text-white' : 'bg-white/10 text-neutral-300',
+            code === current ? 'bg-accent text-white' : 'bg-fg/10 text-neutral-300',
           ]"
           >{{ code }}</span
         >

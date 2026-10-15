@@ -21,7 +21,7 @@ function setLevel(value: number | undefined) {
 <template>
   <div
     v-if="LEVEL_LANGS.includes(settings.studyLang)"
-    class="flex flex-wrap items-center justify-between gap-3 rounded border border-white/10 bg-surface-deep px-4 py-3"
+    class="flex flex-wrap items-center justify-between gap-3 rounded border border-fg/10 bg-surface-deep px-4 py-3"
   >
     <div>
       <div class="text-xs font-medium tracking-wide text-neutral-400 uppercase">
@@ -40,7 +40,7 @@ function setLevel(value: number | undefined) {
       <button
         v-if="level !== undefined"
         type="button"
-        class="text-sm text-neutral-400 underline hover:text-white"
+        class="text-sm text-neutral-400 underline hover:text-fg"
         @click="setLevel(undefined)"
       >
         Turn off
@@ -50,8 +50,8 @@ function setLevel(value: number | undefined) {
         class="rounded px-4 py-2 text-sm font-medium"
         :class="
           level === undefined
-            ? 'border border-transparent bg-accent hover:brightness-110'
-            : 'border border-white/20 hover:bg-white/10'
+            ? 'border border-transparent bg-accent text-white hover:brightness-110'
+            : 'border border-fg/20 hover:bg-fg/10'
         "
         @click="levelOpen = true"
       >

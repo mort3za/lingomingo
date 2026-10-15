@@ -2,6 +2,7 @@
 
 /* Theme tokens from docs/origin/README.md "Visual style". */
 @theme {
+  --color-fg: #ffffff; /* text and lines; `white` is only for text on the accent and other solid colors */
   --color-surface: #1e1f22;
   --color-surface-deep: #111111;
   --color-panel: #2b2d31;
@@ -9,11 +10,54 @@
   --font-sans: 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
 }
 
+:root,
+:host {
+  color-scheme: dark;
+}
+
+/* Light theme, when the system uses it. The classes stay the same: `fg` turns dark, the
+   neutral scale turns around (neutral-300 is a light gray in dark and a dark gray in light),
+   and the light shades (100-400) of the other colors take their dark shades (900-600), so
+   colored text stays readable. Solid fills (500-700) do not change. Only the shades in use
+   are listed: add a line when you use a new light shade.
+   UI on the YouTube video (data-theme="dark") always stays dark. */
+@media (prefers-color-scheme: light) {
+  :root,
+  :host(:not([data-theme='dark'])) {
+    color-scheme: light;
+    --color-fg: oklch(14.5% 0 0);
+    --color-surface: #f7f8f9;
+    --color-surface-deep: #eceef1;
+    --color-panel: #ffffff;
+
+    --color-neutral-100: oklch(20.5% 0 0);
+    --color-neutral-200: oklch(26.9% 0 0);
+    --color-neutral-300: oklch(37.1% 0 0);
+    --color-neutral-400: oklch(43.9% 0 0);
+    --color-neutral-500: oklch(55.6% 0 0);
+    --color-neutral-600: oklch(70.8% 0 0);
+
+    --color-red-200: oklch(44.4% 0.177 26.899);
+    --color-red-300: oklch(50.5% 0.213 27.518);
+    --color-orange-200: oklch(47% 0.157 37.304);
+    --color-orange-300: oklch(55.3% 0.195 38.402);
+    --color-orange-400: oklch(64.6% 0.222 41.116);
+    --color-amber-400: oklch(66.6% 0.179 58.318);
+    --color-yellow-100: oklch(42.1% 0.095 57.708);
+    --color-yellow-300: oklch(55.4% 0.135 66.442);
+    --color-yellow-400: oklch(68.1% 0.162 75.834);
+    --color-green-400: oklch(62.7% 0.194 149.214);
+    --color-emerald-300: oklch(50.8% 0.118 165.612);
+    --color-emerald-400: oklch(59.6% 0.145 163.225);
+    --color-violet-300: oklch(49.1% 0.27 292.581);
+    --color-violet-400: oklch(54.1% 0.281 293.009);
+  }
+}
+
 /* Dropdowns: own chevron instead of the browser one. Not in a layer, so the right padding
    wins over `px-*` utilities and the text never runs under the chevron. */
 select {
   appearance: none;
-  color-scheme: dark;
   cursor: pointer;
   padding-inline-end: 2.25rem;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
@@ -29,7 +73,7 @@ input[type='checkbox'] {
   flex-shrink: 0;
   width: 1rem;
   height: 1rem;
-  border: 1.5px solid rgb(255 255 255 / 0.3);
+  border: 1.5px solid color-mix(in srgb, var(--color-fg) 30%, transparent);
   border-radius: 0.25rem;
   background: transparent center / 0.75rem no-repeat;
   cursor: pointer;
@@ -38,7 +82,7 @@ input[type='checkbox'] {
     border-color 120ms;
 }
 input[type='checkbox']:hover:not(:checked, :disabled) {
-  border-color: rgb(255 255 255 / 0.55);
+  border-color: color-mix(in srgb, var(--color-fg) 55%, transparent);
 }
 input[type='checkbox']:checked {
   border-color: var(--color-accent);

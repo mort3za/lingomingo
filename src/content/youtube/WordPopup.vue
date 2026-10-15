@@ -117,9 +117,9 @@ const arrowLeft = `calc(50% + ${Math.min(Math.max(center - x, -144), 144)}px)`
 const bg = 'bg-[color-mix(in_srgb,white_5%,var(--color-panel))]'
 
 const btn =
-  'flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-white/40 '
+  'flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-fg/40 '
 // Hover only on inactive buttons, so it does not hide the active color.
-const off = 'text-white/60 hover:bg-white/10 hover:text-white'
+const off = 'text-fg/60 hover:bg-fg/10 hover:text-fg'
 const on: Record<Stage, string> = {
   KNOWN: 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/40 ring-inset',
   LEARNING: 'bg-orange-500/15 text-orange-300 ring-1 ring-orange-400/40 ring-inset',
@@ -135,7 +135,7 @@ const stages: { stage: Stage; label: string }[] = [
 <template>
   <div
     data-lm-popup
-    class="fixed z-10 w-80 -translate-x-1/2 rounded-xl border border-t-2 border-white/10 border-t-accent font-sans text-white shadow-2xl shadow-black/60"
+    class="fixed z-10 w-80 -translate-x-1/2 rounded-xl border border-t-2 border-fg/10 border-t-accent font-sans text-fg shadow-2xl shadow-black/60"
     :class="[bg, below ? '' : '-translate-y-full']"
     :style="style"
     @click.stop
@@ -147,7 +147,7 @@ const stages: { stage: Stage; label: string }[] = [
         bg,
         below
           ? '-top-1.5 border-t-2 border-l-2 border-accent'
-          : '-bottom-1.5 border-r border-b border-white/10',
+          : '-bottom-1.5 border-r border-b border-fg/10',
       ]"
       :style="{ left: arrowLeft }"
     />
@@ -159,7 +159,7 @@ const stages: { stage: Stage; label: string }[] = [
         <SpeakButton :text="word" :lang="studyLang" />
       </div>
       <button
-        class="-mr-1.5 shrink-0 rounded-md p-1 text-white/40 hover:bg-white/10 hover:text-white"
+        class="-mr-1.5 shrink-0 rounded-md p-1 text-fg/40 hover:bg-fg/10 hover:text-fg"
         title="Close"
         @click="emit('close')"
       >
@@ -180,38 +180,38 @@ const stages: { stage: Stage; label: string }[] = [
       <!-- Same height as one result, so the popup does not jump when it loads. -->
       <div v-if="loading" class="animate-pulse">
         <div class="flex h-[22px] items-center">
-          <div class="h-3.5 w-2/3 rounded bg-white/10" />
+          <div class="h-3.5 w-2/3 rounded bg-fg/10" />
         </div>
-        <div class="mt-1 flex h-5 items-center"><div class="h-3 w-1/2 rounded bg-white/10" /></div>
+        <div class="mt-1 flex h-5 items-center"><div class="h-3 w-1/2 rounded bg-fg/10" /></div>
       </div>
       <div v-else-if="error" class="text-xs text-red-300">{{ error }}</div>
       <div v-else :dir="dirOf(nativeLang)">
-        <div class="text-[15px] leading-[22px] font-medium text-white/95">
+        <div class="text-[15px] leading-[22px] font-medium text-fg/95">
           {{ translations[0] }}
         </div>
-        <div v-if="translations.length > 1" class="mt-1 text-sm text-white/50">
+        <div v-if="translations.length > 1" class="mt-1 text-sm text-fg/50">
           {{ translations.slice(1).join(' · ') }}
         </div>
       </div>
     </div>
-    <div v-if="examplesError" class="border-t border-white/10 px-4 py-3 text-xs text-red-300">
+    <div v-if="examplesError" class="border-t border-fg/10 px-4 py-3 text-xs text-red-300">
       {{ examplesError }}
     </div>
     <ol
       v-else-if="examplesLoading || examples.length"
-      class="space-y-2.5 border-t border-white/10 px-4 py-3"
+      class="space-y-2.5 border-t border-fg/10 px-4 py-3"
     >
       <template v-if="examplesLoading">
         <li v-for="i in 3" :key="i" class="animate-pulse" aria-hidden="true">
-          <div class="flex h-5 items-center"><div class="h-3 w-5/6 rounded bg-white/10" /></div>
+          <div class="flex h-5 items-center"><div class="h-3 w-5/6 rounded bg-fg/10" /></div>
           <div class="mt-0.5 flex h-4 items-center">
-            <div class="h-2.5 w-2/3 rounded bg-white/10" />
+            <div class="h-2.5 w-2/3 rounded bg-fg/10" />
           </div>
         </li>
       </template>
       <li v-for="(e, i) in examples" v-else :key="i" class="group flex items-start gap-1">
         <div class="min-w-0 flex-1">
-          <p class="text-sm leading-5 text-white/90" :dir="dirOf(studyLang)">
+          <p class="text-sm leading-5 text-fg/90" :dir="dirOf(studyLang)">
             <template v-for="(t, j) in parts(e.sentence)" :key="j">
               <mark
                 v-if="t.hit"
@@ -221,14 +221,14 @@ const stages: { stage: Stage; label: string }[] = [
               <template v-else>{{ t.text }}</template>
             </template>
           </p>
-          <p class="mt-0.5 text-xs leading-4 text-white/50" :dir="dirOf(nativeLang)">
+          <p class="mt-0.5 text-xs leading-4 text-fg/50" :dir="dirOf(nativeLang)">
             {{ e.translation }}
           </p>
         </div>
         <SpeakButton class="-mt-0.5 -mr-1.5" :text="e.sentence" :lang="studyLang" on-hover />
       </li>
     </ol>
-    <div class="flex gap-1 border-t border-white/10 p-1.5">
+    <div class="flex gap-1 border-t border-fg/10 p-1.5">
       <button
         v-for="b in stages"
         :key="b.stage"

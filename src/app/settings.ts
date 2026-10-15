@@ -54,5 +54,5 @@ export function useSettings() {
 }
 
 export const INPUT =
-  'w-full rounded border border-white/10 bg-surface-deep px-3 py-2 text-sm text-white outline-none focus:border-accent'
+  'w-full rounded border border-fg/10 bg-surface-deep px-3 py-2 text-sm text-fg outline-none focus:border-accent'
 export const LABEL = 'mb-1 block text-xs font-medium tracking-wide text-neutral-400 uppercase'

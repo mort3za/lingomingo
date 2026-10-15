@@ -47,7 +47,7 @@ export const WORD_STYLE: Record<WordClass, string> = {
   LEARNING: 'text-orange-300 outline outline-1 outline-orange-300/70',
   SKIPPED: 'text-violet-300/60',
   SUGGESTED: 'text-orange-200',
-  RARE: 'text-white/45',
+  RARE: 'text-fg/45',
   PLAIN: '',
 }
 

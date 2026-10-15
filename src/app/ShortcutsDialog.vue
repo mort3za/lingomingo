@@ -25,11 +25,7 @@ const groups = computed(() =>
     >
       <div class="flex items-center justify-between">
         <h2 id="shortcuts-title" class="text-xl font-semibold">Keyboard shortcuts</h2>
-        <button
-          class="text-xl text-white/60 hover:text-white"
-          title="Close (Esc)"
-          @click="emit('close')"
-        >
+        <button class="text-xl text-fg/60 hover:text-fg" title="Close (Esc)" @click="emit('close')">
           ✕
         </button>
       </div>
@@ -54,7 +50,7 @@ const groups = computed(() =>
                   <kbd
                     v-for="k in alt"
                     :key="k"
-                    class="min-w-6 rounded border border-white/20 bg-surface-deep px-1.5 py-0.5 text-center font-sans text-neutral-200"
+                    class="min-w-6 rounded border border-fg/20 bg-surface-deep px-1.5 py-0.5 text-center font-sans text-neutral-200"
                     >{{ k }}</kbd
                   >
                 </template>

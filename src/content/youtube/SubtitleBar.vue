@@ -15,8 +15,7 @@ const cue = computed(() => props.s.cues.value[idx.value])
 const translation = computed(() => props.s.translationOf(idx.value))
 const isSaved = computed(() => props.s.savedPhraseIds.value.has(props.s.phraseKey(idx.value)))
 
-const round =
-  'grid size-8 place-items-center rounded-full bg-white/10 text-white hover:bg-white/25 '
+const round = 'grid size-8 place-items-center rounded-full bg-fg/10 text-fg hover:bg-fg/25 '
 </script>
 
 <template>
@@ -24,7 +23,7 @@ const round =
     :class="
       s.settings.value.subtitlesOnTop ? 'top-14' : s.onShorts.value ? 'bottom-36' : 'bottom-16'
     "
-    class="pointer-events-auto absolute left-1/2 flex w-[min(90%,900px)] -translate-x-1/2 items-stretch gap-3 rounded-lg bg-black/80 px-3 py-2 font-sans text-white"
+    class="pointer-events-auto absolute left-1/2 flex w-[min(90%,900px)] -translate-x-1/2 items-stretch gap-3 rounded-lg bg-black/80 px-3 py-2 font-sans text-fg"
   >
     <div class="flex flex-col justify-center gap-1">
       <button :class="round" title="Next (D)" @click="s.next()">›</button>
@@ -35,10 +34,7 @@ const round =
     <div class="flex min-h-20 flex-1 flex-col justify-center text-center">
       <template v-if="s.status.value === 'ready'">
         <template v-if="cue && s.cueVisible.value">
-          <div
-            class="text-[28px] leading-snug font-medium"
-            :dir="dirOf(s.lang.value)"
-          >
+          <div class="text-[28px] leading-snug font-medium" :dir="dirOf(s.lang.value)">
             <WordText
               :text="cue.text"
               :lang="s.lang.value"
@@ -49,7 +45,7 @@ const round =
             />
           </div>
           <template v-if="s.translates.value && !s.settings.value.hideTranslation">
-            <hr class="my-1 border-white/20" />
+            <hr class="my-1 border-fg/20" />
             <div
               v-if="translation"
               class="text-[22px] leading-snug text-neutral-400"
@@ -82,7 +78,7 @@ const round =
       <button
         :class="
           'rounded-full px-2 py-1 text-xs font-bold ' +
-          (s.settings.value.autoPause ? 'bg-emerald-500 text-black' : 'bg-white/10')
+          (s.settings.value.autoPause ? 'bg-emerald-500 text-black' : 'bg-fg/10')
         "
         title="Auto-pause (Q)"
         @click="s.toggleAutoPause()"

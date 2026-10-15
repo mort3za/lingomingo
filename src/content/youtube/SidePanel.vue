@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
+import SpeakButton from '@/shared/SpeakButton.vue'
 import { dirOf } from '@/shared/types'
 import type { YoutubeSession } from './session'
 import WordText from './WordText.vue'
@@ -67,24 +68,24 @@ watch(
         ? 'h-full w-full overflow-hidden rounded-xl bg-surface'
         : 'absolute top-0 right-0 bottom-14 w-[374px] bg-surface/95'
     "
-    class="pointer-events-auto flex flex-col font-sans text-white"
+    class="pointer-events-auto flex flex-col font-sans text-fg"
   >
-    <div class="flex items-center justify-between border-b border-white/10 px-3 py-2">
+    <div class="flex items-center justify-between border-b border-fg/10 px-3 py-2">
       <div class="border-b-2 border-accent pb-1 text-[15px] font-medium">Subtitles</div>
-      <button class="text-white/60 hover:text-white" @click="emit('close')">✕</button>
+      <button class="text-fg/60 hover:text-fg" @click="emit('close')">✕</button>
     </div>
     <div class="relative min-h-0 flex-1">
       <!-- Scrollbar shows only on hover. Its space is always kept, so the rows do not move. -->
       <div
         ref="list"
-        class="relative h-full space-y-1 overflow-y-auto p-2 pr-1 [scrollbar-color:transparent_transparent] [scrollbar-gutter:stable] hover:[scrollbar-color:rgb(255_255_255/0.3)_transparent]"
+        class="relative h-full [scrollbar-color:transparent_transparent] [scrollbar-gutter:stable] space-y-1 overflow-y-auto p-2 pr-1 hover:[scrollbar-color:color-mix(in_srgb,var(--color-fg)_30%,transparent)_transparent]"
         @scroll="updateAway"
       >
         <!-- Sticky in the list, so it lines up with the rows whatever the scrollbar width is.
              No height, so the rows do not move. -->
         <div v-if="away" class="sticky top-0 z-10 mb-0 flex h-0 items-start justify-end">
           <button
-            class="rounded-full bg-accent px-3 py-1 text-[13px] font-medium shadow-lg hover:brightness-110"
+            class="rounded-full bg-accent px-3 py-1 text-[13px] font-medium text-white shadow-lg hover:brightness-110"
             title="Scroll to the current sentence"
             @click="scrollToTop(s.activeIdx.value)"
           >
@@ -99,7 +100,7 @@ watch(
           :key="i"
           :ref="(el) => el && rows.set(i, el as HTMLElement)"
           :class="
-            'group flex cursor-pointer gap-2 rounded px-2 py-1.5 text-[15px] hover:bg-white/10 ' +
+            'group flex cursor-pointer gap-2 rounded px-2 py-1.5 text-[15px] hover:bg-fg/10 ' +
             (i === s.activeIdx.value ? 'bg-accent/40' : 'bg-panel')
           "
           @click="s.goTo(i)"
@@ -123,19 +124,12 @@ watch(
               {{ s.translationOf(i) }}
             </div>
           </div>
-          <div class="flex flex-col items-center gap-1">
+          <!-- In one line, so the buttons do not make a short row taller. -->
+          <div class="flex items-center gap-1.5 self-start">
+            <SpeakButton class="-m-1" :text="c.text" :lang="s.lang.value" on-hover @click.stop />
+            <!-- Fixed width: the check mark must not move the star. -->
             <button
-              :class="
-                s.savedPhraseIds.value.has(s.phraseKey(i))
-                  ? 'text-yellow-300 hover:text-yellow-100'
-                  : 'text-white/40 opacity-0 group-hover:opacity-100 hover:text-white focus-visible:opacity-100'
-              "
-              @click.stop="s.togglePhrase(i)"
-            >
-              {{ s.savedPhraseIds.value.has(s.phraseKey(i)) ? '★' : '☆' }}
-            </button>
-            <button
-              class="text-white/40 opacity-0 group-hover:opacity-100 hover:text-white focus-visible:opacity-100"
+              class="flex w-3.5 justify-center text-fg/40 opacity-0 group-hover:opacity-100 hover:text-fg focus-visible:opacity-100"
               title="Copy"
               @click.stop="copy(i)"
             >
@@ -153,6 +147,16 @@ watch(
                 <rect x="9" y="9" width="13" height="13" rx="2" />
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
               </svg>
+            </button>
+            <button
+              :class="
+                s.savedPhraseIds.value.has(s.phraseKey(i))
+                  ? 'text-yellow-300 hover:text-yellow-100'
+                  : 'text-fg/40 opacity-0 group-hover:opacity-100 hover:text-fg focus-visible:opacity-100'
+              "
+              @click.stop="s.togglePhrase(i)"
+            >
+              {{ s.savedPhraseIds.value.has(s.phraseKey(i)) ? '★' : '☆' }}
             </button>
           </div>
         </div>

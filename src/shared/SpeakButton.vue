@@ -26,12 +26,12 @@ const paths = [
 <template>
   <!-- Hover only when it does not play, so it does not hide the playing color. -->
   <button
-    class="shrink-0 rounded-md p-1 transition-[color,background-color,opacity] focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-white/40"
+    class="shrink-0 rounded-md p-1 transition-[color,background-color,opacity] focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-fg/40"
     :class="
       on
         ? 'bg-accent/15 text-accent'
         : [
-            'text-white/40 hover:bg-white/10 hover:text-white',
+            'text-fg/40 hover:bg-fg/10 hover:text-fg',
             onHover && 'opacity-0 group-hover:opacity-100',
           ]
     "

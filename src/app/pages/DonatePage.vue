@@ -66,7 +66,7 @@ const iconAttrs = {
   'stroke-linejoin': 'round',
 } as const
 const tileClass =
-  'group flex flex-col gap-2 rounded-lg bg-panel p-4 text-left text-sm transition-colors hover:bg-white/10'
+  'group flex flex-col gap-2 rounded-lg bg-panel p-4 text-left text-sm transition-colors hover:bg-fg/10'
 
 const copied = ref(false)
 async function copyLink() {
@@ -120,7 +120,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
             Sponsor on GitHub
           </a>
           <button
-            class="group inline-flex items-center gap-2 rounded-lg border border-white/20 px-5 py-2.5 font-medium text-white transition hover:border-white/40 hover:bg-white/5"
+            class="group inline-flex items-center gap-2 rounded-lg border border-fg/20 px-5 py-2.5 font-medium text-fg transition hover:border-fg/40 hover:bg-fg/5"
             @click="cryptoOpen = true"
           >
             <svg
@@ -186,7 +186,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
         <a :href="`${repo}/issues/new`" target="_blank" :class="tileClass">
           <svg
             v-bind="iconAttrs"
-            class="size-5 text-neutral-400 transition-colors group-hover:text-white"
+            class="size-5 text-neutral-400 transition-colors group-hover:text-fg"
           >
             <path v-for="d in bugIcon" :key="d" :d="d" />
           </svg>
@@ -196,7 +196,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
         <button :class="tileClass" @click="copyLink">
           <svg
             v-bind="iconAttrs"
-            class="size-5 text-neutral-400 transition-colors group-hover:text-white"
+            class="size-5 text-neutral-400 transition-colors group-hover:text-fg"
           >
             <path v-for="d in linkIcon" :key="d" :d="d" />
           </svg>
@@ -221,7 +221,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
         <div class="flex items-center justify-between">
           <h2 id="crypto-title" class="text-xl font-semibold">Donate with crypto</h2>
           <button
-            class="text-xl text-white/60 hover:text-white"
+            class="text-xl text-fg/60 hover:text-fg"
             title="Close (Esc)"
             @click="cryptoOpen = false"
           >

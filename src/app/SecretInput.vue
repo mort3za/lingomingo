@@ -33,7 +33,7 @@ const eyeOff = [
     />
     <button
       type="button"
-      class="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-neutral-500 hover:text-white focus-visible:text-white focus-visible:outline-none"
+      class="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-neutral-500 hover:text-fg focus-visible:text-fg focus-visible:outline-none"
       :title="shown ? 'Hide key' : 'Show key'"
       :aria-label="shown ? 'Hide key' : 'Show key'"
       :aria-pressed="shown"

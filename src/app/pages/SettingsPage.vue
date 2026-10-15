@@ -55,7 +55,7 @@ const check = 'flex items-center gap-2 text-sm'
       </div>
       <p :class="hint">
         Changes save automatically. Want help step by step? Open the
-        <RouterLink to="/setup" class="text-accent hover:underline">setup guide</RouterLink>.
+        <RouterLink to="/setup" class="underline hover:text-fg">setup guide</RouterLink>.
       </p>
     </div>
 

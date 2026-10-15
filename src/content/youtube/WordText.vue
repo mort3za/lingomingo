@@ -17,8 +17,8 @@ const emit = defineEmits<{
 const tokens = computed(() => tokenize(props.text, props.lang))
 
 function classes(word: string): string {
-  const base = 'cursor-pointer rounded px-px hover:bg-white/20 '
-  if (props.selected && wordKey(props.selected) === wordKey(word)) return base + 'bg-white/25'
+  const base = 'cursor-pointer rounded px-px hover:bg-fg/20 '
+  if (props.selected && wordKey(props.selected) === wordKey(word)) return base + 'bg-fg/25'
   return base + WORD_STYLE[wordClass(word, props.vocab)]
 }
 </script>
