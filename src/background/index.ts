@@ -5,6 +5,7 @@ import {
   type Request,
   type Response,
 } from '@/shared/messages'
+import { markInstalled } from '@/shared/rating'
 import { getSettings, onStorageKey } from '@/shared/storage'
 import { translateLines, translateWord, wordExtras } from './llm'
 import { speak, TTS_TTL, type CachedAudio } from './tts'
@@ -24,6 +25,7 @@ chrome.runtime.onStartup.addListener(() => void showOnOff())
 chrome.runtime.onInstalled.addListener(() => void showOnOff())
 
 chrome.runtime.onInstalled.addListener(({ reason }) => {
+  void markInstalled()
   // First install: walk the user through the initial setup.
   if (reason === chrome.runtime.OnInstalledReason.INSTALL) {
     chrome.tabs.create({ url: `${APP_URL}#/setup` })

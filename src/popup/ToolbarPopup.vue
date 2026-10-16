@@ -3,9 +3,12 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { footerLinks, iconAttrs, mainLinks } from '@/app/nav'
 import { saveNow, useSettings } from '@/app/settings'
 import StudyLangSwitcher from '@/app/StudyLangSwitcher.vue'
+import { ratingDone, REVIEW_URL } from '@/shared/rating'
 import { isDue, learningWords } from '@/shared/review'
 import { getSavedItems, onStorageKey } from '@/shared/storage'
 import { aiConfigured, type SavedItem } from '@/shared/types'
+
+const props = defineProps<{ rating: boolean }>()
 
 const { settings, loaded } = useSettings()
 // Wait for the stored settings: the defaults have no API key and would show the warning.
@@ -51,6 +54,21 @@ async function openPage(path: string) {
     await chrome.tabs.create({ url })
   }
   window.close()
+}
+
+const rating = ref(props.rating)
+const starIcon =
+  'M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z'
+
+async function rate() {
+  await ratingDone()
+  await chrome.tabs.create({ url: REVIEW_URL })
+  window.close()
+}
+
+function closeRating() {
+  rating.value = false
+  void ratingDone()
 }
 </script>
 
@@ -128,5 +146,68 @@ async function openPage(path: string) {
         </a>
       </template>
     </nav>
+
+    <div v-if="rating" class="rating relative mt-2">
+      <a
+        :href="REVIEW_URL"
+        class="block rounded-lg border border-accent/25 bg-accent/10 py-2.5 pr-9 pl-3 outline-none hover:border-accent/50 focus-visible:border-accent"
+        @click.prevent="rate"
+      >
+        <span class="mb-1 flex gap-0.5 text-accent" aria-hidden="true">
+          <svg
+            v-for="i in 5"
+            :key="i"
+            class="star size-3.5"
+            :style="{ '--i': i }"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path :d="starIcon" />
+          </svg>
+        </span>
+        <span class="block text-sm font-medium">Enjoying LingoMingo?</span>
+        <span class="block text-xs text-neutral-400">
+          Rate it on the Chrome Web Store. It helps other learners find it.
+        </span>
+      </a>
+      <button
+        aria-label="Close"
+        title="Close"
+        class="absolute top-1.5 right-1.5 grid size-6 place-items-center rounded-md text-neutral-400 outline-none hover:bg-fg/10 hover:text-fg focus-visible:bg-fg/10 focus-visible:text-fg"
+        @click="closeRating"
+      >
+        <svg v-bind="iconAttrs" class="size-4" aria-hidden="true">
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
+        </svg>
+      </button>
+    </div>
   </div>
 </template>
+
+<style scoped>
+/* The stars fill one after another when the banner opens, and lift in a wave on hover.
+   Only transform, translate and opacity change: no layout work. The hover uses `translate`,
+   not the animation, so the open animation does not play again when the pointer leaves. */
+.star {
+  animation: star-in 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--i) * 70ms + 150ms);
+  transition: translate 200ms ease-out;
+  transition-delay: calc(var(--i) * 40ms);
+}
+.rating:hover .star {
+  translate: 0 -2px;
+}
+@keyframes star-in {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-30deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .star {
+    animation: none;
+    transition: none;
+  }
+}
+</style>
