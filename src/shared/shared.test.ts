@@ -20,6 +20,7 @@ import {
   preview,
   sentenceParts,
 } from './review'
+import { showRating } from './rating'
 import { tokenize } from './tokenize'
 import { dirOf, type SavedItem, type SavedWord } from './types'
 import { parseWordList, wordClass, type Vocab } from './vocab'
@@ -339,4 +340,12 @@ test('sentenceParts marks the word with * or by its written form', () => {
   const parts = sentenceParts('Das Haus ist alt.', 'haus', 'de')
   expect(parts.filter((p) => p.hit).map((p) => p.text)).toEqual(['Haus'])
   expect(parts.map((p) => p.text).join('')).toBe('Das Haus ist alt.')
+})
+
+test('showRating waits 1 day after install and 3 popup opens', () => {
+  const day = 24 * 60 * 60 * 1000
+  expect(showRating({ installedAt: 0, opens: 3 }, day)).toBe(true)
+  expect(showRating({ installedAt: 0, opens: 2 }, day)).toBe(false)
+  expect(showRating({ installedAt: 0, opens: 9 }, day - 1)).toBe(false)
+  expect(showRating({ installedAt: 0, opens: 9, done: true }, day)).toBe(false)
 })
