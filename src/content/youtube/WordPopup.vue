@@ -290,7 +290,6 @@ const stages: { stage: Stage; label: string; icon: string }[] = [
         >
           <path :d="stages[1]!.icon" />
         </svg>
-        Learn
       </button>
     </div>
     <div v-if="examplesError" class="border-t border-fg/10 px-4 py-3 text-xs text-red-300">
