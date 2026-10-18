@@ -126,7 +126,14 @@ watch(
           </div>
           <!-- In one line, so the buttons do not make a short row taller. -->
           <div class="flex items-center gap-1.5 self-start">
-            <SpeakButton class="-m-1" :text="c.text" :lang="s.lang.value" on-hover @click.stop />
+            <SpeakButton
+              class="-m-1"
+              :text="c.text"
+              :lang="s.lang.value"
+              on-hover
+              @click.stop
+              @play="s.pauseWhile"
+            />
             <!-- Fixed width: the check mark must not move the star. -->
             <button
               class="flex w-3.5 justify-center text-fg/40 opacity-0 group-hover:opacity-100 hover:text-fg focus-visible:opacity-100"

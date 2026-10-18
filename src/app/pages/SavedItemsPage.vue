@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { toCsv, toJson } from '@/shared/export'
 import { getSavedItems, onStorageKey, removeItems, setStage } from '@/shared/storage'
+import SpeakButton from '@/shared/SpeakButton.vue'
 import { dirOf, LANGUAGES, type SavedItem, type SavedWord, type Stage } from '@/shared/types'
 import { ignoreKey } from '../shortcuts'
 import WordDialog from '../WordDialog.vue'
@@ -229,7 +230,9 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
           <th class="p-2">Translation</th>
           <th class="hidden p-2 sm:table-cell">Stage</th>
           <th class="hidden p-2 md:table-cell">Source</th>
-          <th class="w-10 p-2"><span class="sr-only">Card</span></th>
+          <th class="w-10 p-2">
+            <span class="sr-only">{{ tab === 'WORD' ? 'Card' : 'Play' }}</span>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -266,8 +269,16 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
             >
           </td>
           <td class="p-2">
+            <SpeakButton
+              v-if="i.itemType === 'PHRASE'"
+              class="p-1.5!"
+              :text="i.text"
+              :lang="i.langCode"
+              on-hover
+              @click.stop
+            />
             <button
-              v-if="i.itemType === 'WORD'"
+              v-else
               class="grid size-7 place-items-center rounded text-neutral-400 opacity-0 transition-colors group-hover:opacity-100 hover:bg-fg/10 hover:text-fg focus-visible:opacity-100"
               title="Show card"
               :aria-label="`Show the card of ${i.text}`"

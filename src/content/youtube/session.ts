@@ -351,6 +351,23 @@ export function useYoutubeSession() {
     if (v.paused) void v.play()
     else v.pause()
   }
+  /** Pauses the video while a sentence is spoken, then plays it again. */
+  // A newer sentence stops the older one: only the last one plays the video again.
+  let speakTurn = 0
+  let resumeAfter = false
+  async function pauseWhile(done: Promise<void>) {
+    const v = video()
+    if (!v) return
+    const mine = ++speakTurn
+    if (!v.paused) {
+      resumeAfter = true
+      v.pause()
+    }
+    await done
+    if (mine !== speakTurn) return
+    if (resumeAfter && v.paused) void v.play()
+    resumeAfter = false
+  }
   const toggleAutoPause = () => patchSettings({ autoPause: !settings.value.autoPause })
   const toggleSubtitlesOnTop = () =>
     patchSettings({ subtitlesOnTop: !settings.value.subtitlesOnTop })
@@ -500,6 +517,7 @@ export function useYoutubeSession() {
     next,
     prev,
     togglePlay,
+    pauseWhile,
     toggleAutoPause,
     toggleSubtitlesOnTop,
     togglePhrase,

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import SpeakButton from '@/shared/SpeakButton.vue'
 import { dirOf } from '@/shared/types'
 import type { YoutubeSession } from './session'
 import WordText from './WordText.vue'
@@ -13,6 +14,9 @@ const emit = defineEmits<{
 const idx = computed(() => props.s.activeIdx.value)
 const cue = computed(() => props.s.cues.value[idx.value])
 const translation = computed(() => props.s.translationOf(idx.value))
+const shown = computed(
+  () => props.s.status.value === 'ready' && !!cue.value && props.s.cueVisible.value,
+)
 const isSaved = computed(() => props.s.savedPhraseIds.value.has(props.s.phraseKey(idx.value)))
 
 const round = 'grid size-8 place-items-center rounded-full bg-fg/10 text-fg hover:bg-fg/25 '
@@ -68,13 +72,23 @@ const round = 'grid size-8 place-items-center rounded-full bg-fg/10 text-fg hove
     </div>
 
     <div class="flex flex-col items-center justify-between gap-1">
-      <button
-        :class="round + (isSaved ? 'text-yellow-300' : '')"
-        title="Save phrase (R)"
-        @click="s.togglePhrase(idx)"
-      >
-        {{ isSaved ? '★' : '☆' }}
-      </button>
+      <div class="flex gap-1">
+        <!-- Invisible with no sentence: it keeps its space. -->
+        <SpeakButton
+          round
+          :class="!shown && 'invisible'"
+          :text="cue?.text ?? ''"
+          :lang="s.lang.value"
+          @play="s.pauseWhile"
+        />
+        <button
+          :class="round + (isSaved ? 'text-yellow-300' : '')"
+          title="Save phrase (R)"
+          @click="s.togglePhrase(idx)"
+        >
+          {{ isSaved ? '★' : '☆' }}
+        </button>
+      </div>
       <button
         :class="
           'rounded-full px-2 py-1 text-xs font-bold ' +
