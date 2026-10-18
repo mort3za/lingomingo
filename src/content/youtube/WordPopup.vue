@@ -110,7 +110,8 @@ async function loadExamples() {
       examples: 3,
     })
     examples.value = r?.examples ?? []
-    exampleCache.set(cacheKey, examples.value)
+    // No examples is often a bad model answer: the next click asks again.
+    if (examples.value.length) exampleCache.set(cacheKey, examples.value)
   } catch (e) {
     examplesError.value = e instanceof Error ? e.message : String(e)
   } finally {
@@ -326,6 +327,7 @@ const stages: { stage: Stage; label: string; icon: string }[] = [
         <SpeakButton class="-mt-0.5 -mr-1.5" :text="e.sentence" :lang="studyLang" on-hover />
       </li>
     </ol>
+    <div v-else class="border-t border-fg/10 px-4 py-3 text-xs text-fg/40">No examples</div>
     <div class="flex gap-1 border-t border-fg/10 p-1.5">
       <button
         v-for="b in stages"
