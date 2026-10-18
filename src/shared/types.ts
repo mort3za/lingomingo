@@ -34,7 +34,12 @@ export interface SavedWord extends SavedBase {
   examples?: Example[]
   /** FSRS review state. Missing = new card, never reviewed. */
   review?: ReviewCard
+  /** For example `EXPRESSION_TAG`. */
+  tags?: string[]
 }
+
+/** Tag of a saved multi-word expression (phrasal verb, idiom, ...), saved from the word popup. */
+export const EXPRESSION_TAG = 'expression'
 
 /** The word in `sentence` is marked with `*`, also when its form is different. */
 export interface Example {

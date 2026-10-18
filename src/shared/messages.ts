@@ -30,6 +30,18 @@ export interface Have {
   examples: string[]
 }
 
+/** A multi-word expression and its translation. */
+export interface Phrase {
+  text: string
+  translation: string
+}
+
+export interface WordTranslation {
+  translations: string[]
+  /** The expression the word is part of in the sentence. null = none, or the model left it out. */
+  phrase: Phrase | null
+}
+
 /** What the review card needs for one word. */
 export interface WordExtras {
   translations: string[]
@@ -41,7 +53,7 @@ export interface WordExtras {
 export type Response<T> = { ok: true; data: T } | { ok: false; error: string }
 
 export interface ResponseMap {
-  'translate-word': string[]
+  'translate-word': WordTranslation
   /** Same order as `words`. null = the model left the word out. */
   'word-extras': (WordExtras | null)[]
   /** Base64 audio. null = no AI voice: use a browser voice. */

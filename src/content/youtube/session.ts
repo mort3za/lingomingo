@@ -426,11 +426,13 @@ export function useYoutubeSession() {
     stage: Stage,
     translations: string[],
     examples: Example[] = [],
+    tags: string[] = [],
   ) {
     const old = savedWordOf(word)
     // Old translations and examples only when they are in the current translation language.
     const same = old?.translationLang === settings.value.nativeLang
     const keep = (same ? old?.examples : undefined) ?? examples
+    const allTags = [...new Set([...(old?.tags ?? []), ...tags])]
     // One saved item per lemma: marking "ging" updates a saved "gehe".
     const id = old?.id ?? wordId(lang.value, lemma(word))
     const now = Date.now()
@@ -452,6 +454,7 @@ export function useYoutubeSession() {
       // Keep the review history when the stage changes.
       ...(old?.review && { review: { ...old.review } }),
       ...(keep.length ? { examples: keep.map((e) => ({ ...e })) } : {}),
+      ...(allTags.length ? { tags: allTags } : {}),
     })
   }
 

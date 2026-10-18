@@ -1,5 +1,6 @@
 import { errorMessage, extractJson, finishedLines, matchLine } from '@/shared/llm-json'
-import type { Have, WordExtras } from '@/shared/messages'
+import type { Have, WordExtras, WordTranslation } from '@/shared/messages'
+import { wordKey } from '@/shared/tokenize'
 import { LANGUAGES, type Settings } from '@/shared/types'
 
 /** `onText` turns on streaming: it gets the whole answer so far after each new piece. */
@@ -324,16 +325,30 @@ export async function translateWord(
   sentence: string,
   studyLang: string,
   nativeLang: string,
-): Promise<string[]> {
+): Promise<WordTranslation> {
   const system =
     `You are a dictionary. Translate a ${name(studyLang)} word to ${name(nativeLang)}, ` +
-    `using the sentence for meaning. Answer with ONLY JSON: {"translations":["best","alt1","alt2"]} ` +
-    `(1 to 3 short items, the word in its dictionary form if it helps).`
-  const out = extractJson(await ask(settings, system, JSON.stringify({ word, sentence }))) as {
-    translations?: unknown
-  }
+    `using the sentence for meaning. Answer with ONLY JSON: {"translations":["best","alt1","alt2"],` +
+    `"phrase":{"text":"<expression>","translation":"<its translation>"}} ` +
+    `(1 to 3 short items, the word in its dictionary form if it helps). Add "phrase" only when ` +
+    `the word is part of a multi-word expression in this sentence: a phrasal verb, an idiom, a ` +
+    `separable verb or a fixed phrase. Give the expression in its dictionary form. Most words ` +
+    `have no expression: then leave "phrase" out. Never give only the dictionary form of the word.`
+  return parseWordAnswer(await ask(settings, system, JSON.stringify({ word, sentence })), word)
+}
+
+/** Reads the `translateWord` answer. A bad or missing "phrase" gives null, not an error. */
+export function parseWordAnswer(text: string, word: string): WordTranslation {
+  const out = extractJson(text) as { translations?: unknown; phrase?: unknown }
   if (!Array.isArray(out.translations)) throw new Error('Bad answer from model.')
-  return out.translations.map(String).slice(0, 3)
+  const p = (out.phrase ?? {}) as { text?: unknown; translation?: unknown }
+  const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
+  const phrase = { text: str(p.text), translation: str(p.translation) }
+  return {
+    translations: out.translations.map(String).slice(0, 3),
+    phrase:
+      phrase.text && phrase.translation && wordKey(phrase.text) !== wordKey(word) ? phrase : null,
+  }
 }
 
 /** Number of new examples for a word that has `have`. */
