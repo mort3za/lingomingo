@@ -217,6 +217,12 @@ async function chat(
       ...extra,
     }),
     signal: call.signal,
+  }).catch((e: unknown) => {
+    // No server at the address: fetch gives only "Failed to fetch".
+    if (e instanceof TypeError) {
+      throw new Error(`${label}: cannot connect to ${base}. Is the server running at this address?`)
+    }
+    throw e
   })
   if (!res.ok) throw new Error(`${label} ${res.status}: ${errorMessage(await res.text())}`)
   if (call.onText) {
