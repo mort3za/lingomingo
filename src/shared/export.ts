@@ -12,6 +12,8 @@ const COLUMNS = [
   'Video ID',
   'Video title',
   'Date created',
+  'Start ms',
+  'End ms',
 ] as const
 
 export function cell(value: string): string {
@@ -33,6 +35,8 @@ export function toCsv(items: SavedItem[]): string {
       i.source?.videoId ?? '',
       i.source?.title ?? '',
       new Date(i.createdAt).toISOString(),
+      String(i.source?.startMs ?? ''),
+      String(i.source?.endMs ?? ''),
     ].map(cell)
   })
   return [COLUMNS.map(cell), ...rows].map((r) => r.join(',')).join('\n')

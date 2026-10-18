@@ -193,6 +193,25 @@ test('toCsv escapes quotes and commas', () => {
   expect(toCsv([item]).split('\n')[1]).toContain('"Hola, ""amigo"""')
 })
 
+test('toCsv puts start and end ms in the last two columns', () => {
+  const item: SavedItem = {
+    id: '1',
+    itemType: 'PHRASE',
+    langCode: 'es',
+    translationLang: 'en',
+    stage: 'LEARNING',
+    createdAt: 0,
+    updatedAt: 0,
+    text: 'Hola',
+    translation: 'Hi',
+    source: { source: 'YOUTUBE', videoId: 'v', title: 'T', startMs: 1500, endMs: 3250 },
+  }
+  const [head, row, noSource] = toCsv([item, word()]).split('\n')
+  expect(head).toEndWith(',Date created,Start ms,End ms')
+  expect(row).toEndWith(',1500,3250')
+  expect(noSource).toEndWith(',,')
+})
+
 test('dirOf gives rtl for Persian and Arabic, ltr for others', () => {
   expect(dirOf('fa')).toBe('rtl')
   expect(dirOf('ar')).toBe('rtl')
