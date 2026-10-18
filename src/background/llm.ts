@@ -326,26 +326,63 @@ export async function translateWord(
   studyLang: string,
   nativeLang: string,
 ): Promise<WordTranslation> {
+  const noun = NOUN_EXAMPLES[studyLang]
+  const study = name(studyLang)
   const system =
-    `You are a dictionary. Translate a ${name(studyLang)} word to ${name(nativeLang)}, ` +
+    `You are a dictionary. Translate a ${study} word to ${name(nativeLang)}, ` +
     `using the sentence for meaning. Answer with ONLY JSON: {"translations":["best","alt1","alt2"],` +
-    `"phrase":{"text":"<expression>","translation":"<its translation>"}} ` +
-    `(1 to 3 short items, the word in its dictionary form if it helps). Add "phrase" only when ` +
-    `the word is part of a multi-word expression in this sentence: a phrasal verb, an idiom, a ` +
-    `separable verb or a fixed phrase. Give the expression in its dictionary form. Most words ` +
-    `have no expression: then leave "phrase" out. Never give only the dictionary form of the word.`
+    (noun
+      ? `"pos":"<part of speech of the word in this sentence>",` +
+        `"headword":"<noun with article>","plural":"<plural with article>",`
+      : '') +
+    `"ipa":"<pronunciation>","phrase":{"text":"<expression>","translation":"<its translation>"}} ` +
+    `(1 to 3 short items, the word in its dictionary form if it helps). ` +
+    (noun
+      ? `"pos" is one word, like "noun", "verb" or "adjective". Add "headword" and "plural" ` +
+        `only when "pos" is "noun": the ` +
+        `singular with the ${study} article that dictionaries use (like "${noun}"), and the ` +
+        `plural with its article. Leave out "plural" when the noun has none. Leave out both ` +
+        `for a verb or an adjective, also when a noun with the same stem exists. `
+      : '') +
+    `"ipa" is the IPA of the ${study} word itself in its dictionary form (singular, ` +
+    `infinitive), not of the translation or the expression, without an article and without ` +
+    `slashes. ` +
+    `Add "phrase" only when the word is part of a ${study} multi-word expression in this ` +
+    `sentence: a phrasal verb, a separable verb, or an idiom whose meaning is different from ` +
+    `the meaning of its words. "text" is the ${study} expression in its dictionary form. Most ` +
+    `words have no expression: then leave "phrase" out. Words that are only used together (a ` +
+    `verb with its object, place or adverb, like "go to the park" or "run fast") are not an ` +
+    `expression. Never give only the dictionary form of the word.`
   return parseWordAnswer(await ask(settings, system, JSON.stringify({ word, sentence })), word)
 }
 
-/** Reads the `translateWord` answer. A bad or missing "phrase" gives null, not an error. */
+/** Study languages where nouns have an article that shows their gender, with an example. */
+const NOUN_EXAMPLES: Record<string, string> = {
+  de: 'die Arbeit',
+  nl: 'het huis',
+  fr: 'la maison',
+  es: 'la casa',
+  it: 'la casa',
+  pt: 'a casa',
+  sv: 'en bok',
+}
+
+/** Reads the `translateWord` answer. Only bad or missing translations give an error. */
 export function parseWordAnswer(text: string, word: string): WordTranslation {
-  const out = extractJson(text) as { translations?: unknown; phrase?: unknown }
+  const out = extractJson(text) as Record<string, unknown>
   if (!Array.isArray(out.translations)) throw new Error('Bad answer from model.')
   const p = (out.phrase ?? {}) as { text?: unknown; translation?: unknown }
   const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
   const phrase = { text: str(p.text), translation: str(p.translation) }
+  // Only for a noun, and with its article ("die Arbeit", "l'eau").
+  const noun = !('pos' in out) || str(out.pos).toLowerCase() === 'noun'
+  const headword = noun && /\s|['’]/.test(str(out.headword)) ? str(out.headword) : null
+  const ipa = str(out.ipa).replace(/^[/[]+|[/\]]+$/g, '')
   return {
     translations: out.translations.map(String).slice(0, 3),
+    headword,
+    plural: (headword && str(out.plural)) || null,
+    ipa: ipa || null,
     phrase:
       phrase.text && phrase.translation && wordKey(phrase.text) !== wordKey(word) ? phrase : null,
   }

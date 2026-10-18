@@ -36,7 +36,17 @@ export interface Phrase {
   translation: string
 }
 
-export interface WordTranslation {
+/** Dictionary facts of a word. null = unknown, not for this word, or the model left it out. */
+export interface WordInfo {
+  /** The noun with its article, like "die Arbeit". Only in study languages with articles. */
+  headword: string | null
+  /** The plural with its article, like "die Arbeiten". */
+  plural: string | null
+  /** Pronunciation of the dictionary form in IPA, without slashes. */
+  ipa: string | null
+}
+
+export interface WordTranslation extends WordInfo {
   translations: string[]
   /** The expression the word is part of in the sentence. null = none, or the model left it out. */
   phrase: Phrase | null

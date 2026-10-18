@@ -36,6 +36,10 @@ export interface SavedWord extends SavedBase {
   review?: ReviewCard
   /** For example `EXPRESSION_TAG`. */
   tags?: string[]
+  /** See `WordInfo`. */
+  headword?: string
+  plural?: string
+  ipa?: string
 }
 
 /** Tag of a saved multi-word expression (phrasal verb, idiom, ...), saved from the word popup. */

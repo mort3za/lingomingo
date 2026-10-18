@@ -7,7 +7,7 @@ const exampleCache = new Map<string, Example[]>()
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { send, type Phrase, type WordTranslation } from '@/shared/messages'
+import { send, type Phrase, type WordInfo, type WordTranslation } from '@/shared/messages'
 import { dirOf, type Example, type SavedItem, type Stage } from '@/shared/types'
 import SpeakButton from '@/shared/SpeakButton.vue'
 
@@ -22,7 +22,7 @@ const props = defineProps<{
   stageOf: (text: string) => Stage | undefined
 }>()
 const emit = defineEmits<{
-  stage: [stage: Stage, translations: string[], examples: Example[]]
+  stage: [stage: Stage, translations: string[], examples: Example[], info: WordInfo]
   remove: []
   savePhrase: [phrase: Phrase]
   removePhrase: [text: string]
@@ -36,6 +36,13 @@ const savedWord =
     : null
 const translations = ref<string[]>(savedWord?.translations ?? [])
 const phrase = ref<Phrase | null>(null)
+// Facts of the study language: kept also when the translation language changed.
+const old = props.savedItem?.itemType === 'WORD' ? props.savedItem : null
+const info = ref<WordInfo>({
+  headword: old?.headword ?? null,
+  plural: old?.plural ?? null,
+  ipa: old?.ipa ?? null,
+})
 const loading = ref(false)
 const error = ref('')
 const examples = ref<Example[]>(savedWord?.examples ?? [])
@@ -47,12 +54,18 @@ onMounted(loadTranslations)
 onMounted(loadExamples)
 
 // A saved word shows its saved translations at once. The request then only looks for the
-// expression, and an error stays hidden.
+// expression and missing facts, and an error stays hidden.
 async function loadTranslations() {
   const key = `${cacheKey}:${props.sentence}`
   const show = (r: WordTranslation) => {
     if (!translations.value.length) translations.value = r.translations
     phrase.value = r.phrase
+    const i = info.value
+    info.value = {
+      headword: i.headword ?? r.headword,
+      plural: i.plural ?? r.plural,
+      ipa: i.ipa ?? r.ipa,
+    }
   }
   const cached = cache.get(key)
   if (cached) return show(cached)
@@ -111,8 +124,14 @@ const stage = computed(() => props.savedItem?.stage)
 // A click on the active stage button removes the word from the saved items.
 function pick(s: Stage) {
   if (stage.value === s) emit('remove')
-  else emit('stage', s, translations.value, examples.value)
+  else emit('stage', s, translations.value, examples.value, info.value)
 }
+// The noun with its article, the article lighter: "die Arbeit" → "die " + "Arbeit", "l'eau" →
+// "l'" + "eau".
+const title = computed(() => {
+  const m = info.value.headword?.match(/^(\S+?['’]|\S+\s+)(.+)$/)
+  return m ? { article: m[1], text: m[2] } : { article: '', text: props.word }
+})
 // The expression has one button: save it as Learning, or remove it.
 const phraseStage = computed(() => phrase.value && props.stageOf(phrase.value.text))
 function togglePhrase() {
@@ -179,11 +198,21 @@ const stages: { stage: Stage; label: string; icon: string }[] = [
       :style="{ left: arrowLeft }"
     />
     <div class="flex items-start justify-between gap-2 px-4 pt-3">
-      <div class="flex min-w-0 items-start gap-1">
-        <div class="min-w-0 text-lg leading-snug font-semibold break-words" :dir="dirOf(studyLang)">
-          {{ word }}
+      <div class="min-w-0">
+        <div class="flex min-w-0 items-start gap-1">
+          <div
+            class="min-w-0 text-lg leading-snug font-semibold break-words"
+            :dir="dirOf(studyLang)"
+          >
+            <span v-if="title.article" class="font-normal text-fg/50">{{ title.article }}</span
+            >{{ title.text }}
+          </div>
+          <SpeakButton :text="info.headword ?? word" :lang="studyLang" />
         </div>
-        <SpeakButton :text="word" :lang="studyLang" />
+        <div v-if="info.ipa" class="text-xs leading-4 text-fg/50" dir="ltr">/{{ info.ipa }}/</div>
+        <div v-else-if="loading" class="flex h-4 animate-pulse items-center">
+          <div class="h-2.5 w-16 rounded bg-fg/10" />
+        </div>
       </div>
       <button
         class="-mr-1.5 shrink-0 rounded-md p-1 text-fg/40 hover:bg-fg/10 hover:text-fg"

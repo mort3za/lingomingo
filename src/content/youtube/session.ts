@@ -1,6 +1,6 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch, type Ref } from 'vue'
 import { alignTranslation, audioLang, findCueIndex, parseJson3, pickTrack } from '@/shared/captions'
-import { translateChunk as requestChunk } from '@/shared/messages'
+import { translateChunk as requestChunk, type WordInfo } from '@/shared/messages'
 import {
   getSavedItems,
   getSettings,
@@ -426,6 +426,7 @@ export function useYoutubeSession() {
     stage: Stage,
     translations: string[],
     examples: Example[] = [],
+    info: Partial<WordInfo> = {},
     tags: string[] = [],
   ) {
     const old = savedWordOf(word)
@@ -433,6 +434,12 @@ export function useYoutubeSession() {
     const same = old?.translationLang === settings.value.nativeLang
     const keep = (same ? old?.examples : undefined) ?? examples
     const allTags = [...new Set([...(old?.tags ?? []), ...tags])]
+    // Old facts when the new answer has none.
+    const facts = Object.fromEntries(
+      (['headword', 'plural', 'ipa'] as const)
+        .map((k) => [k, info[k] ?? old?.[k]])
+        .filter(([, v]) => v),
+    )
     // One saved item per lemma: marking "ging" updates a saved "gehe".
     const id = old?.id ?? wordId(lang.value, lemma(word))
     const now = Date.now()
@@ -455,6 +462,7 @@ export function useYoutubeSession() {
       ...(old?.review && { review: { ...old.review } }),
       ...(keep.length ? { examples: keep.map((e) => ({ ...e })) } : {}),
       ...(allTags.length ? { tags: allTags } : {}),
+      ...facts,
     })
   }
 
