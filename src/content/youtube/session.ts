@@ -227,8 +227,7 @@ export function useYoutubeSession() {
         return
       }
       showSubs.value = regular() && settings.value.showSubtitles
-      // The list covers half of a Shorts player, so it starts closed there.
-      showPanel.value = regular() && settings.value.showSubtitlesList && !isShorts()
+      showPanel.value = regular() && settings.value.showSubtitlesList
       const nativeTrack = translates.value ? pickTrack(info.tracks, nativeLang) : null
       const { study: studyCues, native: nativeCues } = await videoCaptions(
         id,
@@ -375,15 +374,14 @@ export function useYoutubeSession() {
   const toggleSubtitlesOnTop = () =>
     patchSettings({ subtitlesOnTop: !settings.value.subtitlesOnTop })
 
-  // The user toggles: a change is saved and used for the next videos. On Shorts the list
-  // always starts closed, so a change there is not saved. See `regular` for other videos.
+  // The user toggles: a change is saved and used for the next videos. See `regular` for
+  // videos where it is not saved.
   const remembered = (on: Ref<boolean>, key: 'showSubtitles' | 'showSubtitlesList') =>
     computed({
       get: () => on.value,
       set: (value) => {
         on.value = value
-        if (!regular()) return
-        if (key === 'showSubtitles' || !isShorts()) void patchSettings({ [key]: value })
+        if (regular()) void patchSettings({ [key]: value })
       },
     })
 

@@ -35,6 +35,15 @@ export function fullBleedRow(): HTMLElement | null {
   return currentPlayer()?.closest<HTMLElement>('#full-bleed-container') ?? null
 }
 
+/**
+ * The positioned box around the Shorts player. The like, comment and share buttons are on the
+ * right of the player.
+ */
+export function shortsReel(): HTMLElement | null {
+  if (!isShorts()) return null
+  return currentPlayer()?.closest<HTMLElement>('ytd-reel-video-renderer') ?? null
+}
+
 /** The related videos column next to the watch player, if YouTube shows it now. */
 export function relatedColumn(): HTMLElement | null {
   // In theater mode the column is still visible, but below the video.
