@@ -6,7 +6,12 @@ import { dirOf } from '@/shared/types'
 import type { YoutubeSession } from './session'
 import WordText from './WordText.vue'
 
-const props = defineProps<{ s: YoutubeSession; selected: string | null }>()
+const props = defineProps<{
+  s: YoutubeSession
+  selected: string | null
+  /** Hint letters (Shift+F) on the words of the sentence. */
+  hints?: { labels: string[]; typed: string } | null
+}>()
 const emit = defineEmits<{
   word: [word: string, el: HTMLElement]
   mark: [word: string]
@@ -63,6 +68,7 @@ const round = 'grid size-8 place-items-center rounded-full bg-fg/10 text-fg hove
               :lang="s.lang.value"
               :vocab="s.vocab.value"
               :selected="selected"
+              :hints="hints"
               @word="(w, el) => emit('word', w, el)"
               @mark="(w) => emit('mark', w)"
             />
