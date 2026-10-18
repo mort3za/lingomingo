@@ -15,7 +15,10 @@ export function extractJson(text: string): unknown {
   }
 }
 
-/** Add the closing quote and brackets that the model left out, or that a cut answer lost. */
+/**
+ * Add the closing quote and brackets that the model left out, or that a cut answer lost. Drop
+ * what comes after the first value: models can add one bracket too many (`{"a":{"b":1}}}`).
+ */
 function closeJson(json: string): string {
   let inString = false
   const closers: string[] = []
@@ -27,7 +30,10 @@ function closeJson(json: string): string {
     } else if (c === '"') inString = true
     else if (c === '{') closers.push('}')
     else if (c === '[') closers.push(']')
-    else if (c === '}' || c === ']') closers.pop()
+    else if (c === '}' || c === ']') {
+      closers.pop()
+      if (!closers.length) return json.slice(0, i + 1)
+    }
   }
   // The brackets at the end of an open string close the JSON: put the quote before them.
   if (inString) json = json.replace(/[\s\]}]*$/, '') + '"'

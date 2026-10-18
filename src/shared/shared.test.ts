@@ -128,6 +128,8 @@ test('extractJson adds a missing closing quote and brackets', () => {
   // A cut answer: the open value is lost, the finished part stays.
   expect(extractJson('{"translations":["x","y"],"ipa":"ts')).toEqual({ translations: ['x', 'y'] })
   expect(extractJson('{"a":{"b":["x"]')).toEqual({ a: { b: ['x'] } })
+  // One bracket too many at the end.
+  expect(extractJson('{"a":"x","p":{"b":"y"}}}')).toEqual({ a: 'x', p: { b: 'y' } })
   // Other bad JSON still gives the error.
   expect(() => extractJson('{"a":"x" "b"}')).toThrow()
 })
