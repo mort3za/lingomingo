@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { download } from '@/shared/download'
-import { toCsv, toJson } from '@/shared/export'
+import { toAnki, toCsv, toJson } from '@/shared/export'
 import { getSavedItems, onStorageKey, removeItems, setStage } from '@/shared/storage'
 import SpeakButton from '@/shared/SpeakButton.vue'
 import {
@@ -122,6 +122,7 @@ function onKeydown(e: KeyboardEvent) {
 const exportRows = () =>
   picked.value.size ? items.value.filter((i) => picked.value.has(i.id)) : shown.value
 const exportCsv = () => download('lingomingo.csv', toCsv(exportRows()), 'text/csv')
+const exportAnki = () => download('lingomingo-anki.txt', toAnki(exportRows()), 'text/plain')
 const exportJson = () => download('lingomingo.json', toJson(exportRows()), 'application/json')
 
 const stageColor: Record<Stage, string> = {
@@ -169,6 +170,7 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
       </button>
       <div class="flex-1" />
       <button :class="btn + 'border border-fg/20'" @click="exportCsv">Export CSV</button>
+      <button :class="btn + 'border border-fg/20'" @click="exportAnki">Export Anki</button>
       <button :class="btn + 'bg-accent text-white [--color-fg:white]'" @click="exportJson">
         Export JSON
       </button>
