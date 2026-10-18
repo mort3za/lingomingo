@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
-import { toCsv, toJson } from '@/shared/export'
+import { download, toCsv, toJson } from '@/shared/export'
 import { getSavedItems, onStorageKey, removeItems, setStage } from '@/shared/storage'
 import SpeakButton from '@/shared/SpeakButton.vue'
 import {
@@ -118,13 +118,6 @@ function onKeydown(e: KeyboardEvent) {
   e.preventDefault()
 }
 
-function download(name: string, text: string, type: string) {
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(new Blob([text], { type }))
-  a.download = name
-  a.click()
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000)
-}
 const exportRows = () =>
   picked.value.size ? items.value.filter((i) => picked.value.has(i.id)) : shown.value
 const exportCsv = () => download('lingomingo.csv', toCsv(exportRows()), 'text/csv')

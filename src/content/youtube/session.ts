@@ -1,5 +1,6 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch, type Ref } from 'vue'
 import { alignTranslation, audioLang, findCueIndex, parseJson3, pickTrack } from '@/shared/captions'
+import { download, toSubtitles, type SubtitleFormat } from '@/shared/export'
 import { translateChunk as requestChunk, type WordInfo } from '@/shared/messages'
 import {
   getSavedItems,
@@ -196,8 +197,10 @@ export function useYoutubeSession() {
     translationError.value = ''
     message.value = ''
     requested.clear()
+    pending.clear()
     cancels.forEach((c) => c())
     cancels.clear()
+    cancelExport()
     showSubs.value = false
     showPanel.value = false
     if (!id || !settings.value.enabled) {
@@ -255,16 +258,26 @@ export function useYoutubeSession() {
   }
 
   // ---- AI translation, by chunks of cues ----
-  const requested = new Map<number, 'busy' | number>() // chunk -> busy | time of failure
+  const requested = new Map<number, number>() // chunk -> time of failure
+  const pending = new Map<number, Promise<void>>() // chunks being translated
   const cancels = new Set<() => void>() // open chunk requests, closed on the next load
-  async function translateChunk(chunk: number) {
+  /** Ends when the chunk is translated or failed. `force`: try again now after a failure. */
+  function translateChunk(chunk: number, force = false): Promise<void> {
+    const busy = pending.get(chunk)
+    if (busy) return busy
+    const failedAt = requested.get(chunk)
+    if (!force && failedAt && Date.now() - failedAt < RETRY_MS) return Promise.resolve()
+    const done = runChunk(chunk).finally(() => {
+      if (pending.get(chunk) === done) pending.delete(chunk)
+    })
+    pending.set(chunk, done)
+    return done
+  }
+  async function runChunk(chunk: number) {
     const id = videoId.value
     const token = loadToken
     const slice = cues.value.slice(chunk * CHUNK, (chunk + 1) * CHUNK)
     if (!id || !slice.length) return
-    const failedAt = requested.get(chunk)
-    if (failedAt === 'busy' || (failedAt && Date.now() - failedAt < RETRY_MS)) return
-    requested.set(chunk, 'busy')
     const show = (i: number, text: string) => {
       if (token !== loadToken) return
       const next = [...machine.value]
@@ -297,6 +310,64 @@ export function useYoutubeSession() {
     } finally {
       cancels.delete(cancel)
     }
+  }
+
+  // ---- export ----
+  // Lines without a translation are translated first, chunk by chunk, while the video plays.
+  const exporting = ref(false)
+  /** After an export: lines that have no translation in the file. */
+  const exportMissing = ref(0)
+  let exportTurn = 0
+  const needsAi = () => translates.value && !human.value.length
+  const translatedCount = computed(() => machine.value.filter((t) => t !== null).length)
+  /** Lines an export must translate first. */
+  const exportLeft = computed(() => (needsAi() ? cues.value.length - translatedCount.value : 0))
+  const exportPercent = computed(() =>
+    cues.value.length ? Math.floor((translatedCount.value / cues.value.length) * 100) : 0,
+  )
+  // The note shows for a short time.
+  let noteTimer = 0
+  function dismissExportNote() {
+    clearTimeout(noteTimer)
+    exportMissing.value = 0
+  }
+  function cancelExport() {
+    exportTurn++
+    exporting.value = false
+  }
+  async function exportSubtitles(format: SubtitleFormat, withTranslation: boolean) {
+    if (status.value !== 'ready' || exporting.value) return
+    const mine = ++exportTurn
+    const token = loadToken
+    const stale = () => mine !== exportTurn || token !== loadToken
+    const translate = withTranslation && translates.value
+    dismissExportNote()
+    if (translate && needsAi()) {
+      exporting.value = true
+      const chunks = Math.ceil(cues.value.length / CHUNK)
+      for (let chunk = 0; chunk < chunks; chunk++) {
+        if (stale()) return
+        const lines = machine.value.slice(chunk * CHUNK, (chunk + 1) * CHUNK)
+        if (lines.every((t) => t !== null)) continue
+        await translateChunk(chunk, true)
+      }
+      if (stale()) return
+      exporting.value = false
+    }
+    const lines = cues.value.map((c, i) => ({
+      ...c,
+      translation: translate ? translationOf(i) : null,
+    }))
+    if (translate) exportMissing.value = lines.filter((l) => l.translation === null).length
+    if (exportMissing.value) noteTimer = window.setTimeout(dismissExportNote, 8000)
+    const name = (title.value || videoId.value || 'subtitles')
+      .replace(/[\\/:*?"<>|\x00-\x1f]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 120)
+    const langs = translate ? `${lang.value}-${settings.value.nativeLang}` : lang.value
+    const type = { srt: 'application/x-subrip', vtt: 'text/vtt', csv: 'text/csv' }[format]
+    download(`${name}.${langs}.${format}`, toSubtitles(lines, format), type)
   }
 
   function ensureTranslations(idx: number) {
@@ -523,6 +594,13 @@ export function useYoutubeSession() {
     translates,
     translationError,
     translationOf,
+    exporting,
+    exportPercent,
+    exportLeft,
+    exportMissing,
+    dismissExportNote,
+    exportSubtitles,
+    cancelExport,
     vocab,
     savedWordOf,
     savedPhraseIds,

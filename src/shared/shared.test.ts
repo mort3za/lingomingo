@@ -7,7 +7,7 @@ import {
   parseJson3,
   pickTrack,
 } from './captions'
-import { toCsv } from './export'
+import { timestamp, toCsv, toSubtitles, type SubtitleLine } from './export'
 import { errorMessage, extractJson, finishedLines, matchLine } from './llm-json'
 import {
   answer,
@@ -348,4 +348,37 @@ test('showRating waits 1 day after install and 3 popup opens', () => {
   expect(showRating({ installedAt: 0, opens: 2 }, day)).toBe(false)
   expect(showRating({ installedAt: 0, opens: 9 }, day - 1)).toBe(false)
   expect(showRating({ installedAt: 0, opens: 9, done: true }, day)).toBe(false)
+})
+
+const subLines: SubtitleLine[] = [
+  { start: 1.5, end: 3.25, text: 'Hola, <amigo>\n\n& más', translation: 'Hi, friend' },
+  { start: 3661.007, end: 3662, text: 'Adiós', translation: null },
+]
+
+test('timestamp formats hours, minutes, seconds and milliseconds', () => {
+  expect(timestamp(3661.007, ',')).toBe('01:01:01,007')
+  expect(timestamp(0.5, '.')).toBe('00:00:00.500')
+  expect(timestamp(-1, '.')).toBe('00:00:00.000')
+})
+
+test('toSubtitles writes SRT with the translation under the text', () => {
+  expect(toSubtitles(subLines, 'srt')).toBe(
+    '1\n00:00:01,500 --> 00:00:03,250\nHola, <amigo>\n& más\nHi, friend\n\n' +
+      '2\n01:01:01,007 --> 01:01:02,000\nAdiós\n',
+  )
+})
+
+test('toSubtitles writes VTT and escapes markup', () => {
+  expect(toSubtitles(subLines, 'vtt')).toBe(
+    'WEBVTT\n\n00:00:01.500 --> 00:00:03.250\nHola, &lt;amigo>\n&amp; más\nHi, friend\n\n' +
+      '01:01:01.007 --> 01:01:02.000\nAdiós\n',
+  )
+})
+
+test('toSubtitles writes CSV with an empty translation for untranslated lines', () => {
+  expect(toSubtitles(subLines, 'csv')).toBe(
+    'Start,End,Text,Translation\n' +
+      '00:00:01.500,00:00:03.250,"Hola, <amigo>\n\n& más","Hi, friend"\n' +
+      '01:01:01.007,01:01:02.000,Adiós,',
+  )
 })

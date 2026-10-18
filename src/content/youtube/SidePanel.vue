@@ -2,6 +2,7 @@
 import { nextTick, ref, watch } from 'vue'
 import SpeakButton from '@/shared/SpeakButton.vue'
 import { dirOf } from '@/shared/types'
+import ExportDialog from './ExportDialog.vue'
 import type { YoutubeSession } from './session'
 import WordText from './WordText.vue'
 
@@ -24,6 +25,8 @@ async function copy(i: number) {
   copied.value = i
   setTimeout(() => copied.value === i && (copied.value = null), 1000)
 }
+
+const exportOpen = ref(false)
 
 // Scroll the list only, never the page: no scrollIntoView.
 const list = ref<HTMLElement>()
@@ -71,7 +74,7 @@ watch(
   <div
     :class="
       docked
-        ? 'h-full w-full overflow-hidden rounded-xl bg-surface'
+        ? 'relative h-full w-full overflow-hidden rounded-xl bg-surface'
         : 'absolute top-0 right-0 bottom-14 w-[374px] bg-surface/95'
     "
     class="pointer-events-auto flex flex-col font-sans text-fg"
@@ -79,7 +82,66 @@ watch(
   >
     <div class="flex items-center justify-between border-b border-fg/10 px-3 py-2">
       <div class="border-b-2 border-accent pb-1 text-[15px] font-medium">Subtitles</div>
-      <button class="text-fg/60 hover:text-fg" @click="emit('close')">✕</button>
+      <div class="flex items-center gap-3">
+        <!-- Export progress: translating the rest of the lines before the download. -->
+        <div
+          v-if="s.exporting.value"
+          class="flex items-center gap-1.5 text-[12px] text-fg/70"
+          :title="`Translating for the export: ${s.exportPercent.value}%`"
+          role="progressbar"
+          aria-label="Export"
+          :aria-valuenow="s.exportPercent.value"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div class="h-1 w-12 overflow-hidden rounded-full bg-fg/15">
+            <div
+              class="h-full bg-accent transition-[width]"
+              :style="{ width: `${s.exportPercent.value}%` }"
+            />
+          </div>
+          <span class="w-8 text-right tabular-nums">{{ s.exportPercent.value }}%</span>
+          <button
+            class="text-fg/40 hover:text-fg"
+            title="Stop the export"
+            @click="s.cancelExport()"
+          >
+            <svg
+              class="size-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="6" y="6" width="12" height="12" rx="1" />
+            </svg>
+          </button>
+        </div>
+        <button
+          v-else
+          class="text-fg/60 hover:text-fg disabled:opacity-40"
+          title="Export subtitles (SRT, VTT, CSV)"
+          :disabled="s.status.value !== 'ready'"
+          @click="exportOpen = true"
+        >
+          <svg
+            class="size-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <path d="M7 10l5 5 5-5" />
+            <path d="M12 15V3" />
+          </svg>
+        </button>
+        <button class="text-fg/60 hover:text-fg" @click="emit('close')">✕</button>
+      </div>
     </div>
     <div class="relative min-h-0 flex-1">
       <!-- Scrollbar shows only on hover. Its space is always kept, so the rows do not move. -->
@@ -175,6 +237,21 @@ watch(
           </div>
         </div>
       </div>
+      <!-- Over the list, so the rows do not move. -->
+      <div
+        v-if="s.exportMissing.value"
+        class="absolute inset-x-2 bottom-2 z-10 flex items-start gap-2 rounded bg-panel px-3 py-2 text-[13px] shadow-lg"
+        role="status"
+      >
+        <span class="flex-1">
+          Exported. {{ s.exportMissing.value }} lines have no translation: the AI provider failed.
+          {{ s.translationError.value }}
+        </span>
+        <button class="text-fg/60 hover:text-fg" title="Close" @click="s.dismissExportNote()">
+          ✕
+        </button>
+      </div>
     </div>
+    <ExportDialog v-if="exportOpen" :s="s" @close="exportOpen = false" />
   </div>
 </template>
