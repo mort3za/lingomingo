@@ -137,6 +137,12 @@ const title = computed(() => {
   const m = info.value.headword?.match(/^(\S+?['’]|\S+\s+)(.+)$/)
   return m ? { article: m[1], text: m[2] } : { article: '', text: props.word }
 })
+// The play button sits right after the last word, in one inline-flex box with it, so the button
+// never goes to a new line alone. Chrome breaks before a button even in a nowrap span.
+const lastWord = (s = '') => {
+  const i = s.search(/\S+$/)
+  return { head: s.slice(0, i), last: s.slice(i) }
+}
 // The expression has one button: save it as Learning, or remove it.
 const phraseStage = computed(() => phrase.value && props.stageOf(phrase.value.text))
 function togglePhrase() {
@@ -204,15 +210,13 @@ const stages: { stage: Stage; label: string; icon: string }[] = [
     />
     <div class="flex items-start justify-between gap-2 px-4 pt-3">
       <div class="min-w-0">
-        <div class="flex min-w-0 items-start gap-1">
-          <div
-            class="min-w-0 text-lg leading-snug font-semibold break-words"
-            :dir="dirOf(studyLang)"
-          >
-            <span v-if="title.article" class="font-normal text-fg/50">{{ title.article }}</span
-            >{{ title.text }}
-          </div>
-          <SpeakButton :text="info.headword ?? word" :lang="studyLang" />
+        <div class="min-w-0 text-lg leading-snug font-semibold break-words" :dir="dirOf(studyLang)">
+          <span v-if="title.article" class="font-normal text-fg/50">{{ title.article }}</span
+          >{{ lastWord(title.text).head
+          }}<span class="inline-flex max-w-full items-center"
+            ><span class="min-w-0">{{ lastWord(title.text).last }}</span
+            ><SpeakButton class="-my-1 ms-1" :text="info.headword ?? word" :lang="studyLang"
+          /></span>
         </div>
         <div v-if="info.ipa" class="text-xs leading-4 text-fg/50" dir="ltr">/{{ info.ipa }}/</div>
         <div v-else-if="loading" class="flex h-4 animate-pulse items-center">
@@ -258,11 +262,12 @@ const stages: { stage: Stage; label: string; icon: string }[] = [
     <div v-if="phrase" class="flex items-center gap-2 border-t border-fg/10 px-4 py-2.5">
       <div class="min-w-0 flex-1">
         <div class="text-[10px] font-medium tracking-wide text-fg/40 uppercase">Expression</div>
-        <div class="flex items-start gap-1">
-          <div class="min-w-0 text-sm leading-5 font-semibold break-words" :dir="dirOf(studyLang)">
-            {{ phrase.text }}
-          </div>
-          <SpeakButton class="-mt-0.5" :text="phrase.text" :lang="studyLang" />
+        <div class="text-sm leading-5 font-semibold break-words" :dir="dirOf(studyLang)">
+          {{ lastWord(phrase.text).head
+          }}<span class="inline-flex max-w-full items-center"
+            ><span class="min-w-0">{{ lastWord(phrase.text).last }}</span
+            ><SpeakButton class="-my-1 ms-1" :text="phrase.text" :lang="studyLang"
+          /></span>
         </div>
         <div class="text-sm leading-5 text-fg/60" :dir="dirOf(nativeLang)">
           {{ phrase.translation }}
