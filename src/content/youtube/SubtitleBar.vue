@@ -83,7 +83,7 @@ const round = 'grid size-8 place-items-center rounded-full bg-fg/10 text-fg hove
         />
         <button
           :class="round + (isSaved ? 'text-yellow-300' : '')"
-          title="Save phrase (R)"
+          title="Save sentence (R)"
           @click="s.togglePhrase(idx)"
         >
           {{ isSaved ? '★' : '☆' }}
