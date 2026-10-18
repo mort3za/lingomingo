@@ -165,7 +165,7 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
       <button
         v-for="t in [
           ['WORD', 'Saved Words'],
-          ['PHRASE', 'Saved Phrases'],
+          ['PHRASE', 'Saved Sentences'],
         ] as const"
         :key="t[0]"
         :class="btn + (tab === t[0] ? 'bg-panel text-fg' : 'text-neutral-400')"
@@ -224,7 +224,7 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
 
     <p v-if="!shown.length" class="py-12 text-center text-neutral-500">
       <template v-if="tabCount">No items match the filters.</template>
-      <template v-else>Nothing here yet. Save words and phrases while watching YouTube.</template>
+      <template v-else>Nothing here yet. Save words and sentences while watching YouTube.</template>
     </p>
 
     <table v-else class="w-full text-left text-sm">
@@ -233,7 +233,7 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
           <th class="w-8 p-2">
             <input type="checkbox" :checked="allPicked" @change="toggleAll" />
           </th>
-          <th class="p-2">{{ tab === 'WORD' ? 'Word' : 'Phrase' }}</th>
+          <th class="p-2">{{ tab === 'WORD' ? 'Word' : 'Sentence' }}</th>
           <th class="p-2">Translation</th>
           <th class="hidden p-2 sm:table-cell">Stage</th>
           <th class="hidden p-2 md:table-cell">Source</th>
