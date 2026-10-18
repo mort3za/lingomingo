@@ -334,43 +334,43 @@ const stages: { stage: Stage; label: string; key: string; icon: string }[] = [
     <div v-if="examplesError" class="border-t border-fg/10 px-4 py-3 text-xs text-red-300">
       {{ examplesError }}
     </div>
-    <ol
-      v-else-if="examplesLoading || examples.length"
-      class="space-y-2.5 border-t border-fg/10 px-4 py-3"
-    >
-      <template v-if="examplesLoading">
-        <li v-for="i in 3" :key="i" class="animate-pulse" aria-hidden="true">
-          <div class="flex h-5 items-center"><div class="h-3 w-5/6 rounded bg-fg/10" /></div>
-          <div class="mt-0.5 flex h-4 items-center">
-            <div class="h-2.5 w-2/3 rounded bg-fg/10" />
+    <div v-else-if="examplesLoading || examples.length" class="border-t border-fg/10 px-4 py-3">
+      <div class="text-[10px] font-medium tracking-wide text-fg/40 uppercase">Examples</div>
+      <ol class="space-y-2.5">
+        <template v-if="examplesLoading">
+          <li v-for="i in 3" :key="i" class="animate-pulse" aria-hidden="true">
+            <div class="flex h-5 items-center"><div class="h-3 w-5/6 rounded bg-fg/10" /></div>
+            <div class="mt-0.5 flex h-4 items-center">
+              <div class="h-2.5 w-2/3 rounded bg-fg/10" />
+            </div>
+          </li>
+        </template>
+        <li v-for="(e, i) in examples" v-else :key="i" class="group flex items-start gap-1">
+          <div class="min-w-0 flex-1">
+            <p class="text-sm leading-5 text-fg/90" :dir="dirOf(studyLang)">
+              <template v-for="(t, j) in parts(e.sentence)" :key="j">
+                <mark
+                  v-if="t.hit"
+                  class="rounded-sm bg-orange-300/15 px-0.5 font-medium text-orange-300"
+                  >{{ t.text }}</mark
+                >
+                <template v-else>{{ t.text }}</template>
+              </template>
+            </p>
+            <p class="mt-0.5 text-xs leading-4 text-fg/50" :dir="dirOf(nativeLang)">
+              {{ e.translation }}
+            </p>
           </div>
+          <SpeakButton
+            class="-mt-0.5 -mr-1.5"
+            :text="e.sentence"
+            :lang="studyLang"
+            :shortcut="String(i + 1)"
+            on-hover
+          />
         </li>
-      </template>
-      <li v-for="(e, i) in examples" v-else :key="i" class="group flex items-start gap-1">
-        <div class="min-w-0 flex-1">
-          <p class="text-sm leading-5 text-fg/90" :dir="dirOf(studyLang)">
-            <template v-for="(t, j) in parts(e.sentence)" :key="j">
-              <mark
-                v-if="t.hit"
-                class="rounded-sm bg-orange-300/15 px-0.5 font-medium text-orange-300"
-                >{{ t.text }}</mark
-              >
-              <template v-else>{{ t.text }}</template>
-            </template>
-          </p>
-          <p class="mt-0.5 text-xs leading-4 text-fg/50" :dir="dirOf(nativeLang)">
-            {{ e.translation }}
-          </p>
-        </div>
-        <SpeakButton
-          class="-mt-0.5 -mr-1.5"
-          :text="e.sentence"
-          :lang="studyLang"
-          :shortcut="String(i + 1)"
-          on-hover
-        />
-      </li>
-    </ol>
+      </ol>
+    </div>
     <div v-else class="border-t border-fg/10 px-4 py-3 text-xs text-fg/40">No examples</div>
     <div class="flex gap-1 border-t border-fg/10 p-1.5">
       <button
