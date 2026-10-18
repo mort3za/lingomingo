@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
 import type { Example, Stage } from '@/shared/types'
 import { shadowHost } from '../mount'
-import { currentPlayer, fullBleedRow, relatedColumn } from './page'
+import { currentPlayer, fullBleedRow, relatedColumn, shortsReel } from './page'
 import SidePanel from './SidePanel.vue'
 import SubtitleBar from './SubtitleBar.vue'
 import { useYoutubeSession } from './session'
@@ -11,7 +11,7 @@ import WordPopup from './WordPopup.vue'
 
 const s = useYoutubeSession()
 // `inDock`: the word is in the docked subtitles list. The player clips its children, so the popup
-// for such a word must show in the dock too.
+// for such a word shows outside the player (see `popupHost`).
 const selected = ref<{ word: string; idx: number; rect: DOMRect; inDock: boolean } | null>(null)
 // No subtitles on the video: hide our toggles too. A click would only show an empty bar and
 // change the saved choice for the next videos.
@@ -39,33 +39,66 @@ watchEffect(() => {
 
 // The subtitles list goes on the right of the video, as high as the video: over the related
 // videos column, or (in theater mode, fullscreen and narrow windows) next to the player, which
-// then gets narrower. On Shorts, or if the video would get too narrow, it stays on the video.
+// then gets narrower. On Shorts it goes on the right of the like, comment and share buttons, and
+// the Shorts video moves to the left (as when YouTube shows its comments). If there is no space
+// for it, or if YouTube shows its own panel on Shorts, it stays on the video.
 const BESIDE_WIDTH = 398 // 374px list + 12px padding on each side
 const MIN_VIDEO_WIDTH = 480
+const SHORTS_ACTIONS_WIDTH = 72 // the like, comment and share buttons
 const { host: dockHost, root: dock } = shadowHost()
 dock.style.height = '100%'
 const docked = ref(false)
+// The popup for a word in the docked list. Not in the dock: on Shorts the dock is in the reel,
+// which moves `position: fixed` children and cuts them off.
+const { host: popupHost, root: popupRoot } = shadowHost()
+popupHost.style.cssText = 'position:fixed;top:0;left:0;z-index:2300;'
+document.documentElement.append(popupHost)
+// The list moved or closed: a popup for one of its words must not stay alone on the page.
+watch([docked, s.showPanel], () => (selected.value = null))
 // Out of fullscreen, make the row only as high as the narrower video needs.
 const squeezeStyle = document.createElement('style')
 squeezeStyle.textContent =
   'ytd-watch-flexy:not([fullscreen]) #full-bleed-container[lm-squeezed] {' +
   ` height: max(calc((100vw - ${BESIDE_WIDTH}px) * 9 / 16), ${MIN_VIDEO_WIDTH}px) !important;` +
-  ' min-height: 0 !important; }'
+  ' min-height: 0 !important; }' +
+  // Center the Shorts video, its buttons and the list together.
+  ` [lm-shifted] { right: ${(SHORTS_ACTIONS_WIDTH + BESIDE_WIDTH) / 2}px !important;` +
+  ' transition: right 0.3s linear; }'
 document.documentElement.append(squeezeStyle)
 let squeezed = false
+let shiftedReel: HTMLElement | null = null
 function placeDock() {
   const column = relatedColumn()
   const row = column ? null : fullBleedRow()
   const beside = row && row.clientWidth >= BESIDE_WIDTH + MIN_VIDEO_WIDTH ? row : null
-  docked.value = !!(column || beside)
+  const reel = shortsReel()
+  const player = currentPlayer()
+  // In some YouTube layouts the reel is as wide as the page, so measure the player.
+  const besideReel =
+    reel &&
+    player &&
+    !document.querySelector('ytd-shorts[is-watch-while-mode]') &&
+    (reel.closest('#shorts-container')?.clientWidth ?? 0) >=
+      player.offsetWidth + SHORTS_ACTIONS_WIDTH + BESIDE_WIDTH
+      ? reel
+      : null
+  docked.value = !!(column || beside || besideReel)
   if (column && dockHost.parentElement !== column) column.prepend(dockHost)
   if (beside && dockHost.parentElement !== beside) beside.append(dockHost)
+  if (besideReel && dockHost.parentElement !== besideReel) besideReel.append(dockHost)
   const show = docked.value && s.showPanel.value
   if (column) {
     const height = Math.min(currentPlayer()?.offsetHeight ?? 0, innerHeight - 80)
     dockHost.style.cssText =
       `display:${show ? 'block' : 'none'};height:${height}px;` +
       'position:relative;z-index:100;margin-bottom:12px;'
+  } else if (besideReel) {
+    const r = besideReel.getBoundingClientRect()
+    const p = player!.getBoundingClientRect()
+    dockHost.style.cssText =
+      `display:${show ? 'block' : 'none'};position:absolute;top:${p.top - r.top}px;` +
+      `left:${p.right - r.left + SHORTS_ACTIONS_WIDTH}px;width:${BESIDE_WIDTH}px;` +
+      `height:${p.height}px;padding:0 12px;box-sizing:border-box;`
   } else {
     dockHost.style.cssText =
       `display:${show ? 'block' : 'none'};flex:none;width:${BESIDE_WIDTH}px;` +
@@ -77,6 +110,16 @@ function placeDock() {
   if (squeeze !== squeezed) {
     squeezed = squeeze
     window.dispatchEvent(new Event('resize'))
+  }
+  // Move the thumbnail behind the video too: it shows while the video loads.
+  const shift =
+    besideReel && show
+      ? (besideReel.closest<HTMLElement>('.reel-video-in-sequence-new') ?? besideReel)
+      : null
+  if (shift !== shiftedReel) {
+    shiftedReel?.removeAttribute('lm-shifted')
+    shift?.setAttribute('lm-shifted', '')
+    shiftedReel = shift
   }
 }
 let dockTimer = 0
@@ -160,7 +203,9 @@ onBeforeUnmount(() => {
   document.removeEventListener('fullscreenchange', placeDock)
   clearInterval(dockTimer)
   dockHost.remove()
+  popupHost.remove()
   document.querySelector('#full-bleed-container')?.removeAttribute('lm-squeezed')
+  shiftedReel?.removeAttribute('lm-shifted')
   squeezeStyle.remove()
   hideNative.remove()
 })
@@ -188,7 +233,7 @@ onBeforeUnmount(() => {
         @mark="markLearning"
       />
     </Teleport>
-    <Teleport :to="dock" :disabled="!selected?.inDock">
+    <Teleport :to="popupRoot" :disabled="!selected?.inDock">
       <WordPopup
         v-if="selected"
         :key="selected.word + selected.idx"
