@@ -330,7 +330,8 @@ export async function translateWord(
   const study = name(studyLang)
   const system =
     `You are a dictionary. Translate a ${study} word to ${name(nativeLang)}, ` +
-    `using the sentence for meaning. Answer with ONLY JSON: {"translations":["best","alt1","alt2"],` +
+    `using the sentence for meaning. The word can be a name: then keep it as it is. Never ` +
+    `translate a different word of the sentence. Answer with ONLY JSON: {"translations":["best","alt1","alt2"],` +
     (noun
       ? `"pos":"<part of speech of the word in this sentence>",` +
         `"headword":"<noun with article>","plural":"<plural with article>",`
@@ -405,7 +406,8 @@ export async function wordExtras(
   const system =
     `You help a learner of ${name(studyLang)} who speaks ${name(nativeLang)}. Input is a JSON ` +
     `object that maps numbers to {"word","sentence"}. The sentence shows the meaning of the ` +
-    `word, or is empty. Answer with ONLY a JSON object with the same keys. Under each key put ` +
+    `word, or is empty. The word can be a name: then keep it as it is. Never use a different ` +
+    `word of the sentence. Answer with ONLY a JSON object with the same keys. Under each key put ` +
     `{"translations":["best","alt"],"sentence":"<the sentence in ${name(nativeLang)}, or empty>",` +
     `"examples":[["<example>","<its translation>"],["<example>","<its translation>"]]}. ` +
     `Give 1 to 3 short translations of the word. Write ${count} new examples in ${name(studyLang)}: ` +
