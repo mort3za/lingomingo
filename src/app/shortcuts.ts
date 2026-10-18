@@ -1,4 +1,7 @@
-/** Keyboard shortcuts of the app page, for the help dialog. Each page handles its own keys. */
+/**
+ * Keyboard shortcuts of the app page and of YouTube videos, for the help dialog. Each page
+ * handles its own keys.
+ */
 export interface Shortcut {
   /** Alternatives. Each alternative is a sequence of keys. */
   keys: string[][]
@@ -50,6 +53,42 @@ export const SHORTCUTS: ShortcutGroup[] = [
       { keys: [['N']], label: "Selected → Don't learn" },
       { keys: [['Delete']], label: 'Delete selected' },
       { keys: [['Esc']], label: 'Clear selection' },
+    ],
+  },
+  {
+    title: 'YouTube video',
+    items: [
+      { keys: [['A'], ['←']], label: 'Previous sentence' },
+      { keys: [['S'], ['↓']], label: 'Repeat sentence' },
+      { keys: [['D'], ['→']], label: 'Next sentence' },
+      { keys: [['W']], label: 'Play / pause' },
+      { keys: [['Q']], label: 'Auto-pause on / off' },
+      { keys: [['R']], label: 'Save sentence' },
+      { keys: [['Shift+C']], label: 'Subtitles on / off' },
+      { keys: [['Shift+S']], label: 'Subtitles list on / off' },
+    ],
+  },
+  {
+    title: 'YouTube word hints',
+    items: [
+      { keys: [['Shift+F']], label: 'Show a letter on each word of the sentence' },
+      { keys: [['Letter']], label: 'Open the word' },
+      { keys: [['Shift+Letter']], label: 'Save the word as Learning' },
+      { keys: [['Backspace']], label: 'Undo the first of two letters' },
+      { keys: [['Esc'], ['Shift+F']], label: 'Hide the letters' },
+    ],
+  },
+  {
+    title: 'YouTube word popup',
+    items: [
+      { keys: [['K']], label: 'Known' },
+      { keys: [['L']], label: 'Learn' },
+      { keys: [['N']], label: 'Skip' },
+      { keys: [['P']], label: 'Play the word' },
+      { keys: [['E']], label: 'Save the expression' },
+      { keys: [['X']], label: 'Play the expression' },
+      { keys: [['1'], ['2'], ['3']], label: 'Play example 1 / 2 / 3' },
+      { keys: [['Esc']], label: 'Close' },
     ],
   },
 ]

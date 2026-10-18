@@ -60,7 +60,7 @@ agent-browser --session lm set viewport 1600 988 1.6
    ```sh
    T=store/tools
    for w in "nimmst Learn" "getrennt Learn" "gleichzeitig Known" "zusammenhängenden Learn" "verarbeiten Learn" "Gegenwart Learn" "Reize Learn" "Wärme Known" "Finger Known" "Vergangenheit Learn" "Verspätung Learn" "Moment Known" "Dunkelheit Learn" "Löffel Learn" "Milch Known" "Kaffee Known"; do bash $T/mark.sh $w; done
-   agent-browser --session lm eval "$(cat $T/close-popup.js)"   # Escape does not close the popup
+   agent-browser --session lm eval "$(cat $T/close-popup.js)"
    ```
 
 4. Go to the line, hide the player controls, save the sentence, open the popup, and scroll the side panel:
