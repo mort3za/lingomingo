@@ -127,6 +127,8 @@ export interface Settings {
   /** Last state of the YouTube player toggles. Videos in the native language start with both off. */
   showSubtitles: boolean
   showSubtitlesList: boolean
+  /** Videos in the native language start and save the toggles like other videos. */
+  nativeVideosLikeOthers: boolean
   hideTranslation: boolean
   /** Vocabulary level by study language: words up to this frequency rank count as known. */
   vocabLevels: Record<string, number>
@@ -174,6 +176,7 @@ export const DEFAULT_SETTINGS: Settings = {
   subtitlesOnTop: false,
   showSubtitles: true,
   showSubtitlesList: true,
+  nativeVideosLikeOthers: false,
   hideTranslation: false,
   vocabLevels: {},
   showKnownGreen: true,
