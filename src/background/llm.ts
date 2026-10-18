@@ -158,6 +158,8 @@ async function request(
       undefined,
       {
         reasoning_effort: 'none',
+        // Small models can drop a quote or a bracket. JSON mode makes the answer always valid JSON.
+        response_format: { type: 'json_object' },
       },
     )
   }
