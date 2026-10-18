@@ -21,8 +21,9 @@ const localQueue = createQueue()
 const LOCAL = new Set(['ollama', 'lmstudio', 'local'])
 
 function ask(settings: Settings, system: string, user: string, call: Call = {}): Promise<string> {
-  const send = () => request(settings, system, user, call)
-  if (!LOCAL.has(settings.provider)) return send()
+  if (!LOCAL.has(settings.provider)) return request(settings, system, user, call)
+  // Local models often put the JSON in a code block or on many lines: more tokens to wait for.
+  const send = () => request(settings, `${system} Write the JSON on one line.`, user, call)
   return localQueue(call.priority ?? PRIORITY.lines, send, call.signal)
 }
 
