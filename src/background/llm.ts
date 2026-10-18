@@ -2,7 +2,7 @@ import { errorMessage, extractJson, finishedLines, matchLine } from '@/shared/ll
 import type { Have, WordExtras, WordTranslation } from '@/shared/messages'
 import { wordKey } from '@/shared/tokenize'
 import { LANGUAGES, type Settings } from '@/shared/types'
-import { createQueue } from './queue'
+import { createQueue, Preempted } from './queue'
 
 /** `onText` turns on streaming: it gets the whole answer so far after each new piece. */
 interface Call {
@@ -41,14 +41,17 @@ const PRIORITY = { word: 0, extras: 1, lines: 2 }
 
 // A local server does one request at a time, and the others wait there in order. Here they wait
 // in our queue, so a word request does not wait behind subtitle lines that are not needed yet.
+// A word request also stops the subtitle lines request that runs, and starts at once.
 const localQueue = createQueue()
 const LOCAL = new Set(['ollama', 'lmstudio', 'local'])
 
 function ask(settings: Settings, system: string, user: string, call: Call = {}): Promise<string> {
   if (!LOCAL.has(settings.provider)) return request(settings, system, user, call)
   // Local models often put the JSON in a code block or on many lines: more tokens to wait for.
-  const send = () => request(settings, `${system} Write the JSON on one line.`, user, call)
-  return localQueue(call.priority ?? PRIORITY.lines, send, call.signal)
+  const send = (signal?: AbortSignal) =>
+    request(settings, `${system} Write the JSON on one line.`, user, { ...call, signal })
+  const priority = call.priority ?? PRIORITY.lines
+  return localQueue(priority, send, call.signal, priority === PRIORITY.lines)
 }
 
 async function request(
@@ -320,7 +323,7 @@ export async function translateLines(
   // Ask again for the missing lines, while each answer brings new lines.
   while (todo.length) {
     const ids = todo
-    await askLines(
+    const stopped = await askLines(
       settings,
       ids.map((i) => lines[i]!),
       studyLang,
@@ -329,7 +332,7 @@ export async function translateLines(
       (j, text) => put(ids[j]!, text),
     )
     todo = ids.filter((i) => out[i] === undefined)
-    if (todo.length === ids.length) break
+    if (!stopped && todo.length === ids.length) break
   }
   if (todo.length === 1) throw new Error('Model returned a wrong number of lines.')
   // No progress: smaller requests are easier for the model to keep aligned.
@@ -347,7 +350,10 @@ export async function translateLines(
   return out as string[]
 }
 
-/** One request. `onLine` gets each finished line of the answer, with its index in `lines`. */
+/**
+ * One request. `onLine` gets each finished line of the answer, with its index in `lines`.
+ * True when a word request stopped it before the end.
+ */
 async function askLines(
   settings: Settings,
   lines: string[],
@@ -355,7 +361,7 @@ async function askLines(
   nativeLang: string,
   signal: AbortSignal | undefined,
   onLine: (index: number, text: string) => void,
-): Promise<void> {
+): Promise<boolean> {
   // Numbered keys keep the model aligned. A plain array lets it merge or split lines, mostly
   // with auto-generated captions, where a sentence runs across several lines. The model also
   // copies each line: small models still merge a sentence into one key and shift the next
@@ -376,7 +382,14 @@ async function askLines(
       if (i !== -1) onLine(i, line)
     }
   }
-  read(await ask(settings, system, user, { signal, onText: read }))
+  try {
+    read(await ask(settings, system, user, { signal, onText: read }))
+  } catch (e) {
+    // The lines that came already stay: the caller asks only for the others.
+    if (e instanceof Preempted) return true
+    throw e
+  }
+  return false
 }
 
 /** `before` and `after` = the subtitle lines around the sentence, if any. */
