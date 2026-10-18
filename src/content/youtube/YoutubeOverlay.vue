@@ -185,15 +185,23 @@ function placeDock() {
 }
 let dockTimer = 0
 
-// Close the popup on a click anywhere outside it.
+// Close the popup on a click anywhere outside it. `closedEl`: the word of the popup this click
+// closed. A click on that word only closes its popup, it does not open it again.
+let selectedEl: HTMLElement | null = null
+let closedEl: HTMLElement | null = null
 function onPointerDown(e: PointerEvent) {
   hint.value = null
+  closedEl = null
   if (!selected.value) return
   const inPopup = e.composedPath().some((n) => n instanceof HTMLElement && 'lmPopup' in n.dataset)
-  if (!inPopup) selected.value = null
+  if (inPopup) return
+  closedEl = selectedEl
+  selected.value = null
 }
 
 function openWord(word: string, el: HTMLElement, idx = s.activeIdx.value) {
+  if (el === closedEl) return
+  selectedEl = el
   s.video()?.pause()
   const inDock = el.getRootNode() === dock.getRootNode()
   selected.value = { word, idx, rect: el.getBoundingClientRect(), inDock }
