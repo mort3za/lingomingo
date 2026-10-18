@@ -3,6 +3,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import SpeakButton from '@/shared/SpeakButton.vue'
 import { subtitleStyles } from '@/shared/subtitle-style'
 import { dirOf } from '@/shared/types'
+import ExportMenu from './ExportMenu.vue'
 import type { YoutubeSession } from './session'
 import WordText from './WordText.vue'
 
@@ -80,7 +81,7 @@ watch(
     class="pointer-events-auto flex flex-col font-sans text-fg"
     @wheel="onWheel"
   >
-    <div class="flex items-center justify-between border-b border-fg/10 px-3 py-2">
+    <div class="relative flex items-center justify-between border-b border-fg/10 px-3 py-2">
       <div class="border-b-2 border-accent pb-1 text-[15px] font-medium">Subtitles</div>
       <div class="flex items-center gap-2">
         <button
@@ -93,6 +94,7 @@ watch(
         >
           AP
         </button>
+        <ExportMenu :s="s" />
         <button class="text-fg/60 hover:text-fg" @click="emit('close')">✕</button>
       </div>
     </div>

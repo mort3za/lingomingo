@@ -14,7 +14,7 @@ const COLUMNS = [
   'Date created',
 ] as const
 
-function cell(value: string): string {
+export function cell(value: string): string {
   return /[",\n\t]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value
 }
 

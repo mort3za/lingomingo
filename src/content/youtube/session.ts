@@ -27,6 +27,8 @@ import { currentPlayer, currentVideoId, isShorts } from './page'
 
 const CHUNK = 40
 const RETRY_MS = 15_000
+// Chunk requests at the same time when all lines are translated for an export.
+const PARALLEL_CHUNKS = 3
 
 type Status = 'idle' | 'loading' | 'ready' | 'no-subs' | 'error'
 
@@ -145,6 +147,8 @@ export function useYoutubeSession() {
   const regular = () => translates.value || settings.value.nativeVideosLikeOthers
 
   const translationOf = (i: number): string | null => human.value[i] ?? machine.value[i] ?? null
+  // A human translation track exists: AI never translates this video.
+  const humanTranslation = computed(() => human.value.length > 0)
 
   // Word list of the video language: frequency ranks and lemmas.
   const list = shallowRef<WordList | null>(null)
@@ -255,16 +259,25 @@ export function useYoutubeSession() {
   }
 
   // ---- AI translation, by chunks of cues ----
-  const requested = new Map<number, 'busy' | number>() // chunk -> busy | time of failure
+  const requested = new Map<number, Promise<void> | number>() // chunk -> open request | time of failure
   const cancels = new Set<() => void>() // open chunk requests, closed on the next load
-  async function translateChunk(chunk: number) {
+  /**
+   * `retry`: try again also when the last request failed a short time ago. `signal` stops a new
+   * request with no error; an open request started by someone else does not stop.
+   */
+  function translateChunk(chunk: number, retry = false, signal?: AbortSignal): Promise<void> {
     const id = videoId.value
-    const token = loadToken
     const slice = cues.value.slice(chunk * CHUNK, (chunk + 1) * CHUNK)
-    if (!id || !slice.length) return
-    const failedAt = requested.get(chunk)
-    if (failedAt === 'busy' || (failedAt && Date.now() - failedAt < RETRY_MS)) return
-    requested.set(chunk, 'busy')
+    if (!id || !slice.length) return Promise.resolve()
+    const last = requested.get(chunk)
+    if (last instanceof Promise) return last
+    if (!retry && last && Date.now() - last < RETRY_MS) return Promise.resolve()
+    const open = requestChunkOf(id, chunk, slice, signal)
+    requested.set(chunk, open)
+    return open
+  }
+  async function requestChunkOf(id: string, chunk: number, slice: Cue[], signal?: AbortSignal) {
+    const token = loadToken
     const show = (i: number, text: string) => {
       if (token !== loadToken) return
       const next = [...machine.value]
@@ -282,6 +295,7 @@ export function useYoutubeSession() {
       show,
     )
     cancels.add(cancel)
+    signal?.addEventListener('abort', cancel)
     try {
       const out = await done
       if (token !== loadToken) return
@@ -292,10 +306,13 @@ export function useYoutubeSession() {
       requested.delete(chunk)
     } catch (e) {
       if (token !== loadToken) return
+      // Stopped by the user: not a failure, the chunk can be asked again at once.
+      if (signal?.aborted) return void requested.delete(chunk)
       requested.set(chunk, Date.now())
       translationError.value = e instanceof Error ? e.message : String(e)
     } finally {
       cancels.delete(cancel)
+      signal?.removeEventListener('abort', cancel)
     }
   }
 
@@ -306,6 +323,34 @@ export function useYoutubeSession() {
     const chunk = Math.floor(Math.max(idx, 0) / CHUNK)
     void translateChunk(chunk)
     if (idx % CHUNK > CHUNK - 15) void translateChunk(chunk + 1)
+  }
+
+  const untranslated = (chunk: number) =>
+    cues.value
+      .slice(chunk * CHUNK, (chunk + 1) * CHUNK)
+      .some((_, i) => translationOf(chunk * CHUNK + i) === null)
+
+  /**
+   * Translate all lines that have no translation yet, some chunks at a time. `signal` pauses it:
+   * it then returns, and the next call continues with the chunks not done. Throws when a chunk
+   * fails or another video loads.
+   */
+  async function translateAll(signal?: AbortSignal) {
+    if (!translates.value || human.value.length) return
+    const token = loadToken
+    const todo = [...Array(Math.ceil(cues.value.length / CHUNK)).keys()].filter(untranslated)
+    let next = 0
+    const work = async () => {
+      while (next < todo.length && token === loadToken && !signal?.aborted) {
+        await translateChunk(todo[next++]!, true, signal)
+      }
+    }
+    await Promise.all(Array.from({ length: PARALLEL_CHUNKS }, work))
+    if (token !== loadToken) throw new Error('Another video loaded.')
+    if (signal?.aborted) return
+    if (todo.some(untranslated)) {
+      throw new Error(translationError.value || 'Some lines did not get a translation.')
+    }
   }
 
   // ---- playback loop ----
@@ -523,6 +568,8 @@ export function useYoutubeSession() {
     translates,
     translationError,
     translationOf,
+    translateAll,
+    humanTranslation,
     vocab,
     savedWordOf,
     savedPhraseIds,
