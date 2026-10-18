@@ -96,33 +96,21 @@ const round = 'grid size-8 place-items-center rounded-full bg-fg/10 text-fg hove
       :class="controls + 'flex flex-col items-center justify-between gap-1 rounded-2xl'"
       :style="st.controls"
     >
-      <div class="flex gap-1">
-        <!-- Invisible with no sentence: it keeps its space. -->
-        <SpeakButton
-          round
-          :class="!shown && 'invisible'"
-          :text="cue?.text ?? ''"
-          :lang="s.lang.value"
-          @play="s.pauseWhile"
-        />
-        <button
-          :class="round + (isSaved ? 'text-yellow-300' : '')"
-          title="Save sentence (R)"
-          @click="s.togglePhrase(idx)"
-        >
-          {{ isSaved ? '★' : '☆' }}
-        </button>
-      </div>
       <button
-        :class="
-          'rounded-full px-2 py-1 text-xs font-bold ' +
-          (s.settings.value.autoPause ? 'bg-emerald-500 text-black' : 'bg-fg/10')
-        "
-        title="Auto-pause (Q)"
-        @click="s.toggleAutoPause()"
+        :class="round + (isSaved ? 'text-yellow-300' : '')"
+        title="Save sentence (R)"
+        @click="s.togglePhrase(idx)"
       >
-        AP
+        {{ isSaved ? '★' : '☆' }}
       </button>
+      <!-- Invisible with no sentence: it keeps its space. -->
+      <SpeakButton
+        round
+        :class="!shown && 'invisible'"
+        :text="cue?.text ?? ''"
+        :lang="s.lang.value"
+        @play="s.pauseWhile"
+      />
       <button
         :class="round"
         :title="

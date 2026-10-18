@@ -82,7 +82,19 @@ watch(
   >
     <div class="flex items-center justify-between border-b border-fg/10 px-3 py-2">
       <div class="border-b-2 border-accent pb-1 text-[15px] font-medium">Subtitles</div>
-      <button class="text-fg/60 hover:text-fg" @click="emit('close')">✕</button>
+      <div class="flex items-center gap-2">
+        <button
+          :class="
+            'rounded-full px-2 py-1 text-xs font-bold ' +
+            (s.settings.value.autoPause ? 'bg-emerald-500 text-black' : 'bg-fg/10')
+          "
+          title="Auto-pause (Q)"
+          @click="s.toggleAutoPause()"
+        >
+          AP
+        </button>
+        <button class="text-fg/60 hover:text-fg" @click="emit('close')">✕</button>
+      </div>
     </div>
     <div class="relative min-h-0 flex-1">
       <!-- Scrollbar shows only on hover. Its space is always kept, so the rows do not move. -->
