@@ -126,10 +126,19 @@ const on: Record<Stage, string> = {
   LEARNING: 'bg-orange-500/15 text-orange-300 ring-1 ring-orange-400/40 ring-inset',
   SKIPPED: 'bg-violet-500/15 text-violet-300 ring-1 ring-violet-400/40 ring-inset',
 }
-const stages: { stage: Stage; label: string }[] = [
-  { stage: 'KNOWN', label: '✓ Known' },
-  { stage: 'LEARNING', label: 'Learn' },
-  { stage: 'SKIPPED', label: '⊘ Skip' },
+// Icon paths: Lucide check, graduation-cap and ban, the same set as the close icon.
+const stages: { stage: Stage; label: string; icon: string }[] = [
+  { stage: 'KNOWN', label: 'Known', icon: 'M20 6 9 17l-5-5' },
+  {
+    stage: 'LEARNING',
+    label: 'Learn',
+    icon: 'M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0zM22 10v6M6 12.5V16a6 3 0 0 0 12 0v-3.5',
+  },
+  {
+    stage: 'SKIPPED',
+    label: 'Skip',
+    icon: 'M4.929 4.929 19.07 19.071M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',
+  },
 ]
 </script>
 
@@ -236,6 +245,18 @@ const stages: { stage: Stage; label: string }[] = [
         :class="btn + (stage === b.stage ? on[b.stage] : off)"
         @click="pick(b.stage)"
       >
+        <svg
+          class="size-3.5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path :d="b.icon" />
+        </svg>
         {{ b.label }}
       </button>
     </div>
