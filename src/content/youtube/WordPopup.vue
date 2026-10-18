@@ -167,7 +167,6 @@ const speak = (text: string) => {
   else void play(t, props.studyLang)
 }
 function onKey(e: KeyboardEvent): boolean {
-  if (e.shiftKey) return false
   const example = (i: number) => () => examples.value[i] && speak(examples.value[i].sentence)
   const actions: Record<string, () => void> = {
     escape: () => emit('close'),
@@ -175,13 +174,13 @@ function onKey(e: KeyboardEvent): boolean {
     l: () => pick('LEARNING'),
     n: () => pick('SKIPPED'),
     p: () => speak(info.value.headword ?? props.word),
-    e: togglePhrase,
-    x: () => phrase.value && speak(phrase.value.text),
+    x: togglePhrase,
+    'shift+x': () => phrase.value && speak(phrase.value.text),
     1: example(0),
     2: example(1),
     3: example(2),
   }
-  const run = actions[e.key.toLowerCase()]
+  const run = actions[(e.shiftKey ? 'shift+' : '') + e.key.toLowerCase()]
   run?.()
   return !!run
 }
@@ -300,7 +299,11 @@ const stages: { stage: Stage; label: string; key: string; icon: string }[] = [
           {{ lastWord(phrase.text).head
           }}<span class="inline-flex max-w-full items-center"
             ><span class="min-w-0">{{ lastWord(phrase.text).last }}</span
-            ><SpeakButton class="-my-1 ms-1" :text="phrase.text" :lang="studyLang" shortcut="X"
+            ><SpeakButton
+              class="-my-1 ms-1"
+              :text="phrase.text"
+              :lang="studyLang"
+              shortcut="Shift+X"
           /></span>
         </div>
         <div class="text-sm leading-5 text-fg/60" :dir="dirOf(nativeLang)">
@@ -310,7 +313,7 @@ const stages: { stage: Stage; label: string; key: string; icon: string }[] = [
       <button
         :class="'shrink-0 ' + btnBase + (phraseStage ? on[phraseStage] : off)"
         :title="
-          phraseStage ? 'Remove the expression from saved items (E)' : 'Save the expression (E)'
+          phraseStage ? 'Remove the expression from saved items (X)' : 'Save the expression (X)'
         "
         @click="togglePhrase"
       >

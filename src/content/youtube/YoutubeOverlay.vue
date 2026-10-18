@@ -23,7 +23,7 @@ watch(s.videoId, () => (selected.value = null))
 watch(s.showSubs, () => (selected.value = null))
 const popup = ref<InstanceType<typeof WordPopup>>()
 
-// Word hints (Shift+F): a letter on each word of the current sentence, in the subtitle bar or,
+// Word hints (E): a letter on each word of the current sentence, in the subtitle bar or,
 // with the bar off, in the list. The letter opens the word. `resume`: the video played before.
 const hint = ref<{
   idx: number
@@ -61,7 +61,7 @@ function onHintKey(e: KeyboardEvent) {
   e.preventDefault()
   e.stopImmediatePropagation()
   const key = e.key.toUpperCase()
-  if (e.key === 'Escape' || key === 'F') return endHints(h.resume)
+  if (e.key === 'Escape') return endHints(h.resume)
   if (e.key === 'Backspace') return void (h.typed = h.typed.slice(0, -1))
   if (key.length !== 1 || !HINT_KEYS.includes(key)) return
   const typed = h.typed + key
@@ -231,11 +231,6 @@ function onKeydown(e: KeyboardEvent) {
   )
     return
   if (hint.value) return onHintKey(e)
-  if (e.shiftKey && e.key.toLowerCase() === 'f' && s.status.value === 'ready' && s.studying()) {
-    e.preventDefault()
-    e.stopImmediatePropagation()
-    return startHints()
-  }
   // Shift+C / Shift+S: the same as a click on our toggles in the player bar.
   const toggle =
     e.shiftKey && active.value && { c: s.showSubs, s: s.showPanel }[e.key.toLowerCase()]
@@ -260,6 +255,7 @@ function onKeydown(e: KeyboardEvent) {
     arrowright: s.next,
     q: s.toggleAutoPause,
     r: () => s.togglePhrase(s.activeIdx.value),
+    e: startHints,
     w: s.togglePlay,
   }
   const run = actions[e.key.toLowerCase()]

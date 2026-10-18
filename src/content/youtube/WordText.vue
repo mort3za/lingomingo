@@ -8,7 +8,7 @@ const props = defineProps<{
   lang: string
   vocab: Vocab
   selected?: string | null
-  /** Hint letters (Shift+F), one for each word in order, and the letters typed so far. */
+  /** Hint letters (E), one for each word in order, and the letters typed so far. */
   hints?: { labels: string[]; typed: string } | null
   /** Hints on the start of the word, not above it: for lines with no space between them. */
   hintsInside?: boolean

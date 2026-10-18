@@ -71,11 +71,11 @@ export const SHORTCUTS: ShortcutGroup[] = [
   {
     title: 'YouTube word hints',
     items: [
-      { keys: [['Shift+F']], label: 'Show a letter on each word of the sentence' },
+      { keys: [['E']], label: 'Show a letter on each word of the sentence' },
       { keys: [['Letter']], label: 'Open the word' },
       { keys: [['Shift+Letter']], label: 'Save the word as Learning' },
       { keys: [['Backspace']], label: 'Undo the first of two letters' },
-      { keys: [['Esc'], ['Shift+F']], label: 'Hide the letters' },
+      { keys: [['Esc']], label: 'Hide the letters' },
     ],
   },
   {
@@ -85,8 +85,8 @@ export const SHORTCUTS: ShortcutGroup[] = [
       { keys: [['L']], label: 'Learn' },
       { keys: [['N']], label: 'Skip' },
       { keys: [['P']], label: 'Play the word' },
-      { keys: [['E']], label: 'Save the expression' },
-      { keys: [['X']], label: 'Play the expression' },
+      { keys: [['X']], label: 'Save the expression' },
+      { keys: [['Shift+X']], label: 'Play the expression' },
       { keys: [['1'], ['2'], ['3']], label: 'Play example 1 / 2 / 3' },
       { keys: [['Esc']], label: 'Close' },
     ],

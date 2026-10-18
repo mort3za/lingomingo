@@ -9,7 +9,7 @@ import WordText from './WordText.vue'
 const props = defineProps<{
   s: YoutubeSession
   selected: string | null
-  /** Hint letters (Shift+F) on the words of the sentence. */
+  /** Hint letters (E) on the words of the sentence. */
   hints?: { labels: string[]; typed: string } | null
 }>()
 const emit = defineEmits<{

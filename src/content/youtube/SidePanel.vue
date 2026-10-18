@@ -12,7 +12,7 @@ const props = defineProps<{
   selected: { word: string; idx: number } | null
   /** Shown next to the video, not on it. */
   docked: boolean
-  /** Hint letters (Shift+F) on the words of the sentence `idx`. */
+  /** Hint letters (E) on the words of the sentence `idx`. */
   hints?: { idx: number; labels: string[]; typed: string } | null
 }>()
 const emit = defineEmits<{

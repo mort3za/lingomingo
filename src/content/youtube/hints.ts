@@ -1,4 +1,4 @@
-/** Keys for the word hints (Shift+F), as in Vimium. */
+/** Keys for the word hints (E), as in Vimium. */
 export const HINT_KEYS = 'QWERTYUIOPXCVBNM'
 
 /** One letter for each word. With more words than letters, two letters for each word. */
