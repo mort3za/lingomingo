@@ -248,11 +248,8 @@ function onKeydown(e: KeyboardEvent) {
   }
   const actions: Record<string, () => void> = {
     a: s.prev,
-    arrowleft: s.prev,
     s: s.repeat,
-    arrowdown: s.repeat,
     d: s.next,
-    arrowright: s.next,
     q: s.toggleAutoPause,
     r: () => s.togglePhrase(s.activeIdx.value),
     e: startHints,

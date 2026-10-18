@@ -58,9 +58,9 @@ export const SHORTCUTS: ShortcutGroup[] = [
   {
     title: 'YouTube video',
     items: [
-      { keys: [['A'], ['←']], label: 'Previous sentence' },
-      { keys: [['S'], ['↓']], label: 'Repeat sentence' },
-      { keys: [['D'], ['→']], label: 'Next sentence' },
+      { keys: [['A']], label: 'Previous sentence' },
+      { keys: [['S']], label: 'Repeat sentence' },
+      { keys: [['D']], label: 'Next sentence' },
       { keys: [['W']], label: 'Play / pause' },
       { keys: [['Q']], label: 'Auto-pause on / off' },
       { keys: [['R']], label: 'Save sentence' },
