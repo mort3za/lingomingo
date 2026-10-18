@@ -462,7 +462,20 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
       <div>
         <label :class="label" for="lmodel">Model name</label>
         <input id="lmodel" v-model="settings.localModel" :class="input" placeholder="gemma4" />
-        <p class="mt-1 text-xs text-neutral-500">The model name that your server uses.</p>
+        <p class="mt-1 text-xs text-neutral-500">
+          Examples:
+          <button
+            v-for="m in ['gemma4', 'google/gemma-4-26B-A4B-it']"
+            :key="m"
+            type="button"
+            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
+            @click="settings.localModel = m"
+          >
+            {{ m }}
+          </button>
+          — llama.cpp: the <span class="font-mono">--alias</span> value. vLLM: the Hugging Face
+          name.
+        </p>
       </div>
       <div class="rounded border border-fg/10 p-3 text-xs text-neutral-400">
         <p class="font-medium text-neutral-300">Set up llama.cpp</p>
