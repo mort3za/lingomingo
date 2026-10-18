@@ -12,6 +12,8 @@ const props = defineProps<{
   selected: { word: string; idx: number } | null
   /** Shown next to the video, not on it. */
   docked: boolean
+  /** Hint letters (E) on the words of the sentence `idx`. */
+  hints?: { idx: number; labels: string[]; typed: string } | null
 }>()
 const emit = defineEmits<{
   close: []
@@ -67,6 +69,15 @@ watch(
     const below = (box(rows.get(i))?.bottom ?? 0) > (box(list.value)?.bottom ?? Infinity)
     if (i === prev + 1 && inView(prev) && below) scrollToTop(i)
     updateAway()
+  },
+)
+// All the hints must be visible: move their sentence into view if a part of it is not.
+watch(
+  () => props.hints?.idx,
+  (i) => {
+    const r = box(rows.get(i ?? -1))
+    const l = box(list.value)
+    if (i !== undefined && r && l && (r.top < l.top || r.bottom > l.bottom)) scrollToTop(i)
   },
 )
 </script>
@@ -136,6 +147,8 @@ watch(
                 :lang="s.lang.value"
                 :vocab="s.vocab.value"
                 :selected="selected?.idx === i ? selected.word : null"
+                :hints="hints?.idx === i ? hints : null"
+                hints-inside
                 @word="(w, el) => emit('word', w, el, i)"
                 @mark="(w) => emit('mark', w, i)"
               />

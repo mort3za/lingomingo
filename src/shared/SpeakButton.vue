@@ -10,6 +10,8 @@ const props = defineProps<{
   onHover?: boolean
   /** Round, like the buttons of the subtitle bar. */
   round?: boolean
+  /** Key that plays it too, for the tooltip. */
+  shortcut?: string
 }>()
 const emit = defineEmits<{
   /** It starts to play. `done` resolves when it ends or is stopped. */
@@ -44,7 +46,7 @@ const paths = [
               onHover && 'opacity-0 group-hover:opacity-100',
             ],
     ]"
-    :title="on ? 'Stop' : 'Play'"
+    :title="(on ? 'Stop' : 'Play') + (shortcut ? ` (${shortcut})` : '')"
     @click="toggle"
   >
     <svg

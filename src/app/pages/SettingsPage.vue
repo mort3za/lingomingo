@@ -122,7 +122,7 @@ const check = 'flex items-center gap-2 text-sm'
             <span class="block text-sm">Hide buttons on the subtitle bar</span>
             <span class="block text-xs text-neutral-500">
               The keyboard shortcuts still work: A previous, S repeat, D next, R save sentence, Q
-              auto-pause.
+              auto-pause, E word hints.
             </span>
           </span>
         </label>

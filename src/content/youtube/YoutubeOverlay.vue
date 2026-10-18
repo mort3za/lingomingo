@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
 import type { Phrase, WordInfo } from '@/shared/messages'
+import { tokenize } from '@/shared/tokenize'
 import { EXPRESSION_TAG, type Example, type Stage } from '@/shared/types'
 import { shadowHost } from '../mount'
+import { HINT_KEYS, hintLabels } from './hints'
 import { currentPlayer, fullBleedRow, relatedColumn, shortsReel } from './page'
 import SidePanel from './SidePanel.vue'
 import SubtitleBar from './SubtitleBar.vue'
@@ -19,6 +21,64 @@ const selected = ref<{ word: string; idx: number; rect: DOMRect; inDock: boolean
 const active = computed(() => s.status.value !== 'idle' && s.status.value !== 'no-subs')
 watch(s.videoId, () => (selected.value = null))
 watch(s.showSubs, () => (selected.value = null))
+const popup = ref<InstanceType<typeof WordPopup>>()
+
+// Word hints (E): a letter on each word of the current sentence, in the subtitle bar or,
+// with the bar off, in the list. The letter opens the word. `resume`: the video played before.
+const hint = ref<{
+  idx: number
+  inBar: boolean
+  words: string[]
+  labels: string[]
+  typed: string
+  resume: boolean
+} | null>(null)
+const root = ref<HTMLElement>()
+watch([s.videoId, s.activeIdx, s.showSubs, s.showPanel], () => (hint.value = null))
+
+function startHints() {
+  const inBar = s.showSubs.value
+  const idx = s.activeIdx.value
+  const text = s.cues.value[idx]?.text
+  if (!text || (inBar && !s.cueVisible.value)) return
+  const words = tokenize(text, s.lang.value)
+    .filter((t) => t.isWord)
+    .map((t) => t.text)
+  if (!words.length) return
+  const v = s.video()
+  const resume = !!v && !v.paused
+  v?.pause()
+  selected.value = null
+  hint.value = { idx, inBar, words, labels: hintLabels(words.length), typed: '', resume }
+}
+function endHints(resume: boolean) {
+  hint.value = null
+  if (resume) void s.video()?.play()
+}
+// All keys are for the hints while they show.
+function onHintKey(e: KeyboardEvent) {
+  const h = hint.value!
+  e.preventDefault()
+  e.stopImmediatePropagation()
+  const key = e.key.toUpperCase()
+  if (e.key === 'Escape') return endHints(h.resume)
+  if (e.key === 'Backspace') return void (h.typed = h.typed.slice(0, -1))
+  if (key.length !== 1 || !HINT_KEYS.includes(key)) return
+  const typed = h.typed + key
+  const n = h.labels.findIndex((l) => l.startsWith(typed))
+  if (n < 0) return
+  if (h.labels[n] !== typed) return void (h.typed = typed)
+  const word = h.words[n]!
+  // Shift = mark as Learning with no popup, as a right-click does.
+  if (e.shiftKey) {
+    void markLearning(word, h.idx)
+    return endHints(h.resume)
+  }
+  const sel = `[data-lm-hint="${typed}"]`
+  const el = root.value?.querySelector<HTMLElement>(sel) ?? dock.querySelector<HTMLElement>(sel)
+  hint.value = null
+  if (el) openWord(word, el, h.idx)
+}
 
 usePlayerToggles(
   [
@@ -127,6 +187,7 @@ let dockTimer = 0
 
 // Close the popup on a click anywhere outside it.
 function onPointerDown(e: PointerEvent) {
+  hint.value = null
   if (!selected.value) return
   const inPopup = e.composedPath().some((n) => n instanceof HTMLElement && 'lmPopup' in n.dataset)
   if (!inPopup) selected.value = null
@@ -169,6 +230,7 @@ function onKeydown(e: KeyboardEvent) {
     e.altKey
   )
     return
+  if (hint.value) return onHintKey(e)
   // Shift+C / Shift+S: the same as a click on our toggles in the player bar.
   const toggle =
     e.shiftKey && active.value && { c: s.showSubs, s: s.showPanel }[e.key.toLowerCase()]
@@ -179,6 +241,11 @@ function onKeydown(e: KeyboardEvent) {
     return
   }
   if (s.status.value !== 'ready' || !s.studying()) return
+  if (popup.value?.onKey(e)) {
+    e.preventDefault()
+    e.stopImmediatePropagation()
+    return
+  }
   const actions: Record<string, () => void> = {
     a: s.prev,
     arrowleft: s.prev,
@@ -188,6 +255,7 @@ function onKeydown(e: KeyboardEvent) {
     arrowright: s.next,
     q: s.toggleAutoPause,
     r: () => s.togglePhrase(s.activeIdx.value),
+    e: startHints,
     w: s.togglePlay,
   }
   const run = actions[e.key.toLowerCase()]
@@ -221,11 +289,18 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div v-if="active" class="pointer-events-none absolute inset-0 z-[60]">
+  <div v-if="active" ref="root" class="pointer-events-none absolute inset-0 z-[60]">
+    <div
+      v-if="hint"
+      class="absolute top-3 left-1/2 -translate-x-1/2 rounded-full bg-panel/90 px-3 py-1 font-sans text-xs whitespace-nowrap text-fg shadow-lg shadow-black/40"
+    >
+      Type a letter to open the word · Shift+letter: Learn · Esc: exit
+    </div>
     <SubtitleBar
       v-if="s.showSubs.value"
       :s="s"
       :selected="selected?.idx === s.activeIdx.value ? selected.word : null"
+      :hints="hint?.inBar ? hint : null"
       @word="(w, el) => openWord(w, el)"
       @mark="(w) => markLearning(w)"
     />
@@ -237,6 +312,7 @@ onBeforeUnmount(() => {
         :s="s"
         :selected="selected"
         :docked="docked"
+        :hints="hint && !hint.inBar ? hint : null"
         @close="s.showPanel.value = false"
         @word="openWord"
         @mark="markLearning"
@@ -245,6 +321,7 @@ onBeforeUnmount(() => {
     <Teleport :to="popupRoot" :disabled="!selected?.inDock">
       <WordPopup
         v-if="selected"
+        ref="popup"
         :key="selected.word + selected.idx"
         class="pointer-events-auto"
         :word="selected.word"
