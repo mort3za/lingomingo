@@ -29,13 +29,14 @@ export async function speak(
       : voice === 'gemini'
         ? `${s.geminiVoiceModel}:${s.geminiVoice}`
         : `${s.openaiVoiceModel}:${s.openaiVoice}`
-  const key = `tts:v1:${voice}:${id}:${lang}:${text}`
+  // v3: Gemini gets the language. v1 and v2 can have Gemini audio of a short word in a wrong language.
+  const key = `tts:v3:${voice}:${id}:${lang}:${text}`
   const cached = (await chrome.storage.local.get(key))[key] as CachedAudio | undefined
   let audio = cached?.audio
   if (!audio) {
     if (voice === 'gemini') {
       if (!settings.geminiKey) throw new Error('Add your Gemini API key in Settings.')
-      audio = await gemini(settings.geminiKey, s.geminiVoiceModel, s.geminiVoice, text)
+      audio = await gemini(settings.geminiKey, s.geminiVoiceModel, s.geminiVoice, text, lang)
     } else if (voice === 'openai') {
       if (!settings.openaiKey) throw new Error('Add your OpenAI API key in Settings.')
       audio = await speech('OpenAI API', 'https://api.openai.com/v1', settings.openaiKey, {
@@ -88,7 +89,54 @@ async function speech(
   return btoa(bin)
 }
 
-async function gemini(key: string, model: string, voice: string, text: string): Promise<string> {
+async function gemini(
+  key: string,
+  model: string,
+  voice: string,
+  text: string,
+  lang: string,
+): Promise<string> {
+  if (/^gemini-(2|3\.[0-7])\b/.test(model)) return geminiOld(key, model, voice, text)
+  // Gemini finds the language from the text. With one word ("will", "Hand") it can guess a wrong
+  // one. Gemini 3.8 says all of the text, so the language goes in the style, not in the text.
+  // The `languageCode` field does not help.
+  const res = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+    body: JSON.stringify({
+      model,
+      input: [
+        {
+          type: 'user_input',
+          content: [
+            {
+              type: 'text',
+              text,
+              annotations: [
+                { type: 'speech_metadata', style: `${LANGUAGES[lang] ?? lang} pronunciation` },
+              ],
+            },
+          ],
+        },
+      ],
+      response_format: { type: 'audio' },
+      generation_config: { speech_config: [{ voice }] },
+    }),
+  })
+  if (!res.ok) throw new Error(`Gemini API ${res.status}: ${errorMessage(await res.text())}`)
+  const data = (await res.json()) as {
+    steps?: { type?: string; content?: { type?: string; data?: string }[] }[]
+  }
+  const audio = data.steps
+    ?.filter((s) => s.type === 'model_output')
+    .flatMap((s) => s.content ?? [])
+    .findLast((c) => c.type === 'audio')?.data
+  if (!audio) throw new Error('No audio from Gemini.')
+  return audio
+}
+
+/** Gemini 3.7 and older: `generateContent`, the voice in `prebuiltVoiceConfig`. */
+async function geminiOld(key: string, model: string, voice: string, text: string): Promise<string> {
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
     {
@@ -98,12 +146,7 @@ async function gemini(key: string, model: string, voice: string, text: string): 
         contents: [{ role: 'user', parts: [{ text }] }],
         generationConfig: {
           responseModalities: ['AUDIO'],
-          // Gemini 3.8 and newer name the voice in `voice`. Older models use `prebuiltVoiceConfig`.
-          speechConfig: {
-            voiceConfig: /^gemini-(2|3\.[0-7])\b/.test(model)
-              ? { prebuiltVoiceConfig: { voiceName: voice } }
-              : { voice },
-          },
+          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } },
         },
       }),
     },
