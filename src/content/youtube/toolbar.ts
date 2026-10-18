@@ -1,5 +1,5 @@
 import { onBeforeUnmount, watchEffect, type Ref } from 'vue'
-import { toolbarGroup } from './page'
+import { isShorts, toolbarGroup } from './page'
 
 // Like the native buttons of the new player: a filled icon when on, an outline icon when off.
 // The icon sits in a Persian red chip, so the user sees that the button is ours (see makeButton).
@@ -71,7 +71,15 @@ export function usePlayerToggles(toggles: Toggle[], visible: () => boolean) {
   // the toolbar of the current page.
   const place = () => {
     const bar = toolbarGroup()
-    if (bar && buttons[0]!.parentElement !== bar) bar.prepend(...buttons)
+    if (!bar || buttons[0]!.parentElement === bar) return
+    // The Shorts toolbar lets clicks go through to the video, except on its own buttons. Its
+    // buttons are 48px wide, with the icon in the middle.
+    const shorts = isShorts()
+    for (const b of buttons) {
+      b.style.pointerEvents = shorts ? 'all' : ''
+      b.style.padding = shorts ? '12px' : ''
+    }
+    bar.prepend(...buttons)
   }
   place()
   const timer = setInterval(place, 1000)
