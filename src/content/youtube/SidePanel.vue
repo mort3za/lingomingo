@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import SpeakButton from '@/shared/SpeakButton.vue'
+import { subtitleStyles } from '@/shared/subtitle-style'
 import { dirOf } from '@/shared/types'
 import type { YoutubeSession } from './session'
 import WordText from './WordText.vue'
@@ -16,6 +17,8 @@ const emit = defineEmits<{
   word: [word: string, el: HTMLElement, idx: number]
   mark: [word: string, idx: number]
 }>()
+
+const st = computed(() => subtitleStyles(props.s.settings.value))
 
 // Index of the row whose text was just copied, to show a check mark for a short time.
 const copied = ref<number | null>(null)
@@ -112,8 +115,8 @@ watch(
           "
           @click="s.goTo(i)"
         >
-          <div class="flex-1">
-            <div :dir="dirOf(s.lang.value)">
+          <div class="flex-1" :style="st.font">
+            <div :style="st.listSentence" :dir="dirOf(s.lang.value)">
               <WordText
                 :text="c.text"
                 :lang="s.lang.value"
@@ -125,7 +128,8 @@ watch(
             </div>
             <div
               v-if="s.translationOf(i)"
-              class="text-[13px] text-neutral-400"
+              class="text-neutral-400"
+              :style="st.listTranslation"
               :dir="dirOf(s.settings.value.nativeLang)"
             >
               {{ s.translationOf(i) }}

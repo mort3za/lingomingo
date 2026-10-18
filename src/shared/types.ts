@@ -139,6 +139,16 @@ export interface Settings {
   /** Videos in the native language start and save the toggles like other videos. */
   nativeVideosLikeOthers: boolean
   hideTranslation: boolean
+  /** Hide the buttons on the subtitle bar. The keyboard shortcuts still work. */
+  hideSubtitleButtons: boolean
+  /** Font of the subtitle bar and list text. Empty: the default font. */
+  subtitleFont: string
+  /** Subtitle bar background opacity, in percent. */
+  subtitleBgOpacity: number
+  /** Subtitle bar text size, in px. The translation line is smaller in the same ratio. */
+  subtitleTextSize: number
+  /** Subtitle list text size, in px. */
+  listTextSize: number
   /** Vocabulary level by study language: words up to this frequency rank count as known. */
   vocabLevels: Record<string, number>
   showKnownGreen: boolean
@@ -187,6 +197,11 @@ export const DEFAULT_SETTINGS: Settings = {
   showSubtitlesList: true,
   nativeVideosLikeOthers: false,
   hideTranslation: false,
+  hideSubtitleButtons: false,
+  subtitleFont: '',
+  subtitleBgOpacity: 80,
+  subtitleTextSize: 28,
+  listTextSize: 15,
   vocabLevels: {},
   showKnownGreen: true,
   showSuggested: true,

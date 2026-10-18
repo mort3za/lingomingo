@@ -116,6 +116,16 @@ const check = 'flex items-center gap-2 text-sm'
           Hide translation line
         </label>
         <label class="flex cursor-pointer items-start gap-2">
+          <input v-model="settings.hideSubtitleButtons" type="checkbox" class="mt-1" />
+          <span class="flex-1">
+            <span class="block text-sm">Hide buttons on the subtitle bar</span>
+            <span class="block text-xs text-neutral-500">
+              The keyboard shortcuts still work: A previous, S repeat, D next, R save sentence, Q
+              auto-pause.
+            </span>
+          </span>
+        </label>
+        <label class="flex cursor-pointer items-start gap-2">
           <input v-model="settings.nativeVideosLikeOthers" type="checkbox" class="mt-1" />
           <span class="flex-1">
             <span class="block text-sm">Treat videos in your translation language like others</span>
