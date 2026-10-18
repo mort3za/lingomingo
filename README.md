@@ -51,6 +51,7 @@ To make a release, run `bun run release patch|minor|major` on `main`. It bumps t
 | `bun run format:check` | Prettier (check only)                           |
 | `bun run test`         | `bun test`                                      |
 | `bun run release`      | New release (see above)                         |
+| `bun run llama`        | Local model server (llama.cpp, Gemma 4 26B)     |
 
 ## Privacy
 

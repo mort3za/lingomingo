@@ -19,7 +19,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "bun test",
-    "release": "bun scripts/release.ts"
+    "release": "bun scripts/release.ts",
+    "llama": "bash scripts/llama-server.sh"
   },
   "dependencies": {
     "ts-fsrs": "^5.4.2",
