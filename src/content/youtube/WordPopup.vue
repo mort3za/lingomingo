@@ -14,6 +14,9 @@ import SpeakButton from '@/shared/SpeakButton.vue'
 const props = defineProps<{
   word: string
   sentence: string
+  /** Subtitle lines around the sentence, for the word translation. */
+  before?: string
+  after?: string
   rect: DOMRect
   studyLang: string
   nativeLang: string
@@ -56,7 +59,7 @@ onMounted(loadExamples)
 // A saved word shows its saved translations at once. The request then only looks for the
 // expression and missing facts, and an error stays hidden.
 async function loadTranslations() {
-  const key = `${cacheKey}:${props.sentence}`
+  const key = `${cacheKey}:${props.before}\n${props.sentence}\n${props.after}`
   const show = (r: WordTranslation) => {
     if (!translations.value.length) translations.value = r.translations
     phrase.value = r.phrase
@@ -75,6 +78,8 @@ async function loadTranslations() {
       type: 'translate-word',
       word: props.word,
       sentence: props.sentence,
+      before: props.before,
+      after: props.after,
       studyLang: props.studyLang,
       nativeLang: props.nativeLang,
     })

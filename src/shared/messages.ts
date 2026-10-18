@@ -6,6 +6,9 @@ export type Request =
       type: 'translate-word'
       word: string
       sentence: string
+      /** Subtitle lines around the sentence: a sentence can run across several lines. */
+      before?: string
+      after?: string
       studyLang: string
       nativeLang: string
     }

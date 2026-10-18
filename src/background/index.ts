@@ -41,7 +41,8 @@ async function handle(req: Request): Promise<unknown> {
   if (req.type === 'word-extras') {
     return wordExtras(settings, req.words, req.studyLang, req.nativeLang, req.examples)
   }
-  return translateWord(settings, req.word, req.sentence, req.studyLang, req.nativeLang)
+  const { word, sentence, before, after } = req
+  return translateWord(settings, { word, sentence, before, after }, req.studyLang, req.nativeLang)
 }
 
 async function translateChunk(

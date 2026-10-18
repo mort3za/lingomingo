@@ -344,10 +344,10 @@ async function askLines(
   read(await ask(settings, system, user, { signal, onText: read }))
 }
 
+/** `before` and `after` = the subtitle lines around the sentence, if any. */
 export async function translateWord(
   settings: Settings,
-  word: string,
-  sentence: string,
+  input: { word: string; sentence: string; before?: string; after?: string },
   studyLang: string,
   nativeLang: string,
 ): Promise<WordTranslation> {
@@ -355,7 +355,9 @@ export async function translateWord(
   const study = name(studyLang)
   const system =
     `You are a dictionary. Translate a ${study} word to ${name(nativeLang)}, ` +
-    `using the sentence for meaning. The word can be a name: then keep it as it is. Never ` +
+    `using the sentence for meaning. "before" and "after" are the subtitle lines around the ` +
+    `sentence: when the sentence continues there, read them as one sentence. The word can be ` +
+    `a name: then keep it as it is. Never ` +
     `translate a different word of the sentence. Answer with ONLY JSON: {"translations":["best","alt1","alt2"],` +
     (noun
       ? `"pos":"<part of speech of the word in this sentence>",` +
@@ -379,10 +381,9 @@ export async function translateWord(
     `words have no expression: then leave "phrase" out. Words that are only used together (a ` +
     `verb with its object, place or adverb, like "go to the park" or "run fast") are not an ` +
     `expression. Never give only the dictionary form of the word.`
-  return parseWordAnswer(
-    await ask(settings, system, JSON.stringify({ word, sentence }), { priority: PRIORITY.word }),
-    word,
-  )
+  const { word, before, sentence, after } = input
+  const user = JSON.stringify({ word, before, sentence, after })
+  return parseWordAnswer(await ask(settings, system, user, { priority: PRIORITY.word }), word)
 }
 
 /** Study languages where nouns have an article that shows their gender, with an example. */
