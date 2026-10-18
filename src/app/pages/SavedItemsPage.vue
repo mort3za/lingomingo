@@ -255,12 +255,20 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
             <input type="checkbox" :checked="picked.has(i.id)" :aria-label="`Select ${i.text}`" />
           </td>
           <td class="p-2 text-start" :class="stageColor[i.stage]" :dir="dirOf(i.langCode)">
-            {{ i.text }}
+            {{ (i.itemType === 'WORD' && i.headword) || i.text }}
             <span
               v-if="i.itemType === 'WORD' && i.tags?.includes(EXPRESSION_TAG)"
               class="ms-1 rounded bg-fg/10 px-1.5 py-0.5 align-middle text-[10px] font-medium tracking-wide text-fg/60 uppercase"
               >Expression</span
             >
+            <div
+              v-if="i.itemType === 'WORD' && (i.ipa || i.plural)"
+              class="text-xs text-neutral-400"
+            >
+              <span v-if="i.ipa" dir="ltr">/{{ i.ipa }}/</span>
+              <template v-if="i.ipa && i.plural"> · </template>
+              <template v-if="i.plural">pl. {{ i.plural }}</template>
+            </div>
             <div v-if="i.itemType === 'WORD' && i.context" class="text-xs text-neutral-500">
               {{ i.context.sentence }}
             </div>

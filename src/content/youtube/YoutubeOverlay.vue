@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
-import type { Phrase } from '@/shared/messages'
+import type { Phrase, WordInfo } from '@/shared/messages'
 import { EXPRESSION_TAG, type Example, type Stage } from '@/shared/types'
 import { shadowHost } from '../mount'
 import { currentPlayer, fullBleedRow, relatedColumn, shortsReel } from './page'
@@ -142,14 +142,16 @@ const savedItem = computed(() =>
   selected.value ? (s.savedWordOf(selected.value.word) ?? null) : null,
 )
 
-async function setStage(stage: Stage, translations: string[], examples: Example[]) {
+async function setStage(stage: Stage, translations: string[], examples: Example[], info: WordInfo) {
   if (!selected.value) return
-  await s.markWord(selected.value.word, selected.value.idx, stage, translations, examples)
+  await s.markWord(selected.value.word, selected.value.idx, stage, translations, examples, info)
 }
 
 async function savePhrase(p: Phrase) {
   if (!selected.value) return
-  await s.markWord(p.text, selected.value.idx, 'LEARNING', [p.translation], [], [EXPRESSION_TAG])
+  await s.markWord(p.text, selected.value.idx, 'LEARNING', [p.translation], [], {}, [
+    EXPRESSION_TAG,
+  ])
 }
 const stageOf = (text: string) => s.savedWordOf(text)?.stage
 

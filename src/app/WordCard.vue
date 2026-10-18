@@ -95,10 +95,10 @@ const hide = computed(() =>
       >
         <!-- The button sits beside the word, so the word stays in the center. -->
         <span class="relative">
-          {{ word.text }}
+          {{ word.headword ?? word.text }}
           <SpeakButton
             class="absolute top-1/2 ms-2 -translate-y-1/2 p-1.5! *:size-6"
-            :text="word.text"
+            :text="word.headword ?? word.text"
             :lang="word.langCode"
           />
         </span>
