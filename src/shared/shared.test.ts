@@ -7,7 +7,7 @@ import {
   parseJson3,
   pickTrack,
 } from './captions'
-import { toCsv } from './export'
+import { toAnki, toCsv } from './export'
 import { errorMessage, extractJson, finishedLines, matchLine } from './llm-json'
 import {
   answer,
@@ -212,6 +212,65 @@ test('toCsv puts start and end ms in the last two columns', () => {
   expect(head).toEndWith(',Date created,Start ms,End ms')
   expect(row).toEndWith(',1500,3250')
   expect(noSource).toEndWith(',,')
+})
+
+test('toAnki writes Anki headers and one escaped note per item, with the id as GUID', () => {
+  const phrase: SavedItem = {
+    id: 'p:es:v:0',
+    itemType: 'PHRASE',
+    langCode: 'es',
+    translationLang: 'en',
+    stage: 'LEARNING',
+    createdAt: 0,
+    updatedAt: 0,
+    text: 'Tú & <yo>\tjuntos',
+    translation: 'You "and" me',
+    source: { source: 'YOUTUBE', videoId: 'v', title: 'T', startMs: 0, endMs: 1 },
+  }
+  const w = word({
+    text: 'auf jeden Fall',
+    translations: ['in any case', 'definitely'],
+    context: { sentence: 'Das mache ich\nauf jeden Fall.', translation: null },
+    tags: ['expression'],
+  })
+  const lines = toAnki([phrase, w]).split('\n')
+  expect(lines.slice(0, 7)).toEqual([
+    '#separator:tab',
+    '#html:true',
+    '#notetype:Basic',
+    '#deck:LingoMingo',
+    '#columns:GUID\tFront\tBack\tTags',
+    '#guid column:1',
+    '#tags column:4',
+  ])
+  expect(lines[7]).toBe(
+    'p:es:v:0\tTú &amp; &lt;yo&gt; juntos\tYou &quot;and&quot; me<br><br>' +
+      '<a href="https://www.youtube.com/watch?v=v&amp;t=0s">T</a>\tlingomingo es',
+  )
+  expect(lines[8]).toBe(
+    'w:de:haus\tauf jeden Fall\tin any case, definitely<br><br>Das mache ich<br>auf jeden Fall.\tlingomingo de expression',
+  )
+  expect(lines).toHaveLength(9)
+})
+
+test('toAnki puts the headword on the front, and IPA, plural, examples and video link on the back', () => {
+  const w = word({
+    headword: 'das Haus',
+    ipa: 'haʊ̯s',
+    plural: 'die Häuser',
+    context: { sentence: 'Das Haus ist groß.', translation: 'The house is big.' },
+    examples: [{ sentence: 'Ein *Haus* am See.', translation: 'A house by the lake.' }],
+    source: { source: 'YOUTUBE', videoId: 'v', title: '', startMs: 61900, endMs: 63000 },
+  })
+  const [guid, front, back] = toAnki([w]).split('\n')[7]!.split('\t')
+  expect(guid).toBe('w:de:haus')
+  expect(front).toBe('das Haus')
+  expect(back!.split('<br><br>')).toEqual([
+    '/haʊ̯s/<br>house<br>Plural: die Häuser',
+    'Das Haus ist groß.<br>The house is big.',
+    'Ein <b>Haus</b> am See.<br>A house by the lake.',
+    '<a href="https://www.youtube.com/watch?v=v&amp;t=61s">https://www.youtube.com/watch?v=v&amp;t=61s</a>',
+  ])
 })
 
 test('dirOf gives rtl for Persian and Arabic, ltr for others', () => {
