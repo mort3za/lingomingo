@@ -10,7 +10,31 @@ interface Call {
   onText?: (text: string) => void
   /** Place in the local model queue, see `PRIORITY`. Default: `PRIORITY.lines`. */
   priority?: number
+  /** Shape of the JSON answer. Local servers then let the model write only JSON of this shape. */
+  schema?: Schema
 }
+
+type Schema = Record<string, unknown>
+const STR = { type: 'string' }
+// A fact the model can leave empty. A model that may not write null stops early and drops the rest.
+const OPTIONAL = { type: ['string', 'null'] }
+const strings = (min: number, max: number) => ({
+  type: 'array',
+  items: STR,
+  minItems: min,
+  maxItems: max,
+})
+// The server makes the model write the keys in this order: keep the order of the prompt.
+const object = (properties: Record<string, Schema>, required = Object.keys(properties)) => ({
+  type: 'object',
+  properties,
+  required,
+  additionalProperties: false,
+})
+const schemaFormat = (schema: Schema) => ({
+  type: 'json_schema',
+  json_schema: { name: 'answer', schema },
+})
 
 /** Lower goes first: the user waits for a word, but subtitle lines are asked ahead of time. */
 const PRIORITY = { word: 0, extras: 1, lines: 2 }
@@ -160,10 +184,11 @@ async function request(
       {
         reasoning_effort: 'none',
         // Small models can drop a quote or a bracket. JSON mode makes the answer always valid JSON.
-        response_format: { type: 'json_object' },
+        response_format: call.schema ? schemaFormat(call.schema) : { type: 'json_object' },
       },
     )
   }
+  const format = call.schema && { response_format: schemaFormat(call.schema) }
 
   if (settings.provider === 'lmstudio') {
     if (!settings.lmstudioModel) throw new Error('Set the LM Studio model name in Settings.')
@@ -178,15 +203,24 @@ async function request(
     // LM Studio 0.4.8+ turns thinking off with reasoning_effort "none". Models that always think
     // (DeepSeek R1) can reject it: then ask again without it.
     try {
-      return await chat(...args, undefined, { reasoning_effort: 'none' })
+      return await chat(...args, undefined, { reasoning_effort: 'none', ...format })
     } catch (e) {
       if (!(e instanceof Error && /^LM Studio 4\d\d/.test(e.message))) throw e
-      return chat(...args)
+      return chat(...args, undefined, format)
     }
   }
 
   if (!settings.localModel) throw new Error('Set the local model name in Settings.')
-  return chat('Local model', settings.localBaseUrl, settings.localModel, system, user, call)
+  return chat(
+    'Local model',
+    settings.localBaseUrl,
+    settings.localModel,
+    system,
+    user,
+    call,
+    undefined,
+    format,
+  )
 }
 
 /** OpenAI-compatible chat completion (OpenAI, xAI, DeepSeek, Gemini, OpenRouter, Ollama, llama.cpp, LM Studio). */
@@ -384,7 +418,23 @@ export async function translateWord(
     `expression. Never give only the dictionary form of the word.`
   const { word, before, sentence, after } = input
   const user = JSON.stringify({ word, before, sentence, after })
-  return parseWordAnswer(await ask(settings, system, user, { priority: PRIORITY.word }), word)
+  const schema = object(
+    {
+      translations: strings(1, 3),
+      ...(noun ? { pos: OPTIONAL, headword: OPTIONAL, plural: OPTIONAL } : {}),
+      ipa: OPTIONAL,
+      phrase: {
+        type: ['object', 'null'],
+        properties: { text: STR, translation: STR },
+        required: ['text', 'translation'],
+      },
+    },
+    ['translations'],
+  )
+  return parseWordAnswer(
+    await ask(settings, system, user, { priority: PRIORITY.word, schema }),
+    word,
+  )
 }
 
 /** Study languages where nouns have an article that shows their gender, with an example. */
@@ -453,8 +503,24 @@ export async function wordExtras(
       words.map((w, i) => [i + 1, { word: w.word, sentence: w.sentence ?? '', have: w.have }]),
     ),
   )
+  const example = strings(2, 2)
+  const schema = object(
+    Object.fromEntries(
+      words.map((w, i) => {
+        const n = w.have ? MORE : count
+        return [
+          i + 1,
+          object({
+            translations: strings(w.have ? 0 : 1, 3),
+            sentence: STR,
+            examples: { type: 'array', items: example, minItems: n, maxItems: n },
+          }),
+        ]
+      }),
+    ),
+  )
   const out = extractJson(
-    await ask(settings, system, user, { priority: PRIORITY.extras }),
+    await ask(settings, system, user, { priority: PRIORITY.extras, schema }),
   ) as Record<string, unknown>
   const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
   return words.map((w, i) => {
