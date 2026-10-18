@@ -19,6 +19,7 @@ const selected = ref<{ word: string; idx: number; rect: DOMRect; inDock: boolean
 const active = computed(() => s.status.value !== 'idle' && s.status.value !== 'no-subs')
 watch(s.videoId, () => (selected.value = null))
 watch(s.showSubs, () => (selected.value = null))
+const popup = ref<InstanceType<typeof WordPopup>>()
 
 usePlayerToggles(
   [
@@ -179,6 +180,11 @@ function onKeydown(e: KeyboardEvent) {
     return
   }
   if (s.status.value !== 'ready' || !s.studying()) return
+  if (popup.value?.onKey(e)) {
+    e.preventDefault()
+    e.stopImmediatePropagation()
+    return
+  }
   const actions: Record<string, () => void> = {
     a: s.prev,
     arrowleft: s.prev,
@@ -245,6 +251,7 @@ onBeforeUnmount(() => {
     <Teleport :to="popupRoot" :disabled="!selected?.inDock">
       <WordPopup
         v-if="selected"
+        ref="popup"
         :key="selected.word + selected.idx"
         class="pointer-events-auto"
         :word="selected.word"

@@ -10,6 +10,7 @@ import { computed, onMounted, ref } from 'vue'
 import { send, type Phrase, type WordInfo, type WordTranslation } from '@/shared/messages'
 import { dirOf, type Example, type SavedItem, type Stage } from '@/shared/types'
 import SpeakButton from '@/shared/SpeakButton.vue'
+import { play, speaking, stop } from '@/shared/speech'
 
 const props = defineProps<{
   word: string
@@ -160,6 +161,32 @@ const style = computed(() => {
   return { left: `${x}px`, top: `${y}px` }
 })
 // The arrow points at the word, also when the popup is pushed in from the screen edge.
+// Keys while the popup is open. The overlay sends them here. True = the key was used.
+const speak = (text: string) => {
+  const t = text.replaceAll('*', '')
+  if (speaking.value === `${props.studyLang}:${t}`) stop()
+  else void play(t, props.studyLang)
+}
+function onKey(e: KeyboardEvent): boolean {
+  if (e.shiftKey) return false
+  const example = (i: number) => () => examples.value[i] && speak(examples.value[i].sentence)
+  const actions: Record<string, () => void> = {
+    escape: () => emit('close'),
+    k: () => pick('KNOWN'),
+    l: () => pick('LEARNING'),
+    n: () => pick('SKIPPED'),
+    p: () => speak(info.value.headword ?? props.word),
+    e: togglePhrase,
+    x: () => phrase.value && speak(phrase.value.text),
+    1: example(0),
+    2: example(1),
+    3: example(2),
+  }
+  const run = actions[e.key.toLowerCase()]
+  run?.()
+  return !!run
+}
+defineExpose({ onKey })
 const arrowLeft = `calc(50% + ${Math.min(Math.max(center - x, -144), 144)}px)`
 // A little lighter than the side panel, so the popup stands out on it.
 const bg = 'bg-[color-mix(in_srgb,white_5%,var(--color-panel))]'
@@ -175,16 +202,18 @@ const on: Record<Stage, string> = {
   SKIPPED: 'bg-violet-500/15 text-violet-300 ring-1 ring-violet-400/40 ring-inset',
 }
 // Icon paths: Lucide check, graduation-cap and ban, the same set as the close icon.
-const stages: { stage: Stage; label: string; icon: string }[] = [
-  { stage: 'KNOWN', label: 'Known', icon: 'M20 6 9 17l-5-5' },
+const stages: { stage: Stage; label: string; key: string; icon: string }[] = [
+  { stage: 'KNOWN', label: 'Known', key: 'K', icon: 'M20 6 9 17l-5-5' },
   {
     stage: 'LEARNING',
     label: 'Learn',
+    key: 'L',
     icon: 'M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0zM22 10v6M6 12.5V16a6 3 0 0 0 12 0v-3.5',
   },
   {
     stage: 'SKIPPED',
     label: 'Skip',
+    key: 'N',
     icon: 'M4.929 4.929 19.07 19.071M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',
   },
 ]
@@ -216,7 +245,11 @@ const stages: { stage: Stage; label: string; icon: string }[] = [
           >{{ lastWord(title.text).head
           }}<span class="inline-flex max-w-full items-center"
             ><span class="min-w-0">{{ lastWord(title.text).last }}</span
-            ><SpeakButton class="-my-1 ms-1" :text="info.headword ?? word" :lang="studyLang"
+            ><SpeakButton
+              class="-my-1 ms-1"
+              :text="info.headword ?? word"
+              :lang="studyLang"
+              shortcut="P"
           /></span>
         </div>
         <div v-if="info.ipa" class="text-xs leading-4 text-fg/50" dir="ltr">/{{ info.ipa }}/</div>
@@ -226,7 +259,7 @@ const stages: { stage: Stage; label: string; icon: string }[] = [
       </div>
       <button
         class="-mr-1.5 shrink-0 rounded-md p-1 text-fg/40 hover:bg-fg/10 hover:text-fg"
-        title="Close"
+        title="Close (Esc)"
         @click="emit('close')"
       >
         <svg
@@ -267,7 +300,7 @@ const stages: { stage: Stage; label: string; icon: string }[] = [
           {{ lastWord(phrase.text).head
           }}<span class="inline-flex max-w-full items-center"
             ><span class="min-w-0">{{ lastWord(phrase.text).last }}</span
-            ><SpeakButton class="-my-1 ms-1" :text="phrase.text" :lang="studyLang"
+            ><SpeakButton class="-my-1 ms-1" :text="phrase.text" :lang="studyLang" shortcut="X"
           /></span>
         </div>
         <div class="text-sm leading-5 text-fg/60" :dir="dirOf(nativeLang)">
@@ -276,7 +309,9 @@ const stages: { stage: Stage; label: string; icon: string }[] = [
       </div>
       <button
         :class="'shrink-0 ' + btnBase + (phraseStage ? on[phraseStage] : off)"
-        :title="phraseStage ? 'Remove the expression from saved items' : 'Save the expression'"
+        :title="
+          phraseStage ? 'Remove the expression from saved items (E)' : 'Save the expression (E)'
+        "
         @click="togglePhrase"
       >
         <svg
@@ -324,7 +359,13 @@ const stages: { stage: Stage; label: string; icon: string }[] = [
             {{ e.translation }}
           </p>
         </div>
-        <SpeakButton class="-mt-0.5 -mr-1.5" :text="e.sentence" :lang="studyLang" on-hover />
+        <SpeakButton
+          class="-mt-0.5 -mr-1.5"
+          :text="e.sentence"
+          :lang="studyLang"
+          :shortcut="String(i + 1)"
+          on-hover
+        />
       </li>
     </ol>
     <div v-else class="border-t border-fg/10 px-4 py-3 text-xs text-fg/40">No examples</div>
@@ -333,6 +374,7 @@ const stages: { stage: Stage; label: string; icon: string }[] = [
         v-for="b in stages"
         :key="b.stage"
         :class="btn + (stage === b.stage ? on[b.stage] : off)"
+        :title="`${b.label} (${b.key})`"
         @click="pick(b.stage)"
       >
         <svg
