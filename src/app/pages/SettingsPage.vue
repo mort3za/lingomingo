@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { LEVEL_LANGS, WORD_STYLE } from '@/shared/vocab'
 import LanguageFields from '../LanguageFields.vue'
 import ProviderFields from '../ProviderFields.vue'
+import SubtitleAppearanceFields from '../SubtitleAppearanceFields.vue'
 import VocabLevelField from '../VocabLevelField.vue'
 import VoiceFields from '../VoiceFields.vue'
 import { useSettings } from '../settings'
@@ -136,6 +137,7 @@ const check = 'flex items-center gap-2 text-sm'
           </span>
         </label>
       </div>
+      <SubtitleAppearanceFields />
     </section>
 
     <section id="ai" :class="card">
