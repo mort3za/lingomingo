@@ -1,13 +1,13 @@
 <script lang="ts">
 // Word translations and examples of this tab, so a second click on the same word sends no new
-// request.
-const cache = new Map<string, string[]>()
+// request. Translations by word and sentence: the expression depends on the sentence.
+const cache = new Map<string, WordTranslation>()
 const exampleCache = new Map<string, Example[]>()
 </script>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { send } from '@/shared/messages'
+import { send, type Phrase, type WordTranslation } from '@/shared/messages'
 import { dirOf, type Example, type SavedItem, type Stage } from '@/shared/types'
 import SpeakButton from '@/shared/SpeakButton.vue'
 
@@ -18,10 +18,14 @@ const props = defineProps<{
   studyLang: string
   nativeLang: string
   savedItem: SavedItem | null
+  /** Stage of a saved item with this text, for the expression. */
+  stageOf: (text: string) => Stage | undefined
 }>()
 const emit = defineEmits<{
   stage: [stage: Stage, translations: string[], examples: Example[]]
   remove: []
+  savePhrase: [phrase: Phrase]
+  removePhrase: [text: string]
   close: []
 }>()
 
@@ -31,6 +35,7 @@ const savedWord =
     ? props.savedItem
     : null
 const translations = ref<string[]>(savedWord?.translations ?? [])
+const phrase = ref<Phrase | null>(null)
 const loading = ref(false)
 const error = ref('')
 const examples = ref<Example[]>(savedWord?.examples ?? [])
@@ -41,25 +46,29 @@ const cacheKey = `${props.studyLang}:${props.nativeLang}:${props.word}`
 onMounted(loadTranslations)
 onMounted(loadExamples)
 
+// A saved word shows its saved translations at once. The request then only looks for the
+// expression, and an error stays hidden.
 async function loadTranslations() {
-  if (translations.value.length) return
-  const cached = cache.get(cacheKey)
-  if (cached) {
-    translations.value = cached
-    return
+  const key = `${cacheKey}:${props.sentence}`
+  const show = (r: WordTranslation) => {
+    if (!translations.value.length) translations.value = r.translations
+    phrase.value = r.phrase
   }
-  loading.value = true
+  const cached = cache.get(key)
+  if (cached) return show(cached)
+  loading.value = !translations.value.length
   try {
-    translations.value = await send({
+    const r = await send({
       type: 'translate-word',
       word: props.word,
       sentence: props.sentence,
       studyLang: props.studyLang,
       nativeLang: props.nativeLang,
     })
-    cache.set(cacheKey, translations.value)
+    cache.set(key, r)
+    show(r)
   } catch (e) {
-    error.value = e instanceof Error ? e.message : String(e)
+    if (!translations.value.length) error.value = e instanceof Error ? e.message : String(e)
   } finally {
     loading.value = false
   }
@@ -104,6 +113,13 @@ function pick(s: Stage) {
   if (stage.value === s) emit('remove')
   else emit('stage', s, translations.value, examples.value)
 }
+// The expression has one button: save it as Learning, or remove it.
+const phraseStage = computed(() => phrase.value && props.stageOf(phrase.value.text))
+function togglePhrase() {
+  if (!phrase.value) return
+  if (phraseStage.value) emit('removePhrase', phrase.value.text)
+  else emit('savePhrase', { ...phrase.value })
+}
 // Show on the side of the word with more room; centered on it, kept inside the screen.
 const below = props.rect.top < innerHeight - props.rect.bottom
 const center = props.rect.left + props.rect.width / 2
@@ -117,8 +133,9 @@ const arrowLeft = `calc(50% + ${Math.min(Math.max(center - x, -144), 144)}px)`
 // A little lighter than the side panel, so the popup stands out on it.
 const bg = 'bg-[color-mix(in_srgb,white_5%,var(--color-panel))]'
 
-const btn =
-  'flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-fg/40 '
+const btnBase =
+  'flex items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-fg/40 '
+const btn = 'flex-1 ' + btnBase
 // Hover only on inactive buttons, so it does not hide the active color.
 const off = 'text-fg/60 hover:bg-fg/10 hover:text-fg'
 const on: Record<Stage, string> = {
@@ -203,6 +220,39 @@ const stages: { stage: Stage; label: string; icon: string }[] = [
           {{ translations.slice(1).join(' · ') }}
         </div>
       </div>
+    </div>
+    <div v-if="phrase" class="flex items-center gap-2 border-t border-fg/10 px-4 py-2.5">
+      <div class="min-w-0 flex-1">
+        <div class="text-[10px] font-medium tracking-wide text-fg/40 uppercase">Expression</div>
+        <div class="flex items-start gap-1">
+          <div class="min-w-0 text-sm leading-5 font-semibold break-words" :dir="dirOf(studyLang)">
+            {{ phrase.text }}
+          </div>
+          <SpeakButton class="-mt-0.5" :text="phrase.text" :lang="studyLang" />
+        </div>
+        <div class="text-sm leading-5 text-fg/60" :dir="dirOf(nativeLang)">
+          {{ phrase.translation }}
+        </div>
+      </div>
+      <button
+        :class="'shrink-0 ' + btnBase + (phraseStage ? on[phraseStage] : off)"
+        :title="phraseStage ? 'Remove the expression from saved items' : 'Save the expression'"
+        @click="togglePhrase"
+      >
+        <svg
+          class="size-3.5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path :d="stages[1]!.icon" />
+        </svg>
+        Learn
+      </button>
     </div>
     <div v-if="examplesError" class="border-t border-fg/10 px-4 py-3 text-xs text-red-300">
       {{ examplesError }}

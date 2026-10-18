@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
-import type { Example, Stage } from '@/shared/types'
+import type { Phrase } from '@/shared/messages'
+import { EXPRESSION_TAG, type Example, type Stage } from '@/shared/types'
 import { shadowHost } from '../mount'
 import { currentPlayer, fullBleedRow, relatedColumn, shortsReel } from './page'
 import SidePanel from './SidePanel.vue'
@@ -146,6 +147,12 @@ async function setStage(stage: Stage, translations: string[], examples: Example[
   await s.markWord(selected.value.word, selected.value.idx, stage, translations, examples)
 }
 
+async function savePhrase(p: Phrase) {
+  if (!selected.value) return
+  await s.markWord(p.text, selected.value.idx, 'LEARNING', [p.translation], [], [EXPRESSION_TAG])
+}
+const stageOf = (text: string) => s.savedWordOf(text)?.stage
+
 // Right-click = mark as Learning without a popup.
 const markLearning = (word: string, idx = s.activeIdx.value) =>
   s.markWord(word, idx, 'LEARNING', [])
@@ -244,8 +251,11 @@ onBeforeUnmount(() => {
         :study-lang="s.lang.value"
         :native-lang="s.settings.value.nativeLang"
         :saved-item="savedItem"
+        :stage-of="stageOf"
         @stage="setStage"
         @remove="s.unmarkWord(selected.word)"
+        @save-phrase="savePhrase"
+        @remove-phrase="s.unmarkWord"
         @close="selected = null"
       />
     </Teleport>

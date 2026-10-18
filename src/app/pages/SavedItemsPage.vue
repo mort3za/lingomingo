@@ -3,7 +3,14 @@ import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from
 import { toCsv, toJson } from '@/shared/export'
 import { getSavedItems, onStorageKey, removeItems, setStage } from '@/shared/storage'
 import SpeakButton from '@/shared/SpeakButton.vue'
-import { dirOf, LANGUAGES, type SavedItem, type SavedWord, type Stage } from '@/shared/types'
+import {
+  dirOf,
+  EXPRESSION_TAG,
+  LANGUAGES,
+  type SavedItem,
+  type SavedWord,
+  type Stage,
+} from '@/shared/types'
 import { ignoreKey } from '../shortcuts'
 import WordDialog from '../WordDialog.vue'
 
@@ -249,6 +256,11 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
           </td>
           <td class="p-2 text-start" :class="stageColor[i.stage]" :dir="dirOf(i.langCode)">
             {{ i.text }}
+            <span
+              v-if="i.itemType === 'WORD' && i.tags?.includes(EXPRESSION_TAG)"
+              class="ms-1 rounded bg-fg/10 px-1.5 py-0.5 align-middle text-[10px] font-medium tracking-wide text-fg/60 uppercase"
+              >Expression</span
+            >
             <div v-if="i.itemType === 'WORD' && i.context" class="text-xs text-neutral-500">
               {{ i.context.sentence }}
             </div>
