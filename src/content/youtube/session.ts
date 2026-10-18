@@ -430,7 +430,9 @@ export function useYoutubeSession() {
     examples: Example[] = [],
   ) {
     const old = savedWordOf(word)
-    const keep = old?.examples ?? examples
+    // Old translations and examples only when they are in the current translation language.
+    const same = old?.translationLang === settings.value.nativeLang
+    const keep = (same ? old?.examples : undefined) ?? examples
     // One saved item per lemma: marking "ging" updates a saved "gehe".
     const id = old?.id ?? wordId(lang.value, lemma(word))
     const now = Date.now()
@@ -444,7 +446,7 @@ export function useYoutubeSession() {
       updatedAt: now,
       text: word,
       // Copy: chrome.storage cannot store Vue proxies.
-      translations: [...(translations.length ? translations : (old?.translations ?? []))],
+      translations: [...(translations.length || !same ? translations : (old?.translations ?? []))],
       context: cues.value[idx]
         ? { sentence: cues.value[idx]!.text, translation: translationOf(idx) }
         : null,

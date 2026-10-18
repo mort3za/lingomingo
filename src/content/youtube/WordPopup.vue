@@ -25,14 +25,15 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const translations = ref<string[]>(
-  props.savedItem?.itemType === 'WORD' ? props.savedItem.translations : [],
-)
+// Saved translations and examples only when they are in the current translation language.
+const savedWord =
+  props.savedItem?.itemType === 'WORD' && props.savedItem.translationLang === props.nativeLang
+    ? props.savedItem
+    : null
+const translations = ref<string[]>(savedWord?.translations ?? [])
 const loading = ref(false)
 const error = ref('')
-const examples = ref<Example[]>(
-  props.savedItem?.itemType === 'WORD' ? (props.savedItem.examples ?? []) : [],
-)
+const examples = ref<Example[]>(savedWord?.examples ?? [])
 const examplesLoading = ref(false)
 const examplesError = ref('')
 
