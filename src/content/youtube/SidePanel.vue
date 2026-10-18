@@ -78,7 +78,7 @@ watch(
       <!-- Scrollbar shows only on hover. Its space is always kept, so the rows do not move. -->
       <div
         ref="list"
-        class="relative h-full [scrollbar-color:transparent_transparent] [scrollbar-gutter:stable] space-y-1 overflow-y-auto p-2 pr-1 hover:[scrollbar-color:color-mix(in_srgb,var(--color-fg)_30%,transparent)_transparent]"
+        class="relative h-full [scrollbar-color:transparent_transparent] [scrollbar-gutter:stable] space-y-1 overflow-y-auto overscroll-contain p-2 pr-1 hover:[scrollbar-color:color-mix(in_srgb,var(--color-fg)_30%,transparent)_transparent]"
         @scroll="updateAway"
       >
         <!-- Sticky in the list, so it lines up with the rows whatever the scrollbar width is.
