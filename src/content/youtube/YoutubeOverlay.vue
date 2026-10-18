@@ -4,7 +4,7 @@ import type { Phrase, WordInfo } from '@/shared/messages'
 import { tokenize } from '@/shared/tokenize'
 import { EXPRESSION_TAG, type Example, type Stage } from '@/shared/types'
 import { shadowHost } from '../mount'
-import { HINT_KEYS, hintLabels } from './hints'
+import { hintLabels } from './hints'
 import { currentPlayer, fullBleedRow, relatedColumn, shortsReel } from './page'
 import SidePanel from './SidePanel.vue'
 import SubtitleBar from './SubtitleBar.vue'
@@ -61,9 +61,9 @@ function onHintKey(e: KeyboardEvent) {
   e.preventDefault()
   e.stopImmediatePropagation()
   const key = e.key.toUpperCase()
-  if (e.key === 'Escape') return endHints(h.resume)
+  if (e.key === 'Escape' || key === 'E') return endHints(h.resume)
   if (e.key === 'Backspace') return void (h.typed = h.typed.slice(0, -1))
-  if (key.length !== 1 || !HINT_KEYS.includes(key)) return
+  if (key.length !== 1) return
   const typed = h.typed + key
   const n = h.labels.findIndex((l) => l.startsWith(typed))
   if (n < 0) return
@@ -291,7 +291,7 @@ onBeforeUnmount(() => {
       v-if="hint"
       class="absolute top-3 left-1/2 -translate-x-1/2 rounded-full bg-panel/90 px-3 py-1 font-sans text-xs whitespace-nowrap text-fg shadow-lg shadow-black/40"
     >
-      Type a letter to open the word · Shift+letter: Learn · Esc: exit
+      Type a letter to open the word · Shift+letter: Learn · E or Esc: exit
     </div>
     <SubtitleBar
       v-if="s.showSubs.value"

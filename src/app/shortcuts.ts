@@ -75,7 +75,7 @@ export const SHORTCUTS: ShortcutGroup[] = [
       { keys: [['Letter']], label: 'Open the word' },
       { keys: [['Shift+Letter']], label: 'Save the word as Learning' },
       { keys: [['Backspace']], label: 'Undo the first of two letters' },
-      { keys: [['Esc']], label: 'Hide the letters' },
+      { keys: [['E'], ['Esc']], label: 'Hide the letters' },
     ],
   },
   {

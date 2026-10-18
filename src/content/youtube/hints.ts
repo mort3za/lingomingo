@@ -1,9 +1,12 @@
-/** Keys for the word hints (E), as in Vimium. */
-export const HINT_KEYS = 'QWERTYUIOPXCVBNM'
+/**
+ * Keys for the word hints (E), as in Vimium: one letter from the left hand for each word. Not E:
+ * E hides the hints.
+ */
+const HINT_KEYS = 'QWRTASDFGZXCVB'
+/** With more words than `HINT_KEYS`: two letters from the right hand, so no hint starts another. */
+const HINT_PAIR_KEYS = 'YUIOPHJKLNM'
 
-/** One letter for each word. With more words than letters, two letters for each word. */
 export function hintLabels(count: number): string[] {
-  const keys = [...HINT_KEYS]
-  if (count <= keys.length) return keys.slice(0, count)
-  return keys.flatMap((a) => keys.map((b) => a + b)).slice(0, count)
+  const pairs = [...HINT_PAIR_KEYS].flatMap((a) => [...HINT_PAIR_KEYS].map((b) => a + b))
+  return [...HINT_KEYS, ...pairs].slice(0, count)
 }
