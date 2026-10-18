@@ -98,7 +98,7 @@ function placeDock() {
     dockHost.style.cssText =
       `display:${show ? 'block' : 'none'};position:absolute;top:${p.top - r.top}px;` +
       `left:${p.right - r.left + SHORTS_ACTIONS_WIDTH}px;width:${BESIDE_WIDTH}px;` +
-      `height:${p.height}px;padding:0 12px;box-sizing:border-box;`
+      `height:${p.height}px;padding:0 12px;box-sizing:border-box;z-index:100;`
   } else {
     dockHost.style.cssText =
       `display:${show ? 'block' : 'none'};flex:none;width:${BESIDE_WIDTH}px;` +

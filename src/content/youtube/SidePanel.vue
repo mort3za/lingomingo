@@ -48,6 +48,12 @@ function scrollToTop(i: number) {
   if (el && list.value) list.value.scrollTo({ top: el.offsetTop - 8, behavior: 'smooth' })
 }
 
+// The wheel over the panel must not scroll the page or go to the next Short. The list stops it
+// at its ends (`overscroll-contain`); stop it here on the rest of the panel.
+function onWheel(e: WheelEvent) {
+  if (!list.value?.contains(e.target as Node)) e.preventDefault()
+}
+
 // The next sentence starts below the visible part: move it to the top. If the user scrolled
 // away from the current sentence, do not move the list.
 watch(
@@ -69,6 +75,7 @@ watch(
         : 'absolute top-0 right-0 bottom-14 w-[374px] bg-surface/95'
     "
     class="pointer-events-auto flex flex-col font-sans text-fg"
+    @wheel="onWheel"
   >
     <div class="flex items-center justify-between border-b border-fg/10 px-3 py-2">
       <div class="border-b-2 border-accent pb-1 text-[15px] font-medium">Subtitles</div>
