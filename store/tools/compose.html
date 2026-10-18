@@ -1,0 +1,227 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;800&display=block"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      html,
+      body {
+        background: #0e0e10;
+      }
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: #fff;
+        -webkit-font-smoothing: antialiased;
+      }
+      .canvas {
+        position: relative;
+        overflow: hidden;
+        background:
+          radial-gradient(900px 520px at 100% 0%, rgba(204, 51, 51, 0.3), transparent 70%),
+          radial-gradient(700px 500px at 0% 100%, rgba(204, 51, 51, 0.14), transparent 70%), #121214;
+      }
+      .canvas::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        background-size: 22px 22px;
+        mask-image: linear-gradient(to bottom, #000, transparent 45%);
+      }
+      .hl {
+        color: #f2675a;
+      }
+      .frame {
+        position: absolute;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #000;
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.1),
+          0 30px 80px rgba(0, 0, 0, 0.6),
+          0 0 120px rgba(204, 51, 51, 0.12);
+      }
+      .frame img {
+        display: block;
+        width: 100%;
+      }
+
+      /* Screenshots 1280×800 */
+      .shot {
+        width: 1280px;
+        height: 800px;
+      }
+      .shot h1 {
+        position: absolute;
+        left: 140px;
+        top: 44px;
+        font-size: 44px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+      .shot p {
+        position: absolute;
+        left: 140px;
+        top: 104px;
+        font-size: 20px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.62);
+      }
+      .shot .logo {
+        position: absolute;
+        right: 140px;
+        top: 52px;
+        height: 36px;
+      }
+      .shot .frame {
+        left: 140px;
+        top: 158px;
+        width: 1000px;
+      }
+
+      /* Small promo 440×280 */
+      .small {
+        width: 440px;
+        height: 280px;
+        padding: 36px;
+      }
+      .small .icon {
+        width: 64px;
+        height: 64px;
+      }
+      .small .name {
+        position: absolute;
+        left: 116px;
+        top: 50px;
+        font-size: 34px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .small h2 {
+        margin-top: 26px;
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1.25;
+        letter-spacing: -0.01em;
+      }
+      .chips {
+        display: flex;
+        gap: 8px;
+        margin-top: 18px;
+      }
+      .chip {
+        font-size: 13px;
+        font-weight: 600;
+        padding: 6px 11px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.09);
+        color: rgba(255, 255, 255, 0.85);
+      }
+
+      /* Marquee 1400×560 */
+      .marquee {
+        width: 1400px;
+        height: 560px;
+      }
+      .marquee .text {
+        position: absolute;
+        left: 80px;
+        top: 96px;
+        width: 520px;
+      }
+      .marquee .logo {
+        height: 60px;
+      }
+      .marquee h2 {
+        margin-top: 40px;
+        font-size: 40px;
+        font-weight: 800;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+      }
+      .marquee ul {
+        margin-top: 28px;
+        padding: 0;
+        list-style: none;
+      }
+      .marquee li {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 21px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.8);
+        margin-top: 12px;
+      }
+      .marquee li::before {
+        content: '';
+        width: 9px;
+        height: 9px;
+        border-radius: 3px;
+        background: #cc3333;
+      }
+      .marquee .frame {
+        left: 650px;
+        top: 64px;
+        width: 900px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      const shots = {
+        1: [
+          'Dual subtitles on <span class="hl">YouTube</span>',
+          'Click a word to see its meaning and example sentences.',
+          'yt.png',
+        ],
+        2: [
+          'Find videos in your <span class="hl">study language</span>',
+          'Channel lists for 18 languages. Badges show human-made subtitles.',
+          'media.png',
+        ],
+        3: [
+          'Save words and <span class="hl">sentences</span>',
+          'Each word keeps its sentence and video. Export to Anki, CSV or JSON.',
+          'saved.png',
+        ],
+        4: [
+          'Review with <span class="hl">spaced repetition</span>',
+          'The FSRS scheduler shows each word again at the right time.',
+          'review.png',
+        ],
+        5: [
+          'Set your <span class="hl">vocabulary level</span>',
+          'LingoMingo marks the words you know and the words to learn next.',
+          'vocab.png',
+        ],
+      }
+      const k = location.hash.slice(1)
+      const root = document.getElementById('root')
+      if (shots[k]) {
+        const [h, p, img] = shots[k]
+        root.innerHTML = `<div class="canvas shot"><h1>${h}</h1><p>${p}</p><img class="logo" src="../../docs/logo-dark.svg"><div class="frame"><img src="shots/${img}"></div></div>`
+      } else if (k === 'small') {
+        root.innerHTML = `<div class="canvas small"><img class="icon" src="../../public/icons/icon.svg"><div class="name">LingoMingo</div>
+      <h2>Learn languages with<br>YouTube subtitles</h2>
+      <div class="chips"><span class="chip">Dual subtitles</span><span class="chip">Word popup</span><span class="chip">Review</span></div></div>`
+      } else if (k === 'marquee') {
+        root.innerHTML = `<div class="canvas marquee"><div class="text"><img class="logo" src="../../docs/logo-dark.svg">
+      <h2>Learn languages with the YouTube videos you like</h2>
+      <ul><li>Dual subtitles and a word popup</li><li>Save words, then review them</li><li>Free and open source, no account</li></ul></div>
+      <div class="frame"><img src="shots/yt.png"></div></div>`
+      }
+    </script>
+  </body>
+</html>

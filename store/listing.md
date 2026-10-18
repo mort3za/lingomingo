@@ -33,6 +33,8 @@ English
 
 The store icon has 96×96 art and 16 px of transparent space on each side, as the image guidelines ask. Screenshots and promo tiles are 24-bit PNG (no alpha).
 
+To make new screenshots and promo tiles, see [`screenshots.md`](screenshots.md).
+
 Screenshots, in upload order:
 
 1. Dual subtitles on YouTube: subtitle bar, word popup, subtitle list.

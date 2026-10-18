@@ -81,3 +81,7 @@ Branded Chrome ignores `--load-extension`. Use Chrome for Testing:
 
 6. To force AI subtitle translation, set the translation language (`nativeLang`) to a language with no human-made track on the video, for example `fa`.
 7. Close the browser when you are done: `agent-browser --session lm close`
+
+## Store and README screenshots
+
+To update the Chrome Web Store images and `docs/screenshot.jpg`, follow `store/screenshots.md`.
