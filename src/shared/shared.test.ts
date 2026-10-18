@@ -119,6 +119,19 @@ test('extractJson reads json inside text', () => {
   expect(extractJson('{"translations":["x"]}')).toEqual({ translations: ['x'] })
 })
 
+test('extractJson adds a missing closing quote and brackets', () => {
+  // A small model left out the quote after the last value.
+  expect(extractJson('```json\n{"translations":["at least"],"ipa":"tsuˈmɪndəst}\n```')).toEqual({
+    translations: ['at least'],
+    ipa: 'tsuˈmɪndəst',
+  })
+  // A cut answer: the open value is lost, the finished part stays.
+  expect(extractJson('{"translations":["x","y"],"ipa":"ts')).toEqual({ translations: ['x', 'y'] })
+  expect(extractJson('{"a":{"b":["x"]')).toEqual({ a: { b: ['x'] } })
+  // Other bad JSON still gives the error.
+  expect(() => extractJson('{"a":"x" "b"}')).toThrow()
+})
+
 test('finishedLines reads finished items from a part of an answer', () => {
   const part =
     '```json\n{\n  "1": ["sag \\"hi\\"", "say \\"hi\\""],\n  "2": ["zwei", "two"],\n  "3": ["drei", "thr'

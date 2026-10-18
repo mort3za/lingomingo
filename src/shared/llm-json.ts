@@ -3,7 +3,35 @@ export function extractJson(text: string): unknown {
   const open = text.search(/[[{]/)
   if (open === -1) throw new Error('No JSON in model answer')
   const close = Math.max(text.lastIndexOf(']'), text.lastIndexOf('}'))
-  return JSON.parse(text.slice(open, close + 1))
+  const json = text.slice(open, close + 1)
+  try {
+    return JSON.parse(json)
+  } catch (e) {
+    try {
+      return JSON.parse(closeJson(json))
+    } catch {
+      throw e
+    }
+  }
+}
+
+/** Add the closing quote and brackets that the model left out, or that a cut answer lost. */
+function closeJson(json: string): string {
+  let inString = false
+  const closers: string[] = []
+  for (let i = 0; i < json.length; i++) {
+    const c = json[i]
+    if (inString) {
+      if (c === '\\') i++
+      else if (c === '"') inString = false
+    } else if (c === '"') inString = true
+    else if (c === '{') closers.push('}')
+    else if (c === '[') closers.push(']')
+    else if (c === '}' || c === ']') closers.pop()
+  }
+  // The brackets at the end of an open string close the JSON: put the quote before them.
+  if (inString) json = json.replace(/[\s\]}]*$/, '') + '"'
+  return json + closers.reverse().join('')
 }
 
 /** Get the human message from an API error body (OpenAI, Claude or Ollama shape). Falls back to the raw text. */
