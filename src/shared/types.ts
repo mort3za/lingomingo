@@ -156,6 +156,8 @@ export interface Settings {
   darkenRare: boolean
   /** Channel IDs shown at the top of the channel list on the Media page. */
   pinnedChannels: string[]
+  /** Channels the user added to the Media page channel list, by study language. */
+  customChannels: Record<string, { id: string; name: string }[]>
   /** Media page: hide YouTube Shorts from the video list. */
   hideShorts: boolean
 }
@@ -207,6 +209,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showSuggested: true,
   darkenRare: true,
   pinnedChannels: [],
+  customChannels: {},
   hideShorts: false,
 }
 

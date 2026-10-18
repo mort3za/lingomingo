@@ -18,21 +18,27 @@ import {
   cachedChannelPhotos,
   channelPhoto,
   fetchChannelVideos,
+  findChannel,
   videoTracks,
   type CatalogueVideo,
+  type Channel,
   type TrackInfo,
 } from '../catalogue'
 
 const studyLang = ref('')
 const videos = ref<CatalogueVideo[]>([])
-const errors = ref<string[]>([])
-const loading = ref(false)
+const errors = ref<Record<string, string>>({}) // by channel ID
+const loadingAll = ref(false)
+const pending = ref(new Set<string>()) // channel IDs whose videos are loading
 const channelId = ref('') // '' = all channels
 const sort = ref<'date' | 'views'>('date')
 const query = ref('')
 const hideShorts = ref(false)
 
-const channels = computed(() => CHANNELS[studyLang.value] ?? [])
+// Channels the user added come first, newest first.
+const custom = ref<Channel[]>([])
+const channels = computed(() => [...custom.value, ...(CHANNELS[studyLang.value] ?? [])])
+const isCustom = (id: string) => custom.value.some((c) => c.id === id)
 
 // Pinned channels show first. Sort is stable, so each group keeps the catalogue order.
 const pinned = ref<string[]>([])
@@ -46,6 +52,7 @@ const channelSearch = ref(false)
 const channelQuery = ref('')
 const channelInput = useTemplateRef<HTMLInputElement>('channelInput')
 async function openChannelSearch() {
+  closeAddChannel()
   channelSearch.value = true
   await nextTick()
   channelInput.value?.focus()
@@ -67,15 +74,62 @@ function togglePin(id: string) {
   void patchSettings({ pinnedChannels: list })
 }
 
+// Add channel: the header shows a form in place of its title.
+const addOpen = ref(false)
+const addQuery = ref('')
+const addBusy = ref(false)
+const addError = ref('')
+const addInput = useTemplateRef<HTMLInputElement>('addInput')
+async function openAddChannel() {
+  closeChannelSearch()
+  addOpen.value = true
+  await nextTick()
+  addInput.value?.focus()
+}
+function closeAddChannel() {
+  addOpen.value = false
+  addQuery.value = ''
+  addError.value = ''
+}
+async function addChannel() {
+  if (addBusy.value || !addQuery.value.trim()) return
+  addBusy.value = true
+  addError.value = ''
+  try {
+    const found = await findChannel(addQuery.value)
+    // A channel already in the list is only picked.
+    if (!channels.value.some((c) => c.id === found.id)) await saveCustom([found, ...custom.value])
+    closeAddChannel()
+    pickChannel(found.id)
+  } catch (e) {
+    addError.value = e instanceof Error ? e.message : String(e)
+  } finally {
+    addBusy.value = false
+  }
+}
+async function removeChannel(id: string) {
+  if (pinned.value.includes(id)) togglePin(id)
+  await saveCustom(custom.value.filter((c) => c.id !== id))
+}
+async function saveCustom(list: Channel[]) {
+  // Plain objects: chrome.storage cannot save Vue proxies correctly.
+  const plain = list.map(({ id, name }) => ({ id, name }))
+  custom.value = plain
+  const { customChannels } = await getSettings()
+  await patchSettings({ customChannels: { ...customChannels, [studyLang.value]: plain } })
+}
+
 async function refreshLang() {
   const settings = await getSettings()
   // Older versions of the settings page saved this list as an object ({0: id, 1: id}).
   pinned.value = Object.values(settings.pinnedChannels)
   hideShorts.value = settings.hideShorts
   const lang = settings.studyLang
+  const added = settings.customChannels[lang] ?? []
   // Cached photos show together with their rows, not after the rows come into view.
-  const cached = await cachedChannelPhotos((CHANNELS[lang] ?? []).map((c) => c.id))
+  const cached = await cachedChannelPhotos([...added, ...(CHANNELS[lang] ?? [])].map((c) => c.id))
   photos.value = { ...photos.value, ...cached }
+  custom.value = added
   studyLang.value = lang
 }
 // "/" puts the cursor in the video search. Esc takes it out.
@@ -98,14 +152,44 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydown)
 })
 
+// A new study language loads the videos of all its channels. An added channel loads only its
+// own videos, and a removed channel takes its videos away.
+let loadedLang = ''
+const loaded = new Set<string>()
 watch(channels, async (list) => {
-  channelId.value = ''
-  loading.value = true
-  const results = await Promise.allSettled(list.map(fetchChannelVideos))
-  videos.value = results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
-  errors.value = results.flatMap((r) => (r.status === 'rejected' ? [String(r.reason)] : []))
-  loading.value = false
+  const lang = studyLang.value
+  if (lang !== loadedLang) {
+    loadedLang = lang
+    loaded.clear()
+    channelId.value = ''
+    videos.value = []
+    errors.value = {}
+    loadingAll.value = true
+  }
+  const ids = new Set(list.map((c) => c.id))
+  for (const id of loaded) if (!ids.has(id)) loaded.delete(id)
+  videos.value = videos.value.filter((v) => ids.has(v.channelId))
+  errors.value = Object.fromEntries(Object.entries(errors.value).filter(([id]) => ids.has(id)))
+  if (channelId.value && !ids.has(channelId.value)) channelId.value = ''
+
+  const todo = list.filter((c) => !loaded.has(c.id))
+  todo.forEach((c) => loaded.add(c.id))
+  pending.value = new Set([...pending.value, ...todo.map((c) => c.id)])
+  const results = await Promise.allSettled(todo.map(fetchChannelVideos))
+  if (lang !== loadedLang) return // the language changed while these loaded
+  results.forEach((r, i) => {
+    const id = todo[i]!.id
+    if (!loaded.has(id)) return // removed while it loaded
+    if (r.status === 'fulfilled') videos.value = [...videos.value, ...r.value]
+    else errors.value = { ...errors.value, [id]: String(r.reason) }
+  })
+  pending.value = new Set([...pending.value].filter((id) => !todo.some((c) => c.id === id)))
+  if (!pending.value.size) loadingAll.value = false
 })
+// One channel shows its own loading state. All channels show it only on the first load.
+const loading = computed(() =>
+  channelId.value ? pending.value.has(channelId.value) : loadingAll.value,
+)
 
 const visible = computed(() => videos.value.filter((v) => !hideShorts.value || !v.isShort))
 function pickChannel(id: string) {
@@ -219,6 +303,15 @@ const pinIcon = [
 // Tabler "search" and "x" icons.
 const searchIcon = ['M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0', 'M21 21l-6 -6']
 const closeIcon = ['M18 6l-12 12', 'M6 6l12 12']
+// Tabler "plus" and "trash" icons.
+const plusIcon = ['M12 5l0 14', 'M5 12l14 0']
+const trashIcon = [
+  'M4 7l16 0',
+  'M10 11l0 6',
+  'M14 11l0 6',
+  'M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12',
+  'M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3',
+]
 // Tabler "calendar" and "eye" icons for the sort buttons.
 const calendarIcon = [
   'M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12',
@@ -249,8 +342,44 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
       <div
         class="max-h-72 [scrollbar-width:thin] [scrollbar-gutter:stable] overflow-y-auto lg:max-h-none lg:overflow-visible"
       >
-        <!-- Same height in both states, so the list does not move when the search opens. -->
-        <div class="mb-2 flex h-8 items-center gap-2 ps-2">
+        <!-- Same height in all states, so the list does not move when the search opens. -->
+        <form
+          v-if="addOpen"
+          class="mb-2 flex h-8 items-center gap-2 ps-2"
+          @submit.prevent="addChannel"
+        >
+          <input
+            ref="addInput"
+            v-model="addQuery"
+            :class="field + ' h-8 min-w-0 flex-1'"
+            placeholder="Channel link or @handle"
+            aria-label="Channel link, @handle or channel ID"
+            :aria-invalid="!!addError"
+            aria-describedby="add-channel-hint"
+            :disabled="addBusy"
+            @input="addError = ''"
+            @keydown.esc="closeAddChannel"
+          />
+          <button
+            type="submit"
+            class="rounded p-1 text-neutral-400 hover:bg-fg/10 hover:text-fg disabled:opacity-40"
+            title="Add channel"
+            aria-label="Add channel"
+            :disabled="addBusy || !addQuery.trim()"
+          >
+            <svg v-bind="iconAttrs"><path v-for="d in plusIcon" :key="d" :d="d" /></svg>
+          </button>
+          <button
+            type="button"
+            class="rounded p-1 text-neutral-400 hover:bg-fg/10 hover:text-fg"
+            title="Close"
+            aria-label="Close"
+            @click="closeAddChannel"
+          >
+            <svg v-bind="iconAttrs"><path v-for="d in closeIcon" :key="d" :d="d" /></svg>
+          </button>
+        </form>
+        <div v-else class="mb-2 flex h-8 items-center gap-2 ps-2">
           <input
             v-if="channelSearch"
             ref="channelInput"
@@ -259,7 +388,17 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
             placeholder="Search channels"
             @keydown.esc="closeChannelSearch"
           />
-          <span v-else class="flex-1 text-neutral-400">Channel</span>
+          <template v-else>
+            <span class="flex-1 text-neutral-400">Channel</span>
+            <button
+              class="rounded p-1 text-neutral-400 hover:bg-fg/10 hover:text-fg"
+              title="Add a YouTube channel"
+              aria-label="Add a YouTube channel"
+              @click="openAddChannel"
+            >
+              <svg v-bind="iconAttrs"><path v-for="d in plusIcon" :key="d" :d="d" /></svg>
+            </button>
+          </template>
           <button
             class="rounded p-1 text-neutral-400 hover:bg-fg/10 hover:text-fg"
             :title="channelSearch ? 'Close search' : 'Search channels'"
@@ -271,6 +410,20 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
             </svg>
           </button>
         </div>
+        <!-- Two lines are reserved, so the list does not move when the message changes. -->
+        <p
+          v-if="addOpen"
+          id="add-channel-hint"
+          class="mb-2 line-clamp-2 h-8 px-2 text-xs"
+          :class="addError ? 'text-red-400' : 'text-neutral-400'"
+          aria-live="polite"
+        >
+          {{
+            addBusy
+              ? 'Looking for the channel…'
+              : addError || 'Paste a channel link, @handle or channel ID, then press Enter.'
+          }}
+        </p>
         <button :class="row + (channelId === '' ? 'bg-panel' : '')" @click="pickChannel('')">
           <span class="grid size-9 place-items-center rounded bg-accent font-semibold text-white">
             {{ studyLang.toUpperCase() }}
@@ -304,6 +457,15 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
             {{ c.name[0] }}
           </span>
           <span class="flex-1 truncate">{{ c.name }}</span>
+          <button
+            v-if="isCustom(c.id)"
+            class="relative z-10 rounded p-0.5 text-neutral-400 opacity-0 group-hover:opacity-100 hover:bg-fg/10 hover:text-fg focus-visible:opacity-100"
+            title="Remove channel"
+            :aria-label="`Remove ${c.name}`"
+            @click="removeChannel(c.id)"
+          >
+            <svg v-bind="iconAttrs"><path v-for="d in trashIcon" :key="d" :d="d" /></svg>
+          </button>
           <button
             class="relative z-10 rounded p-0.5 hover:bg-fg/10"
             :class="
@@ -379,11 +541,16 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
         </div>
       </div>
 
-      <p v-for="e in errors" :key="e" class="rounded bg-red-900/40 px-3 py-2 text-sm text-red-200">
+      <p
+        v-for="(e, id) in errors"
+        :key="id"
+        class="rounded bg-red-900/40 px-3 py-2 text-sm text-red-200"
+      >
         Could not load channel. {{ e }}
       </p>
       <p v-if="!channels.length" class="py-12 text-center text-neutral-500">
         No channels for {{ LANGUAGES[studyLang] ?? studyLang }} yet.
+        <button class="text-accent hover:underline" @click="openAddChannel">Add a channel</button>
       </p>
       <p v-else-if="loading" class="py-12 text-center text-neutral-500">Loading videos…</p>
       <p v-else-if="!shown.length" class="py-12 text-center text-neutral-500">No videos found.</p>

@@ -4648,6 +4648,56 @@ async function readFeed(channel: Channel, query: string): Promise<CatalogueVideo
   }))
 }
 
+/**
+ * Channel page URL for what the user typed: a channel link, an @handle or a channel ID.
+ * Null if it is not one of these.
+ */
+export function channelUrl(input: string): string | null {
+  const s = input.trim()
+  if (!s) return null
+  if (!s.includes('/')) {
+    if (/^UC[\w-]{22}$/.test(s)) return `https://www.youtube.com/channel/${s}`
+    if (/\s/.test(s)) return null
+    return `https://www.youtube.com/@${encodeURIComponent(s.replace(/^@/, ''))}`
+  }
+  let url: URL
+  try {
+    url = new URL(/^https?:\/\//i.test(s) ? s : `https://${s}`)
+  } catch {
+    return null
+  }
+  if (!/(^|\.)youtube\.com$/.test(url.hostname)) return null
+  const path = url.pathname.match(/^\/(@[^/]+|channel\/UC[\w-]{22}|c\/[^/]+|user\/[^/]+)/)?.[1]
+  return path ? `https://www.youtube.com/${path}` : null
+}
+
+/**
+ * Channel ID and name for what the user typed (see `channelUrl`). Reads the `og:title` and
+ * `og:url` tags of the channel page. They are about 800 KB in, so it stops reading there.
+ */
+export async function findChannel(input: string): Promise<Channel> {
+  const url = channelUrl(input)
+  if (!url) throw new Error('This is not a YouTube channel link, @handle or channel ID.')
+  // ucbcb=1: in the EU, without it the page redirects to consent.youtube.com (no CORS access).
+  const res = await fetch(`${url}?ucbcb=1`)
+  if (res.status === 404) throw new Error('Channel not found.')
+  if (!res.ok || !res.body) throw new Error(`Could not load the channel page (HTTP ${res.status}).`)
+  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader()
+  let html = ''
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) throw new Error('Channel not found.')
+    html += value
+    const m = html.match(
+      /<meta property="og:title" content="([^"]*)"[\s\S]*?<meta property="og:url" content="https:\/\/www\.youtube\.com\/channel\/(UC[\w-]{22})"/,
+    )
+    if (!m) continue
+    void reader.cancel()
+    const name = new DOMParser().parseFromString(m[1]!, 'text/html').documentElement.textContent
+    return { id: m[2]!, name: name || m[2]! }
+  }
+}
+
 const PHOTO_TTL = 30 * 86400_000
 
 interface CachedPhoto {
