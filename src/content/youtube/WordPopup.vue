@@ -160,7 +160,6 @@ const style = computed(() => {
   const y = below ? props.rect.bottom + 10 : props.rect.top - 10
   return { left: `${x}px`, top: `${y}px` }
 })
-// The arrow points at the word, also when the popup is pushed in from the screen edge.
 // Keys while the popup is open. The overlay sends them here. True = the key was used.
 const speak = (text: string) => {
   const t = text.replaceAll('*', '')
@@ -187,6 +186,7 @@ function onKey(e: KeyboardEvent): boolean {
   return !!run
 }
 defineExpose({ onKey })
+// The arrow points at the word, also when the popup is pushed in from the screen edge.
 const arrowLeft = `calc(50% + ${Math.min(Math.max(center - x, -144), 144)}px)`
 // A little lighter than the side panel, so the popup stands out on it.
 const bg = 'bg-[color-mix(in_srgb,white_5%,var(--color-panel))]'
