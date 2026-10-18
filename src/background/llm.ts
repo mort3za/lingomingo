@@ -2,14 +2,31 @@ import { errorMessage, extractJson, finishedLines, matchLine } from '@/shared/ll
 import type { Have, WordExtras, WordTranslation } from '@/shared/messages'
 import { wordKey } from '@/shared/tokenize'
 import { LANGUAGES, type Settings } from '@/shared/types'
+import { createQueue } from './queue'
 
 /** `onText` turns on streaming: it gets the whole answer so far after each new piece. */
 interface Call {
   signal?: AbortSignal
   onText?: (text: string) => void
+  /** Place in the local model queue, see `PRIORITY`. Default: `PRIORITY.lines`. */
+  priority?: number
 }
 
-async function ask(
+/** Lower goes first: the user waits for a word, but subtitle lines are asked ahead of time. */
+const PRIORITY = { word: 0, extras: 1, lines: 2 }
+
+// A local server does one request at a time, and the others wait there in order. Here they wait
+// in our queue, so a word request does not wait behind subtitle lines that are not needed yet.
+const localQueue = createQueue()
+const LOCAL = new Set(['ollama', 'lmstudio', 'local'])
+
+function ask(settings: Settings, system: string, user: string, call: Call = {}): Promise<string> {
+  const send = () => request(settings, system, user, call)
+  if (!LOCAL.has(settings.provider)) return send()
+  return localQueue(call.priority ?? PRIORITY.lines, send, call.signal)
+}
+
+async function request(
   settings: Settings,
   system: string,
   user: string,
@@ -354,7 +371,10 @@ export async function translateWord(
     `words have no expression: then leave "phrase" out. Words that are only used together (a ` +
     `verb with its object, place or adverb, like "go to the park" or "run fast") are not an ` +
     `expression. Never give only the dictionary form of the word.`
-  return parseWordAnswer(await ask(settings, system, JSON.stringify({ word, sentence })), word)
+  return parseWordAnswer(
+    await ask(settings, system, JSON.stringify({ word, sentence }), { priority: PRIORITY.word }),
+    word,
+  )
 }
 
 /** Study languages where nouns have an article that shows their gender, with an example. */
@@ -423,7 +443,9 @@ export async function wordExtras(
       words.map((w, i) => [i + 1, { word: w.word, sentence: w.sentence ?? '', have: w.have }]),
     ),
   )
-  const out = extractJson(await ask(settings, system, user)) as Record<string, unknown>
+  const out = extractJson(
+    await ask(settings, system, user, { priority: PRIORITY.extras }),
+  ) as Record<string, unknown>
   const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
   return words.map((w, i) => {
     const r = out[i + 1] as
