@@ -140,6 +140,9 @@ export function useYoutubeSession() {
   const studying = () => showSubs.value || showPanel.value
   // A video in the translation language: show its subtitles only, with no translation.
   const translates = computed(() => lang.value !== settings.value.nativeLang)
+  // The toggles start from, and save to, the last user choice. Videos in the translation
+  // language start with both off and do not save a change, unless the user set otherwise.
+  const regular = () => translates.value || settings.value.nativeVideosLikeOthers
 
   const translationOf = (i: number): string | null => human.value[i] ?? machine.value[i] ?? null
 
@@ -223,9 +226,9 @@ export function useYoutubeSession() {
         message.value = `No ${LANGUAGES[code] ?? code} subtitles on this video.`
         return
       }
-      showSubs.value = settings.value.showSubtitles
+      showSubs.value = regular() && settings.value.showSubtitles
       // The list covers half of a Shorts player, so it starts closed there.
-      showPanel.value = settings.value.showSubtitlesList && !isShorts()
+      showPanel.value = regular() && settings.value.showSubtitlesList && !isShorts()
       const nativeTrack = translates.value ? pickTrack(info.tracks, nativeLang) : null
       const { study: studyCues, native: nativeCues } = await videoCaptions(
         id,
@@ -373,12 +376,13 @@ export function useYoutubeSession() {
     patchSettings({ subtitlesOnTop: !settings.value.subtitlesOnTop })
 
   // The user toggles: a change is saved and used for the next videos. On Shorts the list
-  // always starts closed, so a change there is not saved.
+  // always starts closed, so a change there is not saved. See `regular` for other videos.
   const remembered = (on: Ref<boolean>, key: 'showSubtitles' | 'showSubtitlesList') =>
     computed({
       get: () => on.value,
       set: (value) => {
         on.value = value
+        if (!regular()) return
         if (key === 'showSubtitles' || !isShorts()) void patchSettings({ [key]: value })
       },
     })

@@ -115,6 +115,16 @@ const check = 'flex items-center gap-2 text-sm'
           <input v-model="settings.hideTranslation" type="checkbox" />
           Hide translation line
         </label>
+        <label class="flex cursor-pointer items-start gap-2">
+          <input v-model="settings.nativeVideosLikeOthers" type="checkbox" class="mt-1" />
+          <span class="flex-1">
+            <span class="block text-sm">Treat videos in your translation language like others</span>
+            <span class="block text-xs text-neutral-500">
+              Off: these videos start with the subtitles and the list off. You can turn them on in
+              the player, but that choice is not saved for the next videos.
+            </span>
+          </span>
+        </label>
       </div>
     </section>
 
