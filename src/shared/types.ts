@@ -251,7 +251,9 @@ export const LANGUAGES: Record<string, string> = {
   uk: 'Ukrainian',
 }
 
-const RTL_LANGUAGES = new Set(['ar', 'fa', 'he', 'ur'])
+// `iw` is YouTube's old code for Hebrew.
+const RTL_LANGUAGES = new Set(['ar', 'fa', 'he', 'iw', 'ur', 'ps', 'sd', 'ug', 'yi', 'ckb', 'dv'])
 
-/** Text direction of a language, for the `dir` attribute. */
-export const dirOf = (lang: string) => (RTL_LANGUAGES.has(lang) ? 'rtl' : 'ltr')
+/** Text direction of a language (also `fa-IR`), for the `dir` attribute. */
+export const dirOf = (lang: string) =>
+  RTL_LANGUAGES.has(lang.toLowerCase().split(/[-_]/)[0] ?? '') ? 'rtl' : 'ltr'

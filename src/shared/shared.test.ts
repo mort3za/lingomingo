@@ -280,6 +280,14 @@ test('dirOf gives rtl for Persian and Arabic, ltr for others', () => {
   expect(dirOf('en')).toBe('ltr')
 })
 
+test('dirOf knows YouTube codes and region codes', () => {
+  expect(dirOf('iw')).toBe('rtl') // YouTube's old code for Hebrew
+  expect(dirOf('fa-IR')).toBe('rtl')
+  expect(dirOf('ar_EG')).toBe('rtl')
+  expect(dirOf('ur')).toBe('rtl')
+  expect(dirOf('en-US')).toBe('ltr')
+})
+
 const word = (over: Partial<SavedWord> = {}): SavedWord => ({
   id: 'w:de:haus',
   itemType: 'WORD',
