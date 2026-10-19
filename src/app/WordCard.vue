@@ -146,11 +146,13 @@ const hide = computed(() =>
             </span>
             <span v-else-if="loading" :class="skeleton + ' inline-block h-3.5 w-2/3'" />
           </p>
+          <!-- `me-auto` pushes the link to its own start side: the right for an RTL title. -->
           <a
             v-if="s.video && word.source"
             :href="watchUrl(word)"
             target="_blank"
-            class="mt-0.5 inline-block max-w-full truncate text-xs text-neutral-500 hover:text-fg hover:underline"
+            class="me-auto mt-0.5 block w-fit max-w-full truncate text-xs text-neutral-500 hover:text-fg hover:underline"
+            dir="auto"
             >{{ word.source.title || 'YouTube' }}</a
           >
         </div>
