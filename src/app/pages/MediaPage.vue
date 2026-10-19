@@ -456,7 +456,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           >
             {{ c.name[0] }}
           </span>
-          <span class="flex-1 truncate">{{ c.name }}</span>
+          <span class="flex-1 truncate text-start" dir="auto">{{ c.name }}</span>
           <button
             v-if="isCustom(c.id)"
             class="relative z-10 rounded p-0.5 text-neutral-400 opacity-0 group-hover:opacity-100 hover:bg-fg/10 hover:text-fg focus-visible:opacity-100"
@@ -534,8 +534,8 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
         </div>
         <!-- Fixed height, so the list does not move when the count appears. -->
         <div class="h-5 truncate text-sm text-neutral-400">
-          {{ channelName
-          }}<template v-if="!loading && channels.length">
+          <bdi>{{ channelName }}</bdi
+          ><template v-if="!loading && channels.length">
             · {{ shown.length }} {{ shown.length === 1 ? 'video' : 'videos' }}</template
           >
         </div>
@@ -570,8 +570,8 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           class="aspect-video w-full shrink-0 rounded object-cover sm:w-54"
         />
         <div class="min-w-0 space-y-1 px-1 sm:px-0 sm:pt-1">
-          <div class="line-clamp-2 text-fg sm:truncate sm:text-lg">{{ v.title }}</div>
-          <div class="text-sm text-neutral-400">{{ v.channelName }}</div>
+          <div class="line-clamp-2 text-fg sm:truncate sm:text-lg" dir="auto">{{ v.title }}</div>
+          <div class="text-sm text-neutral-400" dir="auto">{{ v.channelName }}</div>
           <div class="text-sm text-neutral-400">
             {{ ago(v.published) }} • {{ compact.format(v.views) }} views
             <span

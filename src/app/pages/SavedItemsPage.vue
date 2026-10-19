@@ -275,7 +275,7 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
           <td class="hidden p-2 sm:table-cell" :class="stageColor[i.stage]">
             {{ stageLabel[i.stage] }}
           </td>
-          <td class="hidden p-2 md:table-cell">
+          <td class="hidden p-2 text-start md:table-cell" dir="auto">
             <a
               v-if="i.source"
               :href="watchUrl(i)"
