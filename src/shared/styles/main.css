@@ -54,6 +54,13 @@
   }
 }
 
+/* Typed text takes the direction of its first letter, so Persian or Arabic runs right-to-left.
+   The box (padding, icons) does not change. */
+input,
+textarea {
+  unicode-bidi: plaintext;
+}
+
 /* Dropdowns: own chevron instead of the browser one. Not in a layer, so the right padding
    wins over `px-*` utilities and the text never runs under the chevron. */
 select {
