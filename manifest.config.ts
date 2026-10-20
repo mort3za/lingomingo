@@ -7,8 +7,11 @@ export default defineManifest(({ command, mode }) => {
 
   return {
     manifest_version: 3,
+    // The name is the brand and stays the same in all languages. The description is in
+    // public/_locales/<language>/messages.json.
     name: 'LingoMingo',
-    description: 'Learn languages with YouTube.',
+    description: '__MSG_extDescription__',
+    default_locale: 'en',
     version: pkg.version,
     // PNGs are made from public/icons/icon.svg (blue dev icon: public/icons/dev/icon.svg).
     icons: {
