@@ -99,6 +99,8 @@ export type Voice = 'browser' | 'openai' | 'gemini' | 'local'
 export interface Settings {
   /** Off: LingoMingo shows nothing on YouTube. */
   enabled: boolean
+  /** Language of the LingoMingo interface. Empty: the browser language. */
+  uiLang: string
   studyLang: string
   nativeLang: string
   provider: Provider
@@ -164,6 +166,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   enabled: true,
+  uiLang: '',
   studyLang: 'de',
   nativeLang: 'en',
   provider: 'claude',
