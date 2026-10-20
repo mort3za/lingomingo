@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
+import { t } from '@/shared/i18n'
 import type { Phrase, WordInfo } from '@/shared/messages'
 import { tokenize } from '@/shared/tokenize'
 import { EXPRESSION_TAG, type Example, type Stage } from '@/shared/types'
@@ -82,8 +83,8 @@ function onHintKey(e: KeyboardEvent) {
 
 usePlayerToggles(
   [
-    { label: 'LingoMingo subtitles (Shift+C)', icon: ICONS.subtitles, on: s.showSubs },
-    { label: 'LingoMingo subtitles list (Shift+S)', icon: ICONS.sidebar, on: s.showPanel },
+    { label: 'yt.toggleSubs', icon: ICONS.subtitles, on: s.showSubs },
+    { label: 'yt.toggleList', icon: ICONS.sidebar, on: s.showPanel },
   ],
   () => active.value,
 )
@@ -299,7 +300,7 @@ onBeforeUnmount(() => {
       v-if="hint"
       class="absolute top-3 left-1/2 -translate-x-1/2 rounded-full bg-panel/90 px-3 py-1 font-sans text-xs whitespace-nowrap text-fg shadow-lg shadow-black/40"
     >
-      Type a letter to open the word · Shift+letter: Learn · E or Esc: exit
+      {{ t('yt.hintBanner') }}
     </div>
     <SubtitleBar
       v-if="s.showSubs.value"

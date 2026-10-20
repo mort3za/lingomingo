@@ -1,4 +1,5 @@
-import { createApp, type Component } from 'vue'
+import { createApp, watchEffect, type Component } from 'vue'
+import { locale, uiDir } from '@/shared/i18n'
 import css from '@/shared/styles/main.css?inline'
 
 /**
@@ -36,6 +37,11 @@ export function shadowHost(): { host: HTMLElement; root: HTMLElement } {
   style.textContent = `:host { all: initial; }\n${pxCss}`
 
   const root = document.createElement('div')
+  // The UI inside follows the interface language. The host, and so its place on the page, does not.
+  watchEffect(() => {
+    root.lang = locale.value
+    root.dir = uiDir()
+  })
   shadow.append(style, root)
   return { host, root }
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { t } from '@/shared/i18n'
 import { SHORTCUTS } from './shortcuts'
 
 const emit = defineEmits<{ close: [] }>()
@@ -10,6 +11,13 @@ const route = useRoute()
 const groups = computed(() =>
   [...SHORTCUTS].sort((a, b) => Number(b.route === route.path) - Number(a.route === route.path)),
 )
+// Names on the keys stay in English, like on most keyboards. Only the words for "any letter"
+// and the mouse click are translated.
+const keyName = (k: string) =>
+  k
+    .replace('Letter', t('key.letter'))
+    .replace('Click', t('key.click'))
+    .replace('Space', t('key.space'))
 </script>
 
 <template>
@@ -24,17 +32,21 @@ const groups = computed(() =>
       class="flex max-h-full w-full max-w-3xl flex-col gap-4 rounded-lg bg-panel p-4 shadow-xl sm:p-6"
     >
       <div class="flex items-center justify-between">
-        <h2 id="shortcuts-title" class="text-xl font-semibold">Keyboard shortcuts</h2>
-        <button class="text-xl text-fg/60 hover:text-fg" title="Close (Esc)" @click="emit('close')">
+        <h2 id="shortcuts-title" class="text-xl font-semibold">{{ t('sc.title') }}</h2>
+        <button
+          class="text-xl text-fg/60 hover:text-fg"
+          :title="t('common.closeEsc')"
+          @click="emit('close')"
+        >
           ✕
         </button>
       </div>
       <div class="grid min-h-0 gap-x-8 gap-y-6 overflow-y-auto md:grid-cols-2">
         <section v-for="g in groups" :key="g.title">
           <h3 class="mb-2 text-sm font-medium text-neutral-400 uppercase">
-            {{ g.title }}
-            <span v-if="g.route === route.path" class="ml-1 text-accent normal-case">
-              · this page
+            {{ t(g.title) }}
+            <span v-if="g.route === route.path" class="ms-1 text-accent normal-case">
+              {{ t('sc.thisPage') }}
             </span>
           </h3>
           <dl class="space-y-1.5 text-sm">
@@ -43,7 +55,7 @@ const groups = computed(() =>
               :key="s.label"
               class="flex items-center justify-between gap-4"
             >
-              <dt class="text-neutral-200">{{ s.label }}</dt>
+              <dt class="text-neutral-200">{{ t(s.label) }}</dt>
               <dd class="flex shrink-0 items-center gap-1 text-xs text-neutral-500">
                 <template v-for="(alt, i) in s.keys" :key="i">
                   <span v-if="i">/</span>
@@ -51,7 +63,7 @@ const groups = computed(() =>
                     v-for="k in alt"
                     :key="k"
                     class="min-w-6 rounded border border-fg/20 bg-surface-deep px-1.5 py-0.5 text-center font-sans text-neutral-200"
-                    >{{ k }}</kbd
+                    >{{ keyName(k) }}</kbd
                   >
                 </template>
               </dd>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, shallowRef } from 'vue'
+import { formatNumber, T, t } from '@/shared/i18n'
 import { tokenize } from '@/shared/tokenize'
 import { dirOf } from '@/shared/types'
 import {
@@ -23,7 +24,7 @@ onMounted(async () => {
   try {
     list.value = await loadWordList(props.lang)
   } catch {
-    error.value = 'Could not load the word list.'
+    error.value = t('vocab.loadError')
   }
 })
 
@@ -63,25 +64,26 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
       class="flex max-h-full w-full max-w-5xl flex-col gap-4 rounded-lg bg-panel p-4 shadow-xl sm:p-6"
     >
       <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-semibold">Set Vocabulary Level</h2>
-        <button class="text-xl text-fg/60 hover:text-fg" title="Close" @click="emit('close')">
+        <h2 class="text-2xl font-semibold">{{ t('vocab.title') }}</h2>
+        <button
+          class="text-xl text-fg/60 hover:text-fg"
+          :title="t('common.close')"
+          @click="emit('close')"
+        >
           ✕
         </button>
       </div>
 
       <div class="grid min-h-0 flex-1 gap-6 md:grid-cols-2">
         <div class="flex min-h-0 flex-col gap-3">
-          <p class="text-sm text-neutral-300">
-            Below are words of increasing difficulty. Please click on the last row where you can
-            understand all the words (scroll to see all).
-          </p>
+          <p class="text-sm text-neutral-300">{{ t('vocab.intro') }}</p>
           <div v-if="error" class="text-sm text-red-300">{{ error }}</div>
           <div class="max-h-[55vh] overflow-y-auto rounded bg-surface-deep">
             <button
               v-for="row in rows"
               :key="row.rank"
               :class="
-                'flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-fg/5 ' +
+                'flex w-full items-center gap-3 px-3 py-2 text-start hover:bg-fg/5 ' +
                 (row.rank === picked
                   ? 'border-b-2 border-dashed border-emerald-300'
                   : 'border-b border-fg/5')
@@ -89,10 +91,10 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
               @click="picked = row.rank"
             >
               <span class="w-12 shrink-0 text-xs text-neutral-500 tabular-nums">{{
-                row.rank
+                formatNumber(row.rank, { useGrouping: false })
               }}</span>
               <span v-if="row.rank === 0" class="flex-1 text-center text-neutral-300">
-                I don't know any words yet.
+                {{ t('vocab.none') }}
               </span>
               <span v-else class="flex flex-1 flex-wrap gap-x-4 gap-y-0.5" :dir="dirOf(lang)">
                 <span v-for="w in row.words" :key="w" class="whitespace-nowrap" :class="style(w)">{{
@@ -104,7 +106,7 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
         </div>
 
         <div class="flex min-h-0 flex-col gap-3">
-          <h3 class="text-center font-medium">Example Text:</h3>
+          <h3 class="text-center font-medium">{{ t('vocab.example') }}</h3>
           <div
             class="max-h-[40vh] overflow-y-auto rounded border border-fg/10 p-4 leading-relaxed"
             :dir="dirOf(lang)"
@@ -116,21 +118,23 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
           </div>
           <label class="flex items-center gap-2 text-sm text-emerald-300">
             <input v-model="showKnownGreen" type="checkbox" />
-            Show Known words in green
+            {{ t('vocab.showKnown') }}
           </label>
           <label class="flex items-center gap-2 text-sm text-fg/45">
             <input v-model="darkenRare" type="checkbox" />
-            Darken rare words
+            {{ t('vocab.darkenRare') }}
           </label>
           <p class="mt-auto text-xs text-neutral-500">
-            Word lists:
-            <a
-              href="https://github.com/hermitdave/FrequencyWords"
-              target="_blank"
-              class="underline hover:text-fg"
-              >FrequencyWords</a
-            >
-            (OpenSubtitles), CC BY-SA 4.0.
+            <T k="vocab.credit">
+              <template #link>
+                <a
+                  href="https://github.com/hermitdave/FrequencyWords"
+                  target="_blank"
+                  class="underline hover:text-fg"
+                  >FrequencyWords</a
+                >
+              </template>
+            </T>
           </p>
         </div>
       </div>
@@ -141,7 +145,7 @@ const sample = computed(() => tokenize(VOCAB_SAMPLES[props.lang] ?? '', props.la
           :disabled="!list"
           @click="emit('set', picked)"
         >
-          Set vocabulary level
+          {{ t('vocab.set') }}
         </button>
       </div>
     </div>

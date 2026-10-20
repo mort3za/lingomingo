@@ -10,7 +10,7 @@ import {
   type Directive,
 } from 'vue'
 import { getSettings, onStorageKey, patchSettings } from '@/shared/storage'
-import { LANGUAGES } from '@/shared/types'
+import { formatNumber, langName, locale, t } from '@/shared/i18n'
 import { pickTrack } from '@/shared/captions'
 import { ignoreKey } from '../shortcuts'
 import {
@@ -198,7 +198,7 @@ function pickChannel(id: string) {
 }
 const countOf = (id: string) => visible.value.filter((v) => v.channelId === id).length
 const channelName = computed(
-  () => channels.value.find((c) => c.id === channelId.value)?.name ?? 'All channels',
+  () => channels.value.find((c) => c.id === channelId.value)?.name ?? t('media.allChannels'),
 )
 const shown = computed(() => {
   const q = query.value.toLowerCase()
@@ -273,7 +273,7 @@ function subsOf(id: string): 'cc' | 'auto' | 'none' | null {
   return !track ? 'none' : track.kind === 'asr' ? 'auto' : 'cc'
 }
 
-const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+const rtf = computed(() => new Intl.RelativeTimeFormat(locale.value, { numeric: 'auto' }))
 const units: [Intl.RelativeTimeFormatUnit, number][] = [
   ['year', 365 * 86400],
   ['month', 30 * 86400],
@@ -285,9 +285,9 @@ const units: [Intl.RelativeTimeFormatUnit, number][] = [
 function ago(ms: number) {
   const s = (ms - Date.now()) / 1000
   const [unit, size] = units.find(([, size]) => Math.abs(s) >= size) ?? ['minute', 60]
-  return rtf.format(Math.trunc(s / size), unit)
+  return rtf.value.format(Math.trunc(s / size), unit)
 }
-const compact = new Intl.NumberFormat('en', { notation: 'compact' })
+const compact = (n: number) => formatNumber(n, { notation: 'compact' })
 
 const watchUrl = (v: CatalogueVideo) => `https://www.youtube.com/watch?v=${v.videoId}`
 const thumbUrl = (v: CatalogueVideo) => `https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`
@@ -352,8 +352,8 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
             ref="addInput"
             v-model="addQuery"
             :class="field + ' h-8 min-w-0 flex-1'"
-            placeholder="Channel link or @handle"
-            aria-label="Channel link, @handle or channel ID"
+            :placeholder="t('media.channelPlaceholder')"
+            :aria-label="t('media.channelInput')"
             :aria-invalid="!!addError"
             aria-describedby="add-channel-hint"
             :disabled="addBusy"
@@ -363,8 +363,8 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           <button
             type="submit"
             class="rounded p-1 text-neutral-400 hover:bg-fg/10 hover:text-fg disabled:opacity-40"
-            title="Add channel"
-            aria-label="Add channel"
+            :title="t('media.addChannel')"
+            :aria-label="t('media.addChannel')"
             :disabled="addBusy || !addQuery.trim()"
           >
             <svg v-bind="iconAttrs"><path v-for="d in plusIcon" :key="d" :d="d" /></svg>
@@ -372,8 +372,8 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           <button
             type="button"
             class="rounded p-1 text-neutral-400 hover:bg-fg/10 hover:text-fg"
-            title="Close"
-            aria-label="Close"
+            :title="t('common.close')"
+            :aria-label="t('common.close')"
             @click="closeAddChannel"
           >
             <svg v-bind="iconAttrs"><path v-for="d in closeIcon" :key="d" :d="d" /></svg>
@@ -385,15 +385,15 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
             ref="channelInput"
             v-model="channelQuery"
             :class="field + ' h-8 min-w-0 flex-1'"
-            placeholder="Search channels"
+            :placeholder="t('media.searchChannels')"
             @keydown.esc="closeChannelSearch"
           />
           <template v-else>
-            <span class="flex-1 text-neutral-400">Channel</span>
+            <span class="flex-1 text-neutral-400">{{ t('media.channel') }}</span>
             <button
               class="rounded p-1 text-neutral-400 hover:bg-fg/10 hover:text-fg"
-              title="Add a YouTube channel"
-              aria-label="Add a YouTube channel"
+              :title="t('media.addYoutubeChannel')"
+              :aria-label="t('media.addYoutubeChannel')"
               @click="openAddChannel"
             >
               <svg v-bind="iconAttrs"><path v-for="d in plusIcon" :key="d" :d="d" /></svg>
@@ -401,8 +401,8 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           </template>
           <button
             class="rounded p-1 text-neutral-400 hover:bg-fg/10 hover:text-fg"
-            :title="channelSearch ? 'Close search' : 'Search channels'"
-            :aria-label="channelSearch ? 'Close search' : 'Search channels'"
+            :title="channelSearch ? t('media.closeSearch') : t('media.searchChannels')"
+            :aria-label="channelSearch ? t('media.closeSearch') : t('media.searchChannels')"
             @click="channelSearch ? closeChannelSearch() : openChannelSearch()"
           >
             <svg v-bind="iconAttrs">
@@ -418,17 +418,13 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           :class="addError ? 'text-red-400' : 'text-neutral-400'"
           aria-live="polite"
         >
-          {{
-            addBusy
-              ? 'Looking for the channel…'
-              : addError || 'Paste a channel link, @handle or channel ID, then press Enter.'
-          }}
+          {{ addBusy ? t('media.looking') : addError || t('media.addHint') }}
         </p>
         <button :class="row + (channelId === '' ? 'bg-panel' : '')" @click="pickChannel('')">
           <span class="grid size-9 place-items-center rounded bg-accent font-semibold text-white">
             {{ studyLang.toUpperCase() }}
           </span>
-          <span class="flex-1">All channels</span>
+          <span class="flex-1">{{ t('media.allChannels') }}</span>
         </button>
         <div
           v-for="c in foundChannels"
@@ -460,8 +456,8 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           <button
             v-if="isCustom(c.id)"
             class="relative z-10 rounded p-0.5 text-neutral-400 opacity-0 group-hover:opacity-100 hover:bg-fg/10 hover:text-fg focus-visible:opacity-100"
-            title="Remove channel"
-            :aria-label="`Remove ${c.name}`"
+            :title="t('media.removeChannel')"
+            :aria-label="t('media.removeNamed', { name: c.name })"
             @click="removeChannel(c.id)"
           >
             <svg v-bind="iconAttrs"><path v-for="d in trashIcon" :key="d" :d="d" /></svg>
@@ -473,8 +469,8 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
                 ? 'text-accent'
                 : 'text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-fg focus-visible:opacity-100'
             "
-            :title="pinned.includes(c.id) ? 'Unpin channel' : 'Pin channel to top'"
-            :aria-label="pinned.includes(c.id) ? 'Unpin channel' : 'Pin channel to top'"
+            :title="pinned.includes(c.id) ? t('media.unpin') : t('media.pin')"
+            :aria-label="pinned.includes(c.id) ? t('media.unpin') : t('media.pin')"
             :aria-pressed="pinned.includes(c.id)"
             @click="togglePin(c.id)"
           >
@@ -482,10 +478,12 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
               <path v-for="d in pinIcon" :key="d" :d="d" />
             </svg>
           </button>
-          <span class="rounded bg-fg/10 px-1.5 text-xs text-neutral-300">{{ countOf(c.id) }}</span>
+          <span class="rounded bg-fg/10 px-1.5 text-xs text-neutral-300">{{
+            formatNumber(countOf(c.id))
+          }}</span>
         </div>
         <p v-if="channelQuery && !foundChannels.length" class="px-2 py-2 text-sm text-neutral-500">
-          No channels found.
+          {{ t('media.noChannelsFound') }}
         </p>
       </div>
     </aside>
@@ -506,15 +504,15 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
               ref="search"
               v-model="query"
               :class="field + ' w-full ps-9'"
-              placeholder="Search videos"
-              title="Search videos (/)"
+              :placeholder="t('media.searchVideos')"
+              :title="t('media.searchVideosKey')"
             />
           </div>
-          <div class="flex overflow-hidden rounded border border-fg/10" title="Sort by">
+          <div class="flex overflow-hidden rounded border border-fg/10" :title="t('media.sortBy')">
             <button
               v-for="s in [
-                ['date', 'Date', calendarIcon],
-                ['views', 'Views', eyeIcon],
+                ['date', t('media.sortDate'), calendarIcon],
+                ['views', t('media.sortViews'), eyeIcon],
               ] as const"
               :key="s[0]"
               class="flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm"
@@ -529,14 +527,14 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           </div>
           <label class="flex items-center gap-2 text-sm whitespace-nowrap">
             <input v-model="hideShorts" type="checkbox" @change="patchSettings({ hideShorts })" />
-            Hide Shorts
+            {{ t('media.hideShorts') }}
           </label>
         </div>
         <!-- Fixed height, so the list does not move when the count appears. -->
         <div class="h-5 truncate text-sm text-neutral-400">
           <bdi>{{ channelName }}</bdi
           ><template v-if="!loading && channels.length">
-            · {{ shown.length }} {{ shown.length === 1 ? 'video' : 'videos' }}</template
+            · {{ t('media.videoCount', { n: shown.length }) }}</template
           >
         </div>
       </div>
@@ -546,14 +544,20 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
         :key="id"
         class="rounded bg-red-900/40 px-3 py-2 text-sm text-red-200"
       >
-        Could not load channel. {{ e }}
+        {{ t('media.loadError', { error: e }) }}
       </p>
       <p v-if="!channels.length" class="py-12 text-center text-neutral-500">
-        No channels for {{ LANGUAGES[studyLang] ?? studyLang }} yet.
-        <button class="text-accent hover:underline" @click="openAddChannel">Add a channel</button>
+        {{ t('media.noChannels', { lang: langName(studyLang) }) }}
+        <button class="text-accent hover:underline" @click="openAddChannel">
+          {{ t('media.addAChannel') }}
+        </button>
       </p>
-      <p v-else-if="loading" class="py-12 text-center text-neutral-500">Loading videos…</p>
-      <p v-else-if="!shown.length" class="py-12 text-center text-neutral-500">No videos found.</p>
+      <p v-else-if="loading" class="py-12 text-center text-neutral-500">
+        {{ t('media.loadingVideos') }}
+      </p>
+      <p v-else-if="!shown.length" class="py-12 text-center text-neutral-500">
+        {{ t('media.noVideos') }}
+      </p>
 
       <a
         v-for="v in page"
@@ -573,27 +577,27 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           <div class="line-clamp-2 text-fg sm:truncate sm:text-lg" dir="auto">{{ v.title }}</div>
           <div class="text-sm text-neutral-400" dir="auto">{{ v.channelName }}</div>
           <div class="text-sm text-neutral-400">
-            {{ ago(v.published) }} • {{ compact.format(v.views) }} views
+            {{ ago(v.published) }} • {{ t('media.views', { n: compact(v.views) }) }}
             <span
               v-if="v.isShort"
               class="ms-2 rounded border border-fg/20 px-1.5 text-xs text-neutral-300"
-              >Short</span
+              >{{ t('media.short') }}</span
             >
             <span
               v-if="subsOf(v.videoId) === 'cc'"
               class="ms-2 rounded bg-accent px-1.5 text-xs text-white"
-              title="Human-made subtitles"
+              :title="t('media.ccTitle')"
               >CC</span
             >
             <span
               v-else-if="subsOf(v.videoId) === 'auto'"
               class="ms-2 rounded border border-fg/20 px-1.5 text-xs text-neutral-300"
-              title="Only auto-generated subtitles"
-              >Auto CC</span
+              :title="t('media.autoCcTitle')"
+              >{{ t('media.autoCc') }}</span
             >
-            <span v-else-if="subsOf(v.videoId) === 'none'" class="ms-2 text-xs text-neutral-500"
-              >No subtitles</span
-            >
+            <span v-else-if="subsOf(v.videoId) === 'none'" class="ms-2 text-xs text-neutral-500">{{
+              t('media.noSubs')
+            }}</span>
           </div>
         </div>
       </a>

@@ -1,4 +1,5 @@
 import { errorMessage } from '@/shared/llm-json'
+import { t } from '@/shared/i18n/core'
 import { LANGUAGES, type Settings } from '@/shared/types'
 
 /** Audio not played for this long is removed. */
@@ -35,10 +36,10 @@ export async function speak(
   let audio = cached?.audio
   if (!audio) {
     if (voice === 'gemini') {
-      if (!settings.geminiKey) throw new Error('Add your Gemini API key in Settings.')
+      if (!settings.geminiKey) throw new Error(t('err.addKey', { name: 'Gemini' }))
       audio = await gemini(settings.geminiKey, s.geminiVoiceModel, s.geminiVoice, text, lang)
     } else if (voice === 'openai') {
-      if (!settings.openaiKey) throw new Error('Add your OpenAI API key in Settings.')
+      if (!settings.openaiKey) throw new Error(t('err.addKey', { name: 'OpenAI' }))
       audio = await speech('OpenAI API', 'https://api.openai.com/v1', settings.openaiKey, {
         model: s.openaiVoiceModel,
         voice: s.openaiVoice,
@@ -46,8 +47,8 @@ export async function speak(
         instructions: `Speak ${LANGUAGES[lang] ?? lang} clearly, for a language learner.`,
       })
     } else {
-      if (!s.voiceModel) throw new Error('Add the model name of your voice server in Settings.')
-      audio = await speech('Voice server', s.voiceBaseUrl, null, {
+      if (!s.voiceModel) throw new Error(t('err.voiceModel'))
+      audio = await speech(t('err.voiceServer'), s.voiceBaseUrl, null, {
         model: s.voiceModel,
         voice: s.voiceName,
         input: text,
@@ -77,7 +78,7 @@ async function speech(
       body: JSON.stringify({ ...body, response_format: 'mp3' }),
     })
   } catch {
-    throw new Error(`${label}: no connection to ${base}.`)
+    throw new Error(t('err.noConnection', { label, base }))
   }
   if (!res.ok) throw new Error(`${label} ${res.status}: ${errorMessage(await res.text())}`)
   const bytes = new Uint8Array(await res.arrayBuffer())
@@ -131,7 +132,7 @@ async function gemini(
     ?.filter((s) => s.type === 'model_output')
     .flatMap((s) => s.content ?? [])
     .findLast((c) => c.type === 'audio')?.data
-  if (!audio) throw new Error('No audio from Gemini.')
+  if (!audio) throw new Error(t('err.noAudio'))
   return audio
 }
 
@@ -156,6 +157,6 @@ async function geminiOld(key: string, model: string, voice: string, text: string
     candidates?: { content?: { parts?: { inlineData?: { data?: string } }[] } }[]
   }
   const audio = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data
-  if (!audio) throw new Error('No audio from Gemini.')
+  if (!audio) throw new Error(t('err.noAudio'))
   return audio
 }

@@ -1,9 +1,17 @@
-// Links of the app sidebar. The toolbar popup shows some of them too.
+import type { Key } from '@/shared/i18n'
+
+// Links of the app sidebar. The toolbar popup shows some of them too. `label`: the text key.
 // Icons: SVG path data in the Lucide style (24×24, stroke).
-export const mainLinks = [
+interface NavLink {
+  to: string
+  label: Key
+  icon: string[]
+}
+
+export const mainLinks: NavLink[] = [
   {
     to: '/media',
-    label: 'Media',
+    label: 'nav.media',
     icon: [
       'M4 7h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z',
       'm17 2-5 5-5-5',
@@ -11,19 +19,19 @@ export const mainLinks = [
   },
   {
     to: '/review',
-    label: 'Review',
+    label: 'nav.review',
     icon: ['M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8', 'M3 3v5h5'],
   },
   {
     to: '/saved-items',
-    label: 'Saved',
+    label: 'nav.saved',
     icon: ['m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z'],
   },
 ]
-export const footerLinks = [
+export const footerLinks: NavLink[] = [
   {
     to: '/settings',
-    label: 'Settings',
+    label: 'nav.settings',
     icon: [
       'M20 7h-9',
       'M14 17H5',
@@ -33,7 +41,7 @@ export const footerLinks = [
   },
   {
     to: '/credits',
-    label: 'Credits',
+    label: 'nav.credits',
     icon: [
       'm15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526',
       'M6 8a6 6 0 1 0 12 0a6 6 0 1 0-12 0',
@@ -41,7 +49,7 @@ export const footerLinks = [
   },
   {
     to: '/donate',
-    label: 'Donate',
+    label: 'nav.donate',
     icon: [
       'M11 14h2a2 2 0 0 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16',
       'm14.45 13.39 5.05-4.694C20.196 8 21 6.85 21 5.75a2.75 2.75 0 0 0-4.797-1.837.276.276 0 0 1-.406 0A2.75 2.75 0 0 0 11 5.75c0 1.2.802 2.248 1.5 2.946L16 11.95',

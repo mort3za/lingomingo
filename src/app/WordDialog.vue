@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { t } from '@/shared/i18n'
 import { needsExtras } from '@/shared/review'
 import type { SavedWord } from '@/shared/types'
 import { fetchExtras } from './extras'
@@ -39,8 +40,8 @@ onMounted(load)
     >
       <WordCard :word="word" revealed :waiting="waiting" :error="error" @retry="load" />
       <button
-        class="absolute top-3 right-4 text-xl text-fg/60 hover:text-fg"
-        title="Close (Esc)"
+        class="absolute end-4 top-3 text-xl text-fg/60 hover:text-fg"
+        :title="t('common.closeEsc')"
         @click="emit('close')"
       >
         ✕

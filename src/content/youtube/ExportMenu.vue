@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { download } from '@/shared/download'
+import { langLabel, langName, t, type Key } from '@/shared/i18n'
 import { subtitleFile, type SubtitleContent, type SubtitleFormat } from '@/shared/subtitle-export'
-import { LANGUAGES } from '@/shared/types'
 import { zip } from '@/shared/zip'
 import type { YoutubeSession } from './session'
 
 const props = defineProps<{ s: YoutubeSession }>()
 
-const FORMATS: { value: SubtitleFormat; hint: string }[] = [
-  { value: 'srt', hint: 'For most video players' },
-  { value: 'vtt', hint: 'For web video players' },
-  { value: 'csv', hint: 'For spreadsheets, a column for each language' },
+const FORMATS: { value: SubtitleFormat; hint: Key }[] = [
+  { value: 'srt', hint: 'exp.srt' },
+  { value: 'vtt', hint: 'exp.vtt' },
+  { value: 'csv', hint: 'exp.csv' },
 ]
 
 // `waiting`: for the subtitles to load (an ad delays them). `working`: translating.
@@ -28,15 +28,14 @@ const phase = ref<Phase>('idle')
 const note = ref('')
 let ctrl: AbortController | null = null
 
-const name = (code: string) => LANGUAGES[code] ?? code
 const study = computed(() => props.s.lang.value)
 const native = computed(() => props.s.settings.value.nativeLang)
 const choices = computed(() => [
-  { value: 'original' as const, label: name(study.value) },
-  { value: 'translation' as const, label: name(native.value) },
+  { value: 'original' as const, label: langLabel(study.value) },
+  { value: 'translation' as const, label: langLabel(native.value) },
   {
     value: 'both' as const,
-    label: `${name(study.value)} and ${name(native.value)}, in a zip file`,
+    label: t('exp.both', { a: langLabel(study.value), b: langName(native.value) }),
   },
 ])
 // A video in the translation language has no translation: only its own subtitles.
@@ -56,20 +55,20 @@ const busy = computed(() => phase.value === 'waiting' || phase.value === 'workin
 
 const status = computed(() => {
   if (phase.value === 'error' || phase.value === 'saved') return note.value
-  if (phase.value === 'waiting') return 'Waiting for the subtitles… An ad can delay them.'
-  if (props.s.status.value !== 'ready') return 'The subtitles are not loaded yet.'
-  if (!needsTranslation.value) return `${total.value} lines`
-  const count = `${translated.value} / ${total.value} lines translated`
-  if (phase.value === 'working') return `Translating… ${count}`
-  if (phase.value === 'paused') return `Paused. ${count}`
+  if (phase.value === 'waiting') return t('exp.waiting')
+  if (props.s.status.value !== 'ready') return t('exp.notLoaded')
+  if (!needsTranslation.value) return t('exp.lines', { n: total.value })
+  const count = t('exp.progress', { done: translated.value, total: total.value })
+  if (phase.value === 'working') return t('exp.translating', { count })
+  if (phase.value === 'paused') return t('exp.paused', { count })
   return count
 })
 const action = computed(() => {
-  if (phase.value === 'waiting') return 'Cancel'
-  if (phase.value === 'working') return 'Pause'
-  if (phase.value === 'error') return 'Try again'
-  if (!missing.value) return 'Download'
-  return phase.value === 'paused' ? 'Continue' : 'Translate and download'
+  if (phase.value === 'waiting') return t('exp.cancel')
+  if (phase.value === 'working') return t('exp.pause')
+  if (phase.value === 'error') return t('exp.tryAgain')
+  if (!missing.value) return t('exp.download')
+  return phase.value === 'paused' ? t('exp.continue') : t('exp.translateDownload')
 })
 
 /** Resolves when the subtitles are loaded, or on `signal`. Rejects when the video has none. */
@@ -80,7 +79,7 @@ function subtitlesLoaded(signal: AbortSignal): Promise<void> {
     const check = () => {
       const st = s.status.value
       if (st === 'no-subs' || st === 'error') {
-        reject(new Error(s.message.value || 'This video has no subtitles.'))
+        reject(new Error(s.message.value || t('exp.noSubs')))
       } else if (st === 'ready' || signal.aborted) resolve()
       else return
       stop()
@@ -125,7 +124,7 @@ async function run() {
       name = file.name
       download(name, file.text, type)
     }
-    note.value = `Saved as ${name}`
+    note.value = t('exp.savedAs', { name })
     phase.value = 'saved'
   } catch (e) {
     if (ctrl !== mine) return
@@ -168,7 +167,7 @@ const LENGTH = 2 * Math.PI * 9
       :class="
         'flex size-5 items-center justify-center ' + (open ? 'text-fg' : 'text-fg/60 hover:text-fg')
       "
-      title="Download the subtitles"
+      :title="t('exp.button')"
       @click="open = !open"
     >
       <svg v-if="busy" class="size-4 -rotate-90" viewBox="0 0 24 24" fill="none" stroke-width="3">
@@ -203,10 +202,12 @@ const LENGTH = 2 * Math.PI * 9
       v-if="open"
       class="absolute inset-x-2 top-full z-20 mt-1 rounded-lg border border-fg/10 bg-surface p-3 text-[13px] shadow-lg"
     >
-      <div class="mb-3 text-[15px] font-medium">Download subtitles</div>
+      <div class="mb-3 text-[15px] font-medium">{{ t('exp.title') }}</div>
 
       <template v-if="s.translates.value">
-        <div class="mb-1 text-[11px] font-medium tracking-wide text-fg/50 uppercase">Text</div>
+        <div class="mb-1 text-[11px] font-medium tracking-wide text-fg/50 uppercase">
+          {{ t('exp.text') }}
+        </div>
         <div class="mb-3 space-y-0.5">
           <label
             v-for="c in choices"
@@ -219,7 +220,9 @@ const LENGTH = 2 * Math.PI * 9
         </div>
       </template>
 
-      <div class="mb-1 text-[11px] font-medium tracking-wide text-fg/50 uppercase">Format</div>
+      <div class="mb-1 text-[11px] font-medium tracking-wide text-fg/50 uppercase">
+        {{ t('exp.format') }}
+      </div>
       <div class="flex gap-1">
         <button
           v-for="f in FORMATS"
@@ -234,7 +237,7 @@ const LENGTH = 2 * Math.PI * 9
         </button>
       </div>
       <div class="mt-1 mb-3 text-[12px] text-fg/50">
-        {{ FORMATS.find((f) => f.value === format)?.hint }}
+        {{ t(FORMATS.find((f) => f.value === format)!.hint) }}
       </div>
 
       <div class="border-t border-fg/10 pt-3">

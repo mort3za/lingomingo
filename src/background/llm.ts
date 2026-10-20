@@ -1,6 +1,7 @@
 import { errorMessage, extractJson, finishedLines, matchLine } from '@/shared/llm-json'
 import type { Have, WordExtras, WordTranslation } from '@/shared/messages'
 import { wordKey } from '@/shared/tokenize'
+import { t } from '@/shared/i18n/core'
 import { LANGUAGES, type Settings } from '@/shared/types'
 import { createQueue, Preempted } from './queue'
 
@@ -61,7 +62,7 @@ async function request(
   call: Call = {},
 ): Promise<string> {
   if (settings.provider === 'claude') {
-    if (!settings.claudeKey) throw new Error('Add your Claude API key in Settings.')
+    if (!settings.claudeKey) throw new Error(t('err.addKey', { name: 'Claude' }))
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -93,7 +94,7 @@ async function request(
   }
 
   if (settings.provider === 'openai') {
-    if (!settings.openaiKey) throw new Error('Add your OpenAI API key in Settings.')
+    if (!settings.openaiKey) throw new Error(t('err.addKey', { name: 'OpenAI' }))
     return chat(
       'OpenAI API',
       'https://api.openai.com/v1',
@@ -108,7 +109,7 @@ async function request(
   }
 
   if (settings.provider === 'grok') {
-    if (!settings.grokKey) throw new Error('Add your xAI API key in Settings.')
+    if (!settings.grokKey) throw new Error(t('err.addKey', { name: 'xAI' }))
     return chat(
       'xAI API',
       'https://api.x.ai/v1',
@@ -122,7 +123,7 @@ async function request(
   }
 
   if (settings.provider === 'deepseek') {
-    if (!settings.deepseekKey) throw new Error('Add your DeepSeek API key in Settings.')
+    if (!settings.deepseekKey) throw new Error(t('err.addKey', { name: 'DeepSeek' }))
     return chat(
       'DeepSeek API',
       'https://api.deepseek.com',
@@ -137,7 +138,7 @@ async function request(
   }
 
   if (settings.provider === 'gemini') {
-    if (!settings.geminiKey) throw new Error('Add your Gemini API key in Settings.')
+    if (!settings.geminiKey) throw new Error(t('err.addKey', { name: 'Gemini' }))
     return chat(
       'Gemini API',
       'https://generativelanguage.googleapis.com/v1beta/openai',
@@ -153,7 +154,7 @@ async function request(
   }
 
   if (settings.provider === 'openrouter') {
-    if (!settings.openrouterKey) throw new Error('Add your OpenRouter API key in Settings.')
+    if (!settings.openrouterKey) throw new Error(t('err.addKey', { name: 'OpenRouter' }))
     const args = [
       'OpenRouter',
       'https://openrouter.ai/api/v1',
@@ -173,7 +174,7 @@ async function request(
   }
 
   if (settings.provider === 'ollama') {
-    if (!settings.ollamaModel) throw new Error('Set the Ollama model name in Settings.')
+    if (!settings.ollamaModel) throw new Error(t('err.setModel', { name: 'Ollama' }))
     // Thinking models (gemma4, qwen3, ...) think by default; short translations do not need it.
     // Models without thinking ignore this field.
     return chat(
@@ -194,7 +195,7 @@ async function request(
   const format = call.schema && { response_format: schemaFormat(call.schema) }
 
   if (settings.provider === 'lmstudio') {
-    if (!settings.lmstudioModel) throw new Error('Set the LM Studio model name in Settings.')
+    if (!settings.lmstudioModel) throw new Error(t('err.setModel', { name: 'LM Studio' }))
     const args = [
       'LM Studio',
       settings.lmstudioBaseUrl,
@@ -213,7 +214,7 @@ async function request(
     }
   }
 
-  if (!settings.localModel) throw new Error('Set the local model name in Settings.')
+  if (!settings.localModel) throw new Error(t('err.localModel'))
   return chat(
     'Local model',
     settings.localBaseUrl,
@@ -258,7 +259,7 @@ async function chat(
   }).catch((e: unknown) => {
     // No server at the address: fetch gives only "Failed to fetch".
     if (e instanceof TypeError) {
-      throw new Error(`${label}: cannot connect to ${base}. Is the server running at this address?`)
+      throw new Error(t('err.connect', { label, base }))
     }
     throw e
   })
@@ -334,7 +335,7 @@ export async function translateLines(
     todo = ids.filter((i) => out[i] === undefined)
     if (!stopped && todo.length === ids.length) break
   }
-  if (todo.length === 1) throw new Error('Model returned a wrong number of lines.')
+  if (todo.length === 1) throw new Error(t('err.wrongLines'))
   // No progress: smaller requests are easier for the model to keep aligned.
   const half = Math.ceil(todo.length / 2)
   for (const part of todo.length ? [todo.slice(0, half), todo.slice(half)] : []) {
@@ -464,7 +465,7 @@ const NOUN_EXAMPLES: Record<string, string> = {
 /** Reads the `translateWord` answer. Only bad or missing translations give an error. */
 export function parseWordAnswer(text: string, word: string): WordTranslation {
   const out = extractJson(text) as Record<string, unknown>
-  if (!Array.isArray(out.translations)) throw new Error('Bad answer from model.')
+  if (!Array.isArray(out.translations)) throw new Error(t('err.badAnswer'))
   const p = (out.phrase ?? {}) as { text?: unknown; translation?: unknown }
   const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
   const phrase = { text: str(p.text), translation: str(p.translation) }

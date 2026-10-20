@@ -1,15 +1,17 @@
 import { createEmptyCard, fsrs, Rating, type Card, type Grade } from 'ts-fsrs'
+import type { Key } from './i18n/core'
 import type { WordExtras } from './messages'
 import { tokenize, wordKey } from './tokenize'
 import type { ReviewCard, SavedItem, SavedWord } from './types'
 
 const scheduler = fsrs({ enable_fuzz: true })
 
-export const GRADES: { grade: Grade; label: string; key: string }[] = [
-  { grade: Rating.Again, label: 'Again', key: '1' },
-  { grade: Rating.Hard, label: 'Hard', key: '2' },
-  { grade: Rating.Good, label: 'Good', key: '3' },
-  { grade: Rating.Easy, label: 'Easy', key: '4' },
+/** `label`: the text key. */
+export const GRADES: { grade: Grade; label: Key; key: string }[] = [
+  { grade: Rating.Again, label: 'grade.again', key: '1' },
+  { grade: Rating.Hard, label: 'grade.hard', key: '2' },
+  { grade: Rating.Good, label: 'grade.good', key: '3' },
+  { grade: Rating.Easy, label: 'grade.easy', key: '4' },
 ]
 
 /** Cards due a little later still show in a session, so "Again" comes back soon. */
@@ -66,17 +68,24 @@ export function answer(w: SavedWord, now: number, grade: Grade): ReviewCard {
   return fromCard(scheduler.next(toCard(w.review, now), now, grade).card)
 }
 
-/** Short time span: `45s`, `10m`, `3h`, `5d`, `2mo`, `1.5y`. */
-export function formatSpan(ms: number): string {
+/**
+ * Short time span: `45s`, `10m`, `3h`, `5d`, `2mo`, `1.5y`. Other languages than English get
+ * the short unit names of `Intl`.
+ */
+export function formatSpan(ms: number, lang = 'en'): string {
+  const fmt = (n: number, unit: string, short: string) =>
+    lang === 'en'
+      ? `${n}${short}`
+      : new Intl.NumberFormat(lang, { style: 'unit', unit, unitDisplay: 'narrow' }).format(n)
   const min = ms / 60_000
-  if (min < 1) return `${Math.max(0, Math.round(ms / 1000))}s`
-  if (min < 60) return `${Math.round(min)}m`
+  if (min < 1) return fmt(Math.max(0, Math.round(ms / 1000)), 'second', 's')
+  if (min < 60) return fmt(Math.round(min), 'minute', 'm')
   const h = min / 60
-  if (h < 24) return `${Math.round(h)}h`
+  if (h < 24) return fmt(Math.round(h), 'hour', 'h')
   const d = h / 24
-  if (d < 30) return `${Math.round(d)}d`
-  if (d < 365) return `${Math.round(d / 30)}mo`
-  return `${Math.round((d / 365) * 10) / 10}y`
+  if (d < 30) return fmt(Math.round(d), 'day', 'd')
+  if (d < 365) return fmt(Math.round(d / 30), 'month', 'mo')
+  return fmt(Math.round((d / 365) * 10) / 10, 'year', 'y')
 }
 
 /** True when the review card still needs something from the AI. */

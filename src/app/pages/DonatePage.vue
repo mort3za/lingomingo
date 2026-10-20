@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { t, type Key } from '@/shared/i18n'
 
 const repo = 'https://github.com/mort3za/lingomingo'
 
@@ -14,9 +15,9 @@ const bitcoinIcon = [
   'M11.767 19.089c4.924.868 6.14-6.025 1.216-6.894m-1.216 6.894L5.86 18.047m5.908 1.042-.347 1.97m1.563-8.864c4.924.869 6.14-6.025 1.215-6.893m-1.215 6.893-3.94-.694m5.155-6.2L8.29 4.26m5.908 1.042.348-1.97M7.48 20.364l3.126-17.727',
 ]
 
-const helps = [
+const helps: { label: Key; icon: string[] }[] = [
   {
-    label: 'New features',
+    label: 'donate.features',
     icon: [
       'M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z',
       'M20 2v4',
@@ -25,11 +26,11 @@ const helps = [
     ],
   },
   {
-    label: 'More languages',
+    label: 'donate.languages',
     icon: ['m5 8 6 6', 'm4 14 6-6 2-3', 'M2 5h12', 'M7 2h1', 'm22 22-5-10-5 10', 'M14 18h6'],
   },
   {
-    label: 'Bug fixes',
+    label: 'donate.bugs',
     icon: [
       'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z',
     ],
@@ -91,18 +92,15 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
     >
       <svg
         v-bind="iconAttrs"
-        class="pointer-events-none absolute -top-6 -right-6 size-48 rotate-12 text-accent/10"
+        class="pointer-events-none absolute -end-6 -top-6 size-48 rotate-12 text-accent/10"
         fill="currentColor"
         stroke="none"
       >
         <path :d="heart" />
       </svg>
       <div class="relative space-y-4">
-        <h1 class="text-3xl font-semibold">Keep LingoMingo free</h1>
-        <p class="max-w-md text-neutral-300">
-          LingoMingo is free and open source. It has no ads and no paid plan. If it helps you learn,
-          you can support its development.
-        </p>
+        <h1 class="text-3xl font-semibold">{{ t('donate.title') }}</h1>
+        <p class="max-w-md text-neutral-300">{{ t('donate.intro') }}</p>
         <div class="flex flex-wrap items-center gap-4 pt-2">
           <a
             href="https://github.com/sponsors/mort3za"
@@ -117,7 +115,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
             >
               <path :d="heart" />
             </svg>
-            Sponsor on GitHub
+            {{ t('donate.sponsor') }}
           </a>
           <button
             class="group inline-flex items-center gap-2 rounded-lg border border-fg/20 px-5 py-2.5 font-medium text-fg transition hover:border-fg/40 hover:bg-fg/5"
@@ -129,7 +127,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
             >
               <path v-for="d in bitcoinIcon" :key="d" :d="d" />
             </svg>
-            Donate with crypto
+            {{ t('donate.crypto') }}
           </button>
         </div>
         <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm text-neutral-400">
@@ -137,20 +135,20 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
             <svg v-bind="iconAttrs" class="size-4">
               <path v-for="d in githubIcon" :key="d" :d="d" />
             </svg>
-            Monthly or one-time, no fee
+            {{ t('donate.monthly') }}
           </span>
           <span class="flex items-center gap-1.5">
             <svg v-bind="iconAttrs" class="size-4">
               <path v-for="d in bitcoinIcon" :key="d" :d="d" />
             </svg>
-            Pay with the coin you have
+            {{ t('donate.anyCoin') }}
           </span>
         </div>
       </div>
     </section>
 
     <section class="space-y-3">
-      <h2 class="text-lg font-medium">Your support pays for</h2>
+      <h2 class="text-lg font-medium">{{ t('donate.paysFor') }}</h2>
       <div class="grid gap-3 sm:grid-cols-3">
         <div
           v-for="item in helps"
@@ -164,14 +162,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
               <path v-for="d in item.icon" :key="d" :d="d" />
             </svg>
           </span>
-          {{ item.label }}
+          {{ t(item.label) }}
         </div>
       </div>
     </section>
 
     <section class="space-y-3">
-      <h2 class="text-lg font-medium">Other ways to help</h2>
-      <p class="text-sm text-neutral-400">No money? These help a lot too.</p>
+      <h2 class="text-lg font-medium">{{ t('donate.otherWays') }}</h2>
+      <p class="text-sm text-neutral-400">{{ t('donate.noMoney') }}</p>
       <div class="grid gap-3 sm:grid-cols-3">
         <a :href="repo" target="_blank" :class="tileClass">
           <svg
@@ -180,8 +178,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
           >
             <path v-for="d in starIcon" :key="d" :d="d" />
           </svg>
-          <span class="font-medium">Star the repo</span>
-          <span class="text-neutral-400">More stars, more learners find it.</span>
+          <span class="font-medium">{{ t('donate.star') }}</span>
+          <span class="text-neutral-400">{{ t('donate.starHint') }}</span>
         </a>
         <a :href="`${repo}/issues/new`" target="_blank" :class="tileClass">
           <svg
@@ -190,8 +188,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
           >
             <path v-for="d in bugIcon" :key="d" :d="d" />
           </svg>
-          <span class="font-medium">Report a bug or idea</span>
-          <span class="text-neutral-400">Tell us what to fix or add.</span>
+          <span class="font-medium">{{ t('donate.report') }}</span>
+          <span class="text-neutral-400">{{ t('donate.reportHint') }}</span>
         </a>
         <button :class="tileClass" @click="copyLink">
           <svg
@@ -200,9 +198,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
           >
             <path v-for="d in linkIcon" :key="d" :d="d" />
           </svg>
-          <span class="font-medium">Tell a friend</span>
+          <span class="font-medium">{{ t('donate.tell') }}</span>
           <span :class="copied ? 'text-green-400' : 'text-neutral-400'">
-            {{ copied ? 'Link copied!' : 'Click to copy the link.' }}
+            {{ copied ? t('donate.copied') : t('donate.copy') }}
           </span>
         </button>
       </div>
@@ -219,10 +217,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
         class="flex max-h-full max-w-full flex-col gap-4 overflow-auto rounded-lg bg-panel p-4 shadow-xl sm:p-6"
       >
         <div class="flex items-center justify-between">
-          <h2 id="crypto-title" class="text-xl font-semibold">Donate with crypto</h2>
+          <h2 id="crypto-title" class="text-xl font-semibold">{{ t('donate.crypto') }}</h2>
           <button
             class="text-xl text-fg/60 hover:text-fg"
-            title="Close (Esc)"
+            :title="t('common.closeEsc')"
             @click="cryptoOpen = false"
           >
             ✕
@@ -231,10 +229,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
         <div
           class="relative grid h-[623px] w-[346px] shrink-0 place-items-center rounded-lg bg-surface text-sm text-neutral-500"
         >
-          Loading…
+          {{ t('common.loading') }}
           <iframe
             src="https://nowpayments.io/embeds/donation-widget?api_key=178365c4-60b0-47ba-a1af-1c06f0841cbd"
-            title="NOWPayments donation form"
+            :title="t('donate.widget')"
             class="absolute inset-0 size-full rounded-lg border-0"
             scrolling="no"
           />

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
+import { t } from '@/shared/i18n'
 import SpeakButton from '@/shared/SpeakButton.vue'
 import { subtitleStyles } from '@/shared/subtitle-style'
 import { dirOf } from '@/shared/types'
@@ -93,20 +94,29 @@ watch(
     @wheel="onWheel"
   >
     <div class="relative flex items-center justify-between border-b border-fg/10 px-3 py-2">
-      <div class="border-b-2 border-accent pb-1 text-[15px] font-medium">Subtitles</div>
+      <div class="border-b-2 border-accent pb-1 text-[15px] font-medium">
+        {{ t('yt.subtitles') }}
+      </div>
       <div class="flex items-center gap-2">
         <button
           :class="
             'rounded-full px-2 py-1 text-xs font-bold ' +
             (s.settings.value.autoPause ? 'bg-emerald-500 text-black' : 'bg-fg/10')
           "
-          title="Auto-pause (Q)"
+          :title="t('yt.autoPause')"
           @click="s.toggleAutoPause()"
         >
           AP
         </button>
         <ExportMenu :s="s" />
-        <button class="text-fg/60 hover:text-fg" @click="emit('close')">✕</button>
+        <button
+          class="text-fg/60 hover:text-fg"
+          :title="t('common.close')"
+          :aria-label="t('common.close')"
+          @click="emit('close')"
+        >
+          ✕
+        </button>
       </div>
     </div>
     <div class="relative min-h-0 flex-1">
@@ -121,14 +131,14 @@ watch(
         <div v-if="away" class="sticky top-0 z-10 mb-0 flex h-0 items-start justify-end">
           <button
             class="rounded-full bg-accent px-3 py-1 text-[13px] font-medium text-white shadow-lg hover:brightness-110"
-            title="Scroll to the current sentence"
+            :title="t('yt.scrollCurrent')"
             @click="scrollToTop(s.activeIdx.value)"
           >
-            {{ away === 'above' ? '↑' : '↓' }} Current
+            {{ away === 'above' ? '↑' : '↓' }} {{ t('yt.current') }}
           </button>
         </div>
         <div v-if="s.status.value !== 'ready'" class="p-2 text-[15px] text-neutral-400">
-          {{ s.message.value || 'Loading…' }}
+          {{ s.message.value || t('common.loading') }}
         </div>
         <div
           v-for="(c, i) in s.cues.value"
@@ -175,7 +185,7 @@ watch(
             <!-- Fixed width: the check mark must not move the star. -->
             <button
               class="flex w-3.5 justify-center text-fg/40 opacity-0 group-hover:opacity-100 hover:text-fg focus-visible:opacity-100"
-              title="Copy"
+              :title="t('yt.copy')"
               @click.stop="copy(i)"
             >
               <span v-if="copied === i">✓</span>
@@ -199,6 +209,7 @@ watch(
                   ? 'text-yellow-300 hover:text-yellow-100'
                   : 'text-fg/40 opacity-0 group-hover:opacity-100 hover:text-fg focus-visible:opacity-100'
               "
+              :title="t('yt.saveSentence')"
               @click.stop="s.togglePhrase(i)"
             >
               {{ s.savedPhraseIds.value.has(s.phraseKey(i)) ? '★' : '☆' }}

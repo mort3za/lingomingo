@@ -7,6 +7,7 @@ const exampleCache = new Map<string, Example[]>()
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { t, uiDir, type Key } from '@/shared/i18n'
 import { send, type Phrase, type WordInfo, type WordTranslation } from '@/shared/messages'
 import { dirOf, type Example, type SavedItem, type Stage } from '@/shared/types'
 import SpeakButton from '@/shared/SpeakButton.vue'
@@ -201,17 +202,17 @@ const on: Record<Stage, string> = {
   SKIPPED: 'bg-violet-500/15 text-violet-300 ring-1 ring-violet-400/40 ring-inset',
 }
 // Icon paths: Lucide check, graduation-cap and ban, the same set as the close icon.
-const stages: { stage: Stage; label: string; key: string; icon: string }[] = [
-  { stage: 'KNOWN', label: 'Known', key: 'K', icon: 'M20 6 9 17l-5-5' },
+const stages: { stage: Stage; label: Key; key: string; icon: string }[] = [
+  { stage: 'KNOWN', label: 'stage.KNOWN', key: 'K', icon: 'M20 6 9 17l-5-5' },
   {
     stage: 'LEARNING',
-    label: 'Learn',
+    label: 'sc.learn',
     key: 'L',
     icon: 'M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0zM22 10v6M6 12.5V16a6 3 0 0 0 12 0v-3.5',
   },
   {
     stage: 'SKIPPED',
-    label: 'Skip',
+    label: 'sc.skip',
     key: 'N',
     icon: 'M4.929 4.929 19.07 19.071M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',
   },
@@ -257,8 +258,8 @@ const stages: { stage: Stage; label: string; key: string; icon: string }[] = [
         </div>
       </div>
       <button
-        class="-mr-1.5 shrink-0 rounded-md p-1 text-fg/40 hover:bg-fg/10 hover:text-fg"
-        title="Close (Esc)"
+        class="-me-1.5 shrink-0 rounded-md p-1 text-fg/40 hover:bg-fg/10 hover:text-fg"
+        :title="t('common.closeEsc')"
         @click="emit('close')"
       >
         <svg
@@ -294,7 +295,9 @@ const stages: { stage: Stage; label: string; key: string; icon: string }[] = [
     </div>
     <div v-if="phrase" class="flex items-center gap-2 border-t border-fg/10 px-4 py-2.5">
       <div class="min-w-0 flex-1">
-        <div class="text-[10px] font-medium tracking-wide text-fg/40 uppercase">Expression</div>
+        <div class="text-[10px] font-medium tracking-wide text-fg/40 uppercase" :dir="uiDir()">
+          {{ t('common.expression') }}
+        </div>
         <div class="text-sm leading-5 font-semibold break-words" :dir="dirOf(studyLang)">
           {{ lastWord(phrase.text).head
           }}<span class="inline-flex max-w-full items-center"
@@ -312,9 +315,7 @@ const stages: { stage: Stage; label: string; key: string; icon: string }[] = [
       </div>
       <button
         :class="'shrink-0 ' + btnBase + (phraseStage ? on[phraseStage] : off)"
-        :title="
-          phraseStage ? 'Remove the expression from saved items (X)' : 'Save the expression (X)'
-        "
+        :title="phraseStage ? t('yt.removeExpr') : t('yt.saveExpr')"
         @click="togglePhrase"
       >
         <svg
@@ -335,7 +336,9 @@ const stages: { stage: Stage; label: string; key: string; icon: string }[] = [
       {{ examplesError }}
     </div>
     <div v-else-if="examplesLoading || examples.length" class="border-t border-fg/10 px-4 py-3">
-      <div class="text-[10px] font-medium tracking-wide text-fg/40 uppercase">Examples</div>
+      <div class="text-[10px] font-medium tracking-wide text-fg/40 uppercase">
+        {{ t('yt.examples') }}
+      </div>
       <ol class="space-y-2.5">
         <template v-if="examplesLoading">
           <li v-for="i in 3" :key="i" class="animate-pulse" aria-hidden="true">
@@ -371,13 +374,15 @@ const stages: { stage: Stage; label: string; key: string; icon: string }[] = [
         </li>
       </ol>
     </div>
-    <div v-else class="border-t border-fg/10 px-4 py-3 text-xs text-fg/40">No examples</div>
+    <div v-else class="border-t border-fg/10 px-4 py-3 text-xs text-fg/40">
+      {{ t('yt.noExamples') }}
+    </div>
     <div class="flex gap-1 border-t border-fg/10 p-1.5">
       <button
         v-for="b in stages"
         :key="b.stage"
         :class="btn + (stage === b.stage ? on[b.stage] : off)"
-        :title="`${b.label} (${b.key})`"
+        :title="`${t(b.label)} (${b.key})`"
         @click="pick(b.stage)"
       >
         <svg
@@ -392,7 +397,7 @@ const stages: { stage: Stage; label: string; key: string; icon: string }[] = [
         >
           <path :d="b.icon" />
         </svg>
-        {{ b.label }}
+        {{ t(b.label) }}
       </button>
     </div>
   </div>

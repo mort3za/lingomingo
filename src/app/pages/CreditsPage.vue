@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { t, type Key } from '@/shared/i18n'
+
 // Open source code and data that ship in the extension.
 const software = [
   {
@@ -25,48 +27,70 @@ const software = [
     license: 'MIT',
     copyright: 'Copyright (c) Tailwind Labs, Inc.',
   },
+  {
+    name: 'Vazirmatn',
+    url: 'https://github.com/rastikerdar/vazirmatn',
+    license: 'OFL 1.1',
+    copyright: 'Copyright 2015 The Vazirmatn Project Authors',
+  },
+  {
+    name: 'Noto Sans Hebrew, Noto Sans Devanagari',
+    url: 'https://notofonts.github.io',
+    license: 'OFL 1.1',
+    copyright: 'Copyright 2022-2024 The Noto Project Authors',
+  },
 ]
 
-const data = [
+// Copyright lines stay in English: they are legal text.
+const data: {
+  name: string
+  url: string
+  license: string
+  licenseUrl: string
+  copyright: Key
+  use: Key
+}[] = [
   {
     name: 'FrequencyWords',
     url: 'https://github.com/hermitdave/FrequencyWords',
     license: 'CC BY-SA 4.0',
     licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
-    copyright: 'By Hermit Dave, made from OpenSubtitles 2018 (opus.nlpl.eu).',
-    use: 'Word frequency lists for the vocabulary level. Changed: only the 20,000 most frequent words, lowercased.',
+    copyright: 'credits.freqBy',
+    use: 'credits.freqUse',
   },
   {
     name: 'Lemmatization Lists',
     url: 'https://github.com/michmech/lemmatization-lists',
     license: 'ODbL 1.0',
     licenseUrl: 'https://opendatacommons.org/licenses/odbl/1-0/',
-    copyright: 'By Michal Měchura.',
-    use: 'Word forms and their dictionary forms (German, English, Spanish, French, Italian, Portuguese, Russian, Swedish). Changed: only frequent forms, lowercased. The changed lists are in the freq folder of the extension, under the same license.',
+    copyright: 'credits.lemmaBy',
+    use: 'credits.lemmaUse',
   },
 ]
 </script>
 
 <template>
   <div class="max-w-2xl space-y-8">
-    <h1 class="text-2xl font-semibold">Credits</h1>
-    <p class="text-sm text-neutral-400">LingoMingo uses these open source projects. Thank you!</p>
+    <h1 class="text-2xl font-semibold">{{ t('nav.credits') }}</h1>
+    <p class="text-sm text-neutral-400">{{ t('credits.intro') }}</p>
 
     <section class="space-y-3">
-      <h2 class="text-lg font-medium">Software</h2>
+      <h2 class="text-lg font-medium">{{ t('credits.software') }}</h2>
       <div v-for="item in software" :key="item.name" class="rounded bg-panel p-3 text-sm">
         <div class="flex items-baseline justify-between gap-3">
           <a :href="item.url" target="_blank" class="font-medium hover:underline">{{
             item.name
           }}</a>
-          <span class="text-xs text-neutral-400">{{ item.license }} License</span>
+          <span class="text-xs text-neutral-400">{{
+            t('credits.license', { license: item.license })
+          }}</span>
         </div>
         <div class="text-neutral-400">{{ item.copyright }}</div>
       </div>
     </section>
 
     <section class="space-y-3">
-      <h2 class="text-lg font-medium">Data</h2>
+      <h2 class="text-lg font-medium">{{ t('credits.data') }}</h2>
       <div v-for="item in data" :key="item.name" class="space-y-1 rounded bg-panel p-3 text-sm">
         <div class="flex items-baseline justify-between gap-3">
           <a :href="item.url" target="_blank" class="font-medium hover:underline">{{
@@ -80,8 +104,8 @@ const data = [
             {{ item.license }}
           </a>
         </div>
-        <div class="text-neutral-400">{{ item.copyright }}</div>
-        <div class="text-neutral-300">{{ item.use }}</div>
+        <div class="text-neutral-400">{{ t(item.copyright) }}</div>
+        <div class="text-neutral-300">{{ t(item.use) }}</div>
       </div>
     </section>
   </div>

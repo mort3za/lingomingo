@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { formatNumber, t } from '@/shared/i18n'
 import { DEFAULT_SETTINGS } from '@/shared/types'
 import FontField from './FontField.vue'
 import SubtitlePreview from './SubtitlePreview.vue'
@@ -8,9 +9,9 @@ import { LABEL, useSettings } from './settings'
 const { settings } = useSettings()
 
 const sliders = [
-  { key: 'subtitleBgOpacity', label: 'Bar background', min: 0, max: 100, step: 10, unit: '%' },
-  { key: 'subtitleTextSize', label: 'Bar text size', min: 18, max: 44, step: 2, unit: 'px' },
-  { key: 'listTextSize', label: 'List text size', min: 12, max: 22, step: 1, unit: 'px' },
+  { key: 'subtitleBgOpacity', label: 'look.barBg', min: 0, max: 100, step: 10, unit: '%' },
+  { key: 'subtitleTextSize', label: 'look.barSize', min: 18, max: 44, step: 2, unit: 'px' },
+  { key: 'listTextSize', label: 'look.listSize', min: 12, max: 22, step: 1, unit: 'px' },
 ] as const
 const KEYS = ['subtitleFont', ...sliders.map((s) => s.key)] as const
 
@@ -52,7 +53,7 @@ onBeforeUnmount(() => {
 <template>
   <div ref="root" class="space-y-3 border-t border-fg/10 pt-4" @input="showPreview">
     <div class="flex items-center justify-between gap-3">
-      <h3 class="text-sm font-medium">Appearance</h3>
+      <h3 class="text-sm font-medium">{{ t('look.title') }}</h3>
       <!-- Hidden, not removed, with the default look: the heading does not move. -->
       <button
         type="button"
@@ -60,15 +61,17 @@ onBeforeUnmount(() => {
         :class="isDefault && 'invisible'"
         @click="reset"
       >
-        Reset
+        {{ t('look.reset') }}
       </button>
     </div>
     <FontField @pick="showPreview" />
     <div class="grid gap-4 sm:grid-cols-3">
       <div v-for="opt in sliders" :key="opt.key">
         <label :class="LABEL" :for="opt.key">
-          {{ opt.label }}
-          <span class="text-fg tabular-nums">{{ settings[opt.key] }}{{ opt.unit }}</span>
+          {{ t(opt.label) }}
+          <span class="text-fg tabular-nums" dir="ltr"
+            >{{ formatNumber(settings[opt.key]) }}{{ opt.unit }}</span
+          >
         </label>
         <input
           :id="opt.key"

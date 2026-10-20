@@ -1,3 +1,5 @@
+import type { Key } from '@/shared/i18n'
+
 /**
  * Keyboard shortcuts of the app page and of YouTube videos, for the help dialog. Each page
  * handles its own keys.
@@ -5,11 +7,11 @@
 export interface Shortcut {
   /** Alternatives. Each alternative is a sequence of keys. */
   keys: string[][]
-  label: string
+  label: Key
 }
 
 export interface ShortcutGroup {
-  title: string
+  title: Key
   /** The route where the group works. Missing = all pages. */
   route?: string
   items: Shortcut[]
@@ -17,78 +19,78 @@ export interface ShortcutGroup {
 
 export const SHORTCUTS: ShortcutGroup[] = [
   {
-    title: 'General',
+    title: 'sc.general',
     items: [
-      { keys: [['?']], label: 'Show keyboard shortcuts' },
-      { keys: [['G', 'M']], label: 'Go to Media' },
-      { keys: [['G', 'R']], label: 'Go to Review' },
-      { keys: [['G', 'S']], label: 'Go to Saved' },
-      { keys: [['G', ',']], label: 'Go to Settings' },
+      { keys: [['?']], label: 'sc.showShortcuts' },
+      { keys: [['G', 'M']], label: 'sc.goMedia' },
+      { keys: [['G', 'R']], label: 'sc.goReview' },
+      { keys: [['G', 'S']], label: 'sc.goSaved' },
+      { keys: [['G', ',']], label: 'sc.goSettings' },
     ],
   },
   {
-    title: 'Media',
+    title: 'nav.media',
     route: '/media',
-    items: [{ keys: [['/']], label: 'Search videos' }],
+    items: [{ keys: [['/']], label: 'sc.searchVideos' }],
   },
   {
-    title: 'Review',
+    title: 'nav.review',
     route: '/review',
     items: [
-      { keys: [['Space'], ['Enter']], label: 'Show answer, then "Good" (next word)' },
-      { keys: [['1'], ['2'], ['3'], ['4']], label: 'Again / Hard / Good / Easy' },
-      { keys: [['K']], label: 'Learned (move to Known)' },
-      { keys: [['Z']], label: 'Undo last answer' },
+      { keys: [['Space'], ['Enter']], label: 'sc.reveal' },
+      { keys: [['1'], ['2'], ['3'], ['4']], label: 'sc.grades' },
+      { keys: [['K']], label: 'sc.learned' },
+      { keys: [['Z']], label: 'sc.undo' },
     ],
   },
   {
-    title: 'Saved',
+    title: 'nav.saved',
     route: '/saved-items',
     items: [
-      { keys: [['/']], label: 'Search' },
-      { keys: [['A']], label: 'Select all / none' },
-      { keys: [['Shift+Click']], label: 'Select a range of rows' },
-      { keys: [['K']], label: 'Selected → Known' },
-      { keys: [['L']], label: 'Selected → Learning' },
-      { keys: [['N']], label: "Selected → Don't learn" },
-      { keys: [['Delete']], label: 'Delete selected' },
-      { keys: [['Esc']], label: 'Clear selection' },
+      { keys: [['/']], label: 'sc.search' },
+      { keys: [['A']], label: 'sc.selectAll' },
+      { keys: [['Shift+Click']], label: 'sc.selectRange' },
+      { keys: [['K']], label: 'sc.toKnown' },
+      { keys: [['L']], label: 'sc.toLearning' },
+      { keys: [['N']], label: 'sc.toSkipped' },
+      { keys: [['Delete']], label: 'sc.delete' },
+      { keys: [['Esc']], label: 'sc.clear' },
     ],
   },
   {
-    title: 'YouTube video',
+    title: 'sc.youtube',
     items: [
-      { keys: [['A']], label: 'Previous sentence' },
-      { keys: [['S']], label: 'Repeat sentence' },
-      { keys: [['D']], label: 'Next sentence' },
-      { keys: [['W']], label: 'Play / pause' },
-      { keys: [['Q']], label: 'Auto-pause on / off' },
-      { keys: [['R']], label: 'Save sentence' },
-      { keys: [['Shift+C']], label: 'Subtitles on / off' },
-      { keys: [['Shift+S']], label: 'Subtitles list on / off' },
+      { keys: [['A']], label: 'sc.prev' },
+      { keys: [['S']], label: 'sc.repeat' },
+      { keys: [['D']], label: 'sc.next' },
+      { keys: [['W']], label: 'sc.playPause' },
+      { keys: [['Q']], label: 'sc.autoPause' },
+      { keys: [['R']], label: 'sc.saveSentence' },
+      { keys: [['Shift+C']], label: 'sc.subs' },
+      { keys: [['Shift+S']], label: 'sc.list' },
     ],
   },
   {
-    title: 'YouTube word hints',
+    title: 'sc.hints',
     items: [
-      { keys: [['E']], label: 'Show a letter on each word of the sentence' },
-      { keys: [['Letter']], label: 'Open the word' },
-      { keys: [['Shift+Letter']], label: 'Save the word as Learning' },
-      { keys: [['Backspace']], label: 'Undo the first of two letters' },
-      { keys: [['E'], ['Esc']], label: 'Hide the letters' },
+      { keys: [['E']], label: 'sc.hintShow' },
+      { keys: [['Letter']], label: 'sc.hintOpen' },
+      { keys: [['Shift+Letter']], label: 'sc.hintSave' },
+      { keys: [['Backspace']], label: 'sc.hintBack' },
+      { keys: [['E'], ['Esc']], label: 'sc.hintHide' },
     ],
   },
   {
-    title: 'YouTube word popup',
+    title: 'sc.popup',
     items: [
-      { keys: [['K']], label: 'Known' },
-      { keys: [['L']], label: 'Learn' },
-      { keys: [['N']], label: 'Skip' },
-      { keys: [['P']], label: 'Play the word' },
-      { keys: [['X']], label: 'Save the expression' },
-      { keys: [['Shift+X']], label: 'Play the expression' },
-      { keys: [['1'], ['2'], ['3']], label: 'Play example 1 / 2 / 3' },
-      { keys: [['Esc']], label: 'Close' },
+      { keys: [['K']], label: 'stage.KNOWN' },
+      { keys: [['L']], label: 'sc.learn' },
+      { keys: [['N']], label: 'sc.skip' },
+      { keys: [['P']], label: 'sc.playWord' },
+      { keys: [['X']], label: 'sc.saveExpr' },
+      { keys: [['Shift+X']], label: 'sc.playExpr' },
+      { keys: [['1'], ['2'], ['3']], label: 'sc.playExample' },
+      { keys: [['Esc']], label: 'common.close' },
     ],
   },
 ]

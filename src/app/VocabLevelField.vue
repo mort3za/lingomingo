@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { LANGUAGES } from '@/shared/types'
+import { formatNumber, langLabel, langName, T, t } from '@/shared/i18n'
 import { LEVEL_LANGS } from '@/shared/vocab'
 import { useSettings } from './settings'
 import VocabLevelDialog from './VocabLevelDialog.vue'
@@ -25,15 +25,17 @@ function setLevel(value: number | undefined) {
   >
     <div>
       <div class="text-xs font-medium tracking-wide text-neutral-400 uppercase">
-        Vocabulary level · {{ LANGUAGES[settings.studyLang] }}
+        {{ t('vocab.levelFor', { lang: langLabel(settings.studyLang) }) }}
       </div>
       <div v-if="level === undefined" class="text-sm text-neutral-300">
-        Not set. Set it to see the words you know in color.
+        {{ t('vocab.notSet') }}
       </div>
       <div v-else class="text-sm">
-        You know the
-        <span class="font-semibold tabular-nums">{{ level.toLocaleString('en') }}</span> most common
-        words
+        <T k="vocab.youKnow">
+          <template #n>
+            <span class="font-semibold tabular-nums">{{ formatNumber(level) }}</span>
+          </template>
+        </T>
       </div>
     </div>
     <div class="flex items-center gap-4">
@@ -43,7 +45,7 @@ function setLevel(value: number | undefined) {
         class="text-sm text-neutral-400 underline hover:text-fg"
         @click="setLevel(undefined)"
       >
-        Turn off
+        {{ t('vocab.turnOff') }}
       </button>
       <button
         type="button"
@@ -55,12 +57,12 @@ function setLevel(value: number | undefined) {
         "
         @click="levelOpen = true"
       >
-        {{ level === undefined ? 'Set level' : 'Change level' }}
+        {{ level === undefined ? t('vocab.setLevel') : t('vocab.changeLevel') }}
       </button>
     </div>
   </div>
   <p v-else class="text-sm text-neutral-400">
-    Vocabulary level is not available for {{ LANGUAGES[settings.studyLang] }} yet.
+    {{ t('vocab.notAvailable', { lang: langName(settings.studyLang) }) }}
   </p>
   <VocabLevelDialog
     v-if="levelOpen"

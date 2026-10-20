@@ -1,3 +1,5 @@
+import { loadLocale } from '@/shared/i18n'
+import { getSettings, onStorageKey } from '@/shared/storage'
 import { mountInShadow } from './mount'
 import { currentPlayer } from './youtube/page'
 import YoutubeOverlay from './youtube/YoutubeOverlay.vue'
@@ -30,6 +32,11 @@ function mountWhenReady() {
   return true
 }
 
-if (!mountWhenReady()) {
-  const timer = setInterval(() => mountWhenReady() && clearInterval(timer), 300)
-}
+// The interface language is loaded first, so the UI does not show English for a moment.
+const syncLocale = async () => loadLocale((await getSettings()).uiLang)
+onStorageKey('settings', () => void syncLocale())
+void syncLocale().then(() => {
+  if (!mountWhenReady()) {
+    const timer = setInterval(() => mountWhenReady() && clearInterval(timer), 300)
+  }
+})

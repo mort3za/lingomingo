@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { t } from '@/shared/i18n'
 import { sentenceParts } from '@/shared/review'
 import SpeakButton from '@/shared/SpeakButton.vue'
 import { dirOf, type SavedWord } from '@/shared/types'
@@ -36,15 +37,15 @@ async function more() {
   try {
     const p = (await fetchExtras([w], true))[w.id]
     // The model can answer with only repeats: say so, else the click seems to do nothing.
-    if (!p || count(p) <= count(w)) moreError.value = 'The AI gave nothing new.'
+    if (!p || count(p) <= count(w)) moreError.value = t('card.nothingNew')
   } catch (e) {
-    moreError.value = `No AI examples: ${e instanceof Error ? e.message : String(e)}`
+    moreError.value = t('card.noExamples', { error: e instanceof Error ? e.message : String(e) })
   } finally {
     busy.value = false
   }
 }
 const error = computed(
-  () => moreError.value || (props.error ? `No AI examples: ${props.error}` : ''),
+  () => moreError.value || (props.error ? t('card.noExamples', { error: props.error }) : ''),
 )
 const retry = () => (moreError.value ? void more() : emit('retry'))
 
@@ -121,9 +122,9 @@ const hide = computed(() =>
           v-bind="iconAttrs"
           class="mt-1.5 size-4 shrink-0"
           :class="s.video ? 'text-accent' : 'text-neutral-500'"
-          :aria-label="s.video ? 'From the video' : 'Example by AI'"
+          :aria-label="s.video ? t('card.fromVideo') : t('card.byAi')"
         >
-          <title>{{ s.video ? 'From the video' : 'Example by AI' }}</title>
+          <title>{{ s.video ? t('card.fromVideo') : t('card.byAi') }}</title>
           <path v-for="d in s.video ? icons.video : icons.ai" :key="d" :d="d" />
         </svg>
         <div class="min-w-0 flex-1 text-start">
@@ -181,7 +182,9 @@ const hide = computed(() =>
           <path v-for="d in icons.ai" :key="d" :d="d" />
         </svg>
         <span class="min-w-0 flex-1 truncate" :title="error">{{ error }}</span>
-        <button class="shrink-0 text-fg hover:underline" @click="retry">Retry</button>
+        <button class="shrink-0 text-fg hover:underline" @click="retry">
+          {{ t('common.retry') }}
+        </button>
       </template>
       <button
         v-else
@@ -192,7 +195,7 @@ const hide = computed(() =>
         <svg v-bind="iconAttrs" class="size-4 shrink-0" :class="{ 'animate-pulse': busy }">
           <path v-for="d in icons.ai" :key="d" :d="d" />
         </svg>
-        More examples and translations
+        {{ t('card.more') }}
       </button>
     </div>
   </section>

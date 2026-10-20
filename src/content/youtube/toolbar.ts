@@ -1,4 +1,5 @@
 import { onBeforeUnmount, watchEffect, type Ref } from 'vue'
+import { t, type Key } from '@/shared/i18n'
 import { isShorts, toolbarGroup } from './page'
 
 // Like the native buttons of the new player: a filled icon when on, an outline icon when off.
@@ -15,7 +16,8 @@ export const ICONS = {
 }
 
 export interface Toggle {
-  label: string
+  /** Text key of the tooltip. */
+  label: Key
   icon: { on: string; off: string }
   on: Ref<boolean>
 }
@@ -33,11 +35,9 @@ interface Parts {
 
 // On: a solid red chip with a white filled icon. Off: a red chip outline with a white outline
 // icon. White icons like the native ones; the red chip shows that the button is from LingoMingo.
-function makeButton(t: Toggle): Parts {
+function makeButton(toggle: Toggle): Parts {
   const btn = document.createElement('button')
   btn.className = 'ytp-button'
-  btn.title = t.label
-  btn.setAttribute('aria-label', t.label)
   // No innerHTML: YouTube enforces Trusted Types.
   const ns = 'http://www.w3.org/2000/svg'
   const svg = document.createElementNS(ns, 'svg')
@@ -58,7 +58,7 @@ function makeButton(t: Toggle): Parts {
   path.setAttribute('transform', 'translate(4 4) scale(0.6667)')
   svg.append(chip, path)
   btn.append(svg)
-  btn.addEventListener('click', () => (t.on.value = !t.on.value))
+  btn.addEventListener('click', () => (toggle.on.value = !toggle.on.value))
   return { btn, chip, path }
 }
 
@@ -86,12 +86,14 @@ export function usePlayerToggles(toggles: Toggle[], visible: () => boolean) {
 
   watchEffect(() => {
     const show = visible()
-    toggles.forEach((t, i) => {
+    toggles.forEach((toggle, i) => {
       const { btn, chip, path } = parts[i]!
+      btn.title = t(toggle.label)
+      btn.setAttribute('aria-label', btn.title)
       btn.style.display = show ? '' : 'none'
-      btn.setAttribute('aria-pressed', String(t.on.value))
-      chip.setAttribute('fill', t.on.value ? ACCENT : 'none')
-      path.setAttribute('d', t.on.value ? t.icon.on : t.icon.off)
+      btn.setAttribute('aria-pressed', String(toggle.on.value))
+      chip.setAttribute('fill', toggle.on.value ? ACCENT : 'none')
+      path.setAttribute('d', toggle.on.value ? toggle.icon.on : toggle.icon.off)
     })
   })
 

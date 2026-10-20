@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t, uiDir } from '@/shared/i18n'
 import SpeakButton from '@/shared/SpeakButton.vue'
 import { subtitleStyles } from '@/shared/subtitle-style'
 import { dirOf } from '@/shared/types'
@@ -51,9 +52,9 @@ const round = 'grid size-8 place-items-center rounded-full bg-fg/10 text-fg hove
       :class="controls + 'flex flex-col justify-center gap-1 self-center rounded-full'"
       :style="st.controls"
     >
-      <button :class="round" title="Next (D)" @click="s.next()">›</button>
-      <button :class="round" title="Repeat (S)" @click="s.repeat()">↻</button>
-      <button :class="round" title="Previous (A)" @click="s.prev()">‹</button>
+      <button :class="round" :title="t('yt.next')" @click="s.next()">›</button>
+      <button :class="round" :title="t('yt.repeat')" @click="s.repeat()">↻</button>
+      <button :class="round" :title="t('yt.prev')" @click="s.prev()">‹</button>
     </div>
 
     <div
@@ -83,18 +84,20 @@ const round = 'grid size-8 place-items-center rounded-full bg-fg/10 text-fg hove
             >
               {{ translation }}
             </div>
-            <div v-else-if="s.translationError.value" class="text-sm text-red-300">
+            <div v-else-if="s.translationError.value" class="text-sm text-red-300" :dir="uiDir()">
               {{ s.translationError.value }}
             </div>
-            <div v-else class="text-sm text-neutral-500">Translating…</div>
+            <div v-else class="text-sm text-neutral-500" :dir="uiDir()">
+              {{ t('yt.translating') }}
+            </div>
           </template>
         </template>
         <div v-else class="text-sm text-neutral-500">&nbsp;</div>
       </template>
-      <div v-else-if="s.status.value === 'loading'" class="text-sm text-neutral-400">
-        Loading subtitles…
+      <div v-else-if="s.status.value === 'loading'" class="text-sm text-neutral-400" :dir="uiDir()">
+        {{ t('yt.loadingSubs') }}
       </div>
-      <div v-else class="text-sm text-neutral-300">{{ s.message.value }}</div>
+      <div v-else class="text-sm text-neutral-300" :dir="uiDir()">{{ s.message.value }}</div>
     </div>
 
     <div
@@ -104,7 +107,7 @@ const round = 'grid size-8 place-items-center rounded-full bg-fg/10 text-fg hove
     >
       <button
         :class="round + (isSaved ? 'text-yellow-300' : '')"
-        title="Save sentence (R)"
+        :title="t('yt.saveSentence')"
         @click="s.togglePhrase(idx)"
       >
         {{ isSaved ? '★' : '☆' }}
@@ -119,9 +122,7 @@ const round = 'grid size-8 place-items-center rounded-full bg-fg/10 text-fg hove
       />
       <button
         :class="round"
-        :title="
-          s.settings.value.subtitlesOnTop ? 'Move subtitles to bottom' : 'Move subtitles to top'
-        "
+        :title="s.settings.value.subtitlesOnTop ? t('yt.moveBottom') : t('yt.moveTop')"
         @click="s.toggleSubtitlesOnTop()"
       >
         {{ s.settings.value.subtitlesOnTop ? '↓' : '↑' }}
