@@ -165,7 +165,7 @@ watch(
           <!-- In one line, so the buttons do not make a short row taller. -->
           <div class="flex items-center gap-1.5 self-start">
             <SpeakButton
-              class="-m-1"
+              class="-m-1 transition-none!"
               :text="c.text"
               :lang="s.lang.value"
               on-hover
