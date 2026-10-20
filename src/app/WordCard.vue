@@ -117,7 +117,13 @@ const hide = computed(() =>
     </div>
 
     <ol v-if="sentences.length || skeletons" class="divide-y divide-fg/5 border-t border-fg/5">
-      <li v-for="(s, i) in sentences" :key="i" class="group flex gap-4 px-8 py-3">
+      <!-- In the direction of the study language: the sentence starts at its own side. -->
+      <li
+        v-for="(s, i) in sentences"
+        :key="i"
+        class="group flex gap-4 px-8 py-3"
+        :dir="dirOf(word.langCode)"
+      >
         <svg
           v-bind="iconAttrs"
           class="mt-1.5 size-4 shrink-0"

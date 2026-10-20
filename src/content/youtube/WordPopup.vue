@@ -293,7 +293,13 @@ const stages: { stage: Stage; label: Key; key: string; icon: string }[] = [
         </div>
       </div>
     </div>
-    <div v-if="phrase" class="flex items-center gap-2 border-t border-fg/10 px-4 py-2.5">
+    <!-- Rows of study-language text go in its direction: the text starts at its own side and its
+         button is at its end. The labels stay in the interface language. -->
+    <div
+      v-if="phrase"
+      class="flex items-center gap-2 border-t border-fg/10 px-4 py-2.5"
+      :dir="dirOf(studyLang)"
+    >
       <div class="min-w-0 flex-1">
         <div class="text-[10px] font-medium tracking-wide text-fg/40 uppercase" :dir="uiDir()">
           {{ t('common.expression') }}
@@ -348,7 +354,13 @@ const stages: { stage: Stage; label: Key; key: string; icon: string }[] = [
             </div>
           </li>
         </template>
-        <li v-for="(e, i) in examples" v-else :key="i" class="group flex items-start gap-1">
+        <li
+          v-for="(e, i) in examples"
+          v-else
+          :key="i"
+          class="group flex items-start gap-1"
+          :dir="dirOf(studyLang)"
+        >
           <div class="min-w-0 flex-1">
             <p class="text-sm leading-5 text-fg/90" :dir="dirOf(studyLang)">
               <template v-for="(t, j) in parts(e.sentence)" :key="j">
@@ -365,7 +377,7 @@ const stages: { stage: Stage; label: Key; key: string; icon: string }[] = [
             </p>
           </div>
           <SpeakButton
-            class="-mt-0.5 -mr-1.5"
+            class="-me-1.5 -mt-0.5"
             :text="e.sentence"
             :lang="studyLang"
             :shortcut="String(i + 1)"

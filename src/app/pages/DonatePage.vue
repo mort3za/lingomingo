@@ -67,7 +67,7 @@ const iconAttrs = {
   'stroke-linejoin': 'round',
 } as const
 const tileClass =
-  'group flex flex-col gap-2 rounded-lg bg-panel p-4 text-left text-sm transition-colors hover:bg-fg/10'
+  'group flex flex-col gap-2 rounded-lg bg-panel p-4 text-start text-sm transition-colors hover:bg-fg/10'
 
 const copied = ref(false)
 async function copyLink() {
