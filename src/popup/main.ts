@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import '@/shared/styles/main.css'
+import '@/shared/styles/fonts.css'
 import { useSettings } from '@/app/settings'
 import { countOpen } from '@/shared/rating'
 import ToolbarPopup from './ToolbarPopup.vue'
