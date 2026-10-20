@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { T, t, type Key } from '@/shared/i18n'
 import { send } from '@/shared/messages'
 import { play, speaking, stop } from '@/shared/speech'
 import type { Voice } from '@/shared/types'
@@ -10,67 +11,46 @@ import { VOCAB_SAMPLES } from './vocab-samples'
 const { settings } = useSettings()
 
 // Cost, limits and privacy of each voice. `warn` items are shown in a warning color.
-const CACHE = 'Audio is saved for 30 days: a replay sends no new request.'
-const NOTES: Record<Voice, { text: string; warn?: boolean }[]> = {
+const NOTES: Record<Voice, { text: Key; warn?: boolean }[]> = {
   browser: [
-    { text: 'Free. Quality depends on the language and on the voices of your computer.' },
-    {
-      text: 'For better voices, download them: on macOS, open System Settings > Accessibility > Read & Speak (or Spoken Content), and add a voice next to "System voice". "Premium" and "Enhanced" voices sound best. On Windows 11, open Settings > Time & language > Speech > Manage voices > Add voices.',
-    },
-    {
-      text: 'Without a downloaded voice, LingoMingo uses Chrome\'s online "Google ..." voice for your language. It sends the text to Google.',
-      warn: true,
-    },
+    { text: 'voice.browserFree' },
+    { text: 'voice.browserDownload' },
+    { text: 'voice.browserGoogle', warn: true },
   ],
   openai: [
-    { text: 'Paid: you pay for each new text. There is no free tier.' },
-    { text: CACHE },
-    { text: 'OpenAI voices are made for English. Other languages can have an English accent.' },
-    {
-      text: 'OpenAI shuts down these voice models on January 6, 2027. After that, use Gemini or a local server.',
-      warn: true,
-    },
-    { text: 'OpenAI does not train its models on API data, unless you allow it.' },
+    { text: 'voice.openaiCost' },
+    { text: 'voice.cache' },
+    { text: 'voice.openaiAccent' },
+    { text: 'voice.openaiEnd', warn: true },
+    { text: 'ai.openaiTrain' },
   ],
   gemini: [
-    {
-      text: 'Free tier: no cost, but with daily limits. Google shows your limits in Google AI Studio. Paid tier: Flash-Lite costs about 0.15 cent for 10 seconds of speech in 2026, and double from 2027.',
-    },
-    { text: CACHE },
-    { text: 'Speaks over 100 languages. Flash TTS speaks over 130.' },
-    {
-      text: 'On the free tier, Google uses your requests to improve its products, and people at Google can read them. To stop this, turn on billing in Google AI Studio.',
-      warn: true,
-    },
-    {
-      text: 'In the EU (EEA), Switzerland and the UK, the Google terms allow only the paid tier.',
-      warn: true,
-    },
+    { text: 'voice.geminiCost' },
+    { text: 'voice.cache' },
+    { text: 'voice.geminiLangs' },
+    { text: 'voice.geminiTrain', warn: true },
+    { text: 'ai.geminiEu', warn: true },
   ],
-  local: [
-    { text: 'Free and private: the text stays on your computer.' },
-    { text: 'Many local models speak only a few languages. Use one for your study language.' },
-  ],
+  local: [{ text: 'voice.localFree' }, { text: 'voice.localLangs' }],
 }
 
 // Local servers with an OpenAI-compatible speech API, with settings that work.
 const SERVERS = [
   {
     name: 'Kokoro-FastAPI',
-    langs:
-      'English, Spanish, French, Italian, Portuguese, Hindi, Japanese, Chinese. No German or Persian.',
+    langs: 'voice.kokoroLangs',
     baseUrl: 'http://localhost:8880/v1',
     model: 'kokoro',
     voice: 'af_heart',
   },
   {
-    name: 'Speaches with Piper',
-    langs: 'About 45 languages, also German, Dutch, Persian, Polish, Russian and Turkish.',
+    name: 'voice.speaches',
+    langs: 'voice.piperLangs',
     baseUrl: 'http://localhost:8000/v1',
     model: 'speaches-ai/piper-de_DE-thorsten-medium',
     voice: 'thorsten',
   },
-]
+] as const
 function useServer(s: (typeof SERVERS)[number]) {
   settings.value.voiceBaseUrl = s.baseUrl
   settings.value.voiceModel = s.model
@@ -104,7 +84,7 @@ async function testVoice() {
     // Ask first, so an error shows here. play() then gets the audio from the cache.
     await send({ type: 'speak', text, lang })
   } catch (e) {
-    testError.value = `${e instanceof Error ? e.message : String(e)} The browser voice plays instead.`
+    testError.value = t('voice.testError', { error: e instanceof Error ? e.message : String(e) })
   }
   if (mine !== run) return
   loading.value = false
@@ -115,41 +95,44 @@ const playIcon =
   'M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z'
 const stopIcon = 'M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'
 
-const example = 'ml-1 font-mono text-neutral-400 underline hover:text-fg'
+const example = 'ms-1 font-mono text-neutral-400 underline hover:text-fg'
 const code = 'font-mono break-all text-neutral-300'
+const link = 'underline hover:text-fg'
+// The server name of a row, as the user sees it.
+const serverName = (name: string) => (name.startsWith('voice.') ? t(name as Key) : name)
 </script>
 
 <template>
   <div class="space-y-4">
     <div>
-      <label :class="label" for="voice">Voice</label>
+      <label :class="label" for="voice">{{ t('settings.voice') }}</label>
       <select id="voice" v-model="settings.voice" :class="input">
-        <option value="browser">Browser voice (free)</option>
+        <option value="browser">{{ t('voice.optBrowser') }}</option>
         <option value="openai">OpenAI</option>
-        <option value="gemini">Google Gemini (free tier)</option>
-        <option value="local">Local speech server</option>
+        <option value="gemini">{{ t('voice.optGemini') }}</option>
+        <option value="local">{{ t('voice.optLocal') }}</option>
       </select>
     </div>
 
     <template v-if="settings.voice === 'openai'">
       <div>
-        <label :class="label" for="vokey">API key</label>
+        <label :class="label" for="vokey">{{ t('ai.apiKey') }}</label>
         <SecretInput id="vokey" v-model="settings.openaiKey" placeholder="sk-..." />
         <p class="mt-1 text-xs text-neutral-500">
-          Stored only in this browser. The same key as for AI translation with OpenAI. Get a key on
-          <a
-            href="https://platform.openai.com/api-keys"
-            target="_blank"
-            class="underline hover:text-fg"
-            >platform.openai.com</a
-          >.
+          <T k="voice.openaiKeyHint">
+            <template #link>
+              <a href="https://platform.openai.com/api-keys" target="_blank" :class="link"
+                >platform.openai.com</a
+              >
+            </template>
+          </T>
         </p>
       </div>
       <div>
-        <label :class="label" for="vomodel">Model</label>
+        <label :class="label" for="vomodel">{{ t('ai.model') }}</label>
         <input id="vomodel" v-model="settings.openaiVoiceModel" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
-          Examples:
+          {{ t('common.examples') }}
           <button
             v-for="m in ['gpt-4o-mini-tts', 'tts-1', 'tts-1-hd']"
             :key="m"
@@ -159,14 +142,14 @@ const code = 'font-mono break-all text-neutral-300'
           >
             {{ m }}
           </button>
-          — gpt-4o-mini-tts sounds the most natural.
+          — {{ t('voice.openaiModelTip') }}
         </p>
       </div>
       <div>
-        <label :class="label" for="vovoice">Voice name</label>
+        <label :class="label" for="vovoice">{{ t('voice.name') }}</label>
         <input id="vovoice" v-model="settings.openaiVoice" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
-          Examples:
+          {{ t('common.examples') }}
           <button
             v-for="v in ['marin', 'cedar', 'coral', 'nova', 'onyx']"
             :key="v"
@@ -176,34 +159,35 @@ const code = 'font-mono break-all text-neutral-300'
           >
             {{ v }}
           </button>
-          — marin and cedar have the best quality, but only with gpt-4o-mini-tts. Hear all voices on
-          <a href="https://www.openai.fm" target="_blank" class="underline hover:text-fg"
-            >openai.fm</a
-          >.
+          —
+          <T k="voice.openaiVoiceTip">
+            <template #link>
+              <a href="https://www.openai.fm" target="_blank" :class="link">openai.fm</a>
+            </template>
+          </T>
         </p>
       </div>
     </template>
 
     <template v-else-if="settings.voice === 'gemini'">
       <div>
-        <label :class="label" for="vgkey">API key</label>
-        <SecretInput id="vgkey" v-model="settings.geminiKey" placeholder="AQ... or AIza..." />
+        <label :class="label" for="vgkey">{{ t('ai.apiKey') }}</label>
+        <SecretInput id="vgkey" v-model="settings.geminiKey" placeholder="AQ... / AIza..." />
         <p class="mt-1 text-xs text-neutral-500">
-          Stored only in this browser. The same key as for AI translation with Gemini. Get a free
-          key in
-          <a
-            href="https://aistudio.google.com/api-keys"
-            target="_blank"
-            class="underline hover:text-fg"
-            >Google AI Studio</a
-          >.
+          <T k="voice.geminiKeyHint">
+            <template #link>
+              <a href="https://aistudio.google.com/api-keys" target="_blank" :class="link"
+                >Google AI Studio</a
+              >
+            </template>
+          </T>
         </p>
       </div>
       <div>
-        <label :class="label" for="vgmodel">Model</label>
+        <label :class="label" for="vgmodel">{{ t('ai.model') }}</label>
         <input id="vgmodel" v-model="settings.geminiVoiceModel" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
-          Examples:
+          {{ t('common.examples') }}
           <button
             v-for="m in ['gemini-3.8-flash-lite-tts', 'gemini-3.8-flash-tts']"
             :key="m"
@@ -213,14 +197,14 @@ const code = 'font-mono break-all text-neutral-300'
           >
             {{ m }}
           </button>
-          — Flash-Lite is the cheapest and fastest. Flash speaks more languages.
+          — {{ t('voice.geminiModelTip') }}
         </p>
       </div>
       <div>
-        <label :class="label" for="vgvoice">Voice name</label>
+        <label :class="label" for="vgvoice">{{ t('voice.name') }}</label>
         <input id="vgvoice" v-model="settings.geminiVoice" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
-          Examples:
+          {{ t('common.examples') }}
           <button
             v-for="v in ['Kore', 'Puck', 'Charon', 'Aoede', 'Iapetus', 'Sulafat']"
             :key="v"
@@ -230,28 +214,29 @@ const code = 'font-mono break-all text-neutral-300'
           >
             {{ v }}
           </button>
-          — Hear all voices in
-          <a
-            href="https://aistudio.google.com/generate-speech"
-            target="_blank"
-            class="underline hover:text-fg"
-            >Google AI Studio</a
-          >.
+          —
+          <T k="voice.geminiVoiceTip">
+            <template #link>
+              <a href="https://aistudio.google.com/generate-speech" target="_blank" :class="link"
+                >Google AI Studio</a
+              >
+            </template>
+          </T>
         </p>
       </div>
     </template>
 
     <template v-else-if="settings.voice === 'local'">
       <div>
-        <label :class="label" for="vbase">Base URL (OpenAI-compatible)</label>
+        <label :class="label" for="vbase">{{ t('ai.baseUrlCompat') }}</label>
         <input id="vbase" v-model="settings.voiceBaseUrl" :class="input" />
       </div>
       <div>
-        <label :class="label" for="vmodel">Model name</label>
+        <label :class="label" for="vmodel">{{ t('ai.modelName') }}</label>
         <input id="vmodel" v-model="settings.voiceModel" :class="input" placeholder="kokoro" />
       </div>
       <div>
-        <label :class="label" for="vname">Voice name</label>
+        <label :class="label" for="vname">{{ t('voice.name') }}</label>
         <input id="vname" v-model="settings.voiceName" :class="input" placeholder="af_heart" />
       </div>
       <div class="space-y-1 text-xs text-neutral-500">
@@ -261,106 +246,131 @@ const code = 'font-mono break-all text-neutral-300'
             class="font-mono text-neutral-400 underline hover:text-fg"
             @click="useServer(s)"
           >
-            {{ s.name }}
+            {{ serverName(s.name) }}
           </button>
-          — {{ s.langs }}
+          — {{ t(s.langs) }}
         </p>
       </div>
       <div class="rounded border border-fg/10 p-3 text-xs text-neutral-400">
-        <p class="font-medium text-neutral-300">Set up Kokoro-FastAPI</p>
-        <ol class="mt-2 list-decimal space-y-1 pl-4">
+        <p class="font-medium text-neutral-300">{{ t('voice.kokoroSetup') }}</p>
+        <ol class="mt-2 list-decimal space-y-1 ps-4">
           <li>
-            Install
-            <a
-              href="https://www.docker.com/products/docker-desktop/"
-              target="_blank"
-              class="underline hover:text-fg"
-              >Docker Desktop</a
-            >.
+            <T k="voice.kokoroStep1">
+              <template #link>
+                <a
+                  href="https://www.docker.com/products/docker-desktop/"
+                  target="_blank"
+                  :class="link"
+                  >Docker Desktop</a
+                >
+              </template>
+            </T>
           </li>
           <li>
-            Start the server:
-            <code :class="code"
-              >docker run -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-cpu:latest</code
-            >
+            <T k="voice.startServer">
+              <template #cmd>
+                <code :class="code"
+                  >docker run -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-cpu:latest</code
+                >
+              </template>
+            </T>
           </li>
           <li>
-            Click <span class="text-neutral-300">Kokoro-FastAPI</span> above. Voice names start with
-            the language: <code :class="code">a</code>/<code :class="code">b</code> English,
-            <code :class="code">e</code> Spanish, <code :class="code">f</code> French,
-            <code :class="code">i</code> Italian, <code :class="code">p</code> Portuguese,
-            <code :class="code">j</code> Japanese, <code :class="code">z</code> Chinese. See all
-            voices on
-            <a
-              href="https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md"
-              target="_blank"
-              class="underline hover:text-fg"
-              >Hugging Face</a
-            >.
+            <T k="voice.kokoroStep3">
+              <template #name><span class="text-neutral-300">Kokoro-FastAPI</span></template>
+              <template v-for="c in ['a', 'b', 'e', 'f', 'i', 'p', 'j', 'z']" :key="c" #[c]>
+                <code :class="code">{{ c }}</code>
+              </template>
+              <template #link>
+                <a
+                  href="https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md"
+                  target="_blank"
+                  :class="link"
+                  >Hugging Face</a
+                >
+              </template>
+            </T>
           </li>
         </ol>
         <p class="mt-2 text-neutral-500">
-          With an NVIDIA GPU:
-          <code :class="code">ghcr.io/remsky/kokoro-fastapi-gpu:latest</code> with
-          <code :class="code">--gpus all</code>. More in the
-          <a
-            href="https://github.com/remsky/Kokoro-FastAPI"
-            target="_blank"
-            class="underline hover:text-fg"
-            >Kokoro-FastAPI guide</a
-          >.
+          <T k="voice.kokoroGpu">
+            <template #image>
+              <code :class="code">ghcr.io/remsky/kokoro-fastapi-gpu:latest</code>
+            </template>
+            <template #flag><code :class="code">--gpus all</code></template>
+            <template #link>
+              <a href="https://github.com/remsky/Kokoro-FastAPI" target="_blank" :class="link">{{
+                t('voice.kokoroGuide')
+              }}</a>
+            </template>
+          </T>
         </p>
       </div>
       <div class="rounded border border-fg/10 p-3 text-xs text-neutral-400">
-        <p class="font-medium text-neutral-300">Set up Speaches with Piper (German and more)</p>
-        <ol class="mt-2 list-decimal space-y-1 pl-4">
+        <p class="font-medium text-neutral-300">{{ t('voice.piperSetup') }}</p>
+        <ol class="mt-2 list-decimal space-y-1 ps-4">
           <li>
-            Start the server:
-            <code :class="code"
-              >docker run --detach -p 8000:8000 -v hf-hub-cache:/home/ubuntu/.cache/huggingface/hub
-              ghcr.io/speaches-ai/speaches:latest-cpu</code
-            >
+            <T k="voice.startServer">
+              <template #cmd>
+                <code :class="code"
+                  >docker run --detach -p 8000:8000 -v
+                  hf-hub-cache:/home/ubuntu/.cache/huggingface/hub
+                  ghcr.io/speaches-ai/speaches:latest-cpu</code
+                >
+              </template>
+            </T>
           </li>
           <li>
-            Download a voice:
-            <code :class="code"
-              >curl -X POST
-              http://localhost:8000/v1/models/speaches-ai/piper-de_DE-thorsten-medium</code
-            >
+            <T k="voice.piperStep2">
+              <template #cmd>
+                <code :class="code"
+                  >curl -X POST
+                  http://localhost:8000/v1/models/speaches-ai/piper-de_DE-thorsten-medium</code
+                >
+              </template>
+            </T>
           </li>
           <li>
-            Click <span class="text-neutral-300">Speaches with Piper</span> above. For another
-            language, find a voice on the
-            <a
-              href="https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md"
-              target="_blank"
-              class="underline hover:text-fg"
-              >Piper voice list</a
-            >, and download it as in step 2. The model name is
-            <code :class="code">speaches-ai/piper-</code> + the voice, like
-            <code :class="code">de_DE-thorsten-medium</code>. The voice name is its middle part,
-            like <code :class="code">thorsten</code>.
+            <T k="voice.piperStep3">
+              <template #name>
+                <span class="text-neutral-300">{{ t('voice.speaches') }}</span>
+              </template>
+              <template #link>
+                <a
+                  href="https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md"
+                  target="_blank"
+                  :class="link"
+                  >{{ t('voice.piperList') }}</a
+                >
+              </template>
+              <template #prefix><code :class="code">speaches-ai/piper-</code></template>
+              <template #model><code :class="code">de_DE-thorsten-medium</code></template>
+              <template #voice><code :class="code">thorsten</code></template>
+            </T>
           </li>
         </ol>
         <p class="mt-2 text-neutral-500">
-          More in the
-          <a
-            href="https://github.com/speaches-ai/speaches/blob/master/docs/usage/text-to-speech.md"
-            target="_blank"
-            class="underline hover:text-fg"
-            >Speaches guide</a
-          >.
+          <T k="voice.moreIn">
+            <template #link>
+              <a
+                href="https://github.com/speaches-ai/speaches/blob/master/docs/usage/text-to-speech.md"
+                target="_blank"
+                :class="link"
+                >{{ t('voice.speachesGuide') }}</a
+              >
+            </template>
+          </T>
         </p>
       </div>
     </template>
 
-    <ul class="list-disc space-y-1 rounded border border-fg/10 p-3 pl-7 text-xs text-neutral-400">
+    <ul class="list-disc space-y-1 rounded border border-fg/10 p-3 ps-7 text-xs text-neutral-400">
       <li
         v-for="n in NOTES[settings.voice]"
         :key="n.text"
         :class="n.warn ? 'text-yellow-300' : undefined"
       >
-        {{ n.text }}
+        {{ t(n.text) }}
       </li>
     </ul>
 
@@ -368,8 +378,7 @@ const code = 'font-mono break-all text-neutral-300'
       v-if="settings.voice === 'openai' || settings.voice === 'gemini'"
       class="text-xs text-neutral-500"
     >
-      LingoMingo sends the words and sentences that you play to this provider. The voice is made by
-      AI. The privacy policy of the provider applies.
+      {{ t('voice.privacy') }}
     </p>
 
     <div class="flex items-center gap-3">
@@ -396,8 +405,12 @@ const code = 'font-mono break-all text-neutral-300'
         </svg>
         <!-- Both labels share one cell, so the button keeps its width. -->
         <span class="grid text-start">
-          <span class="col-start-1 row-start-1" :class="{ invisible: testOn }">Test voice</span>
-          <span class="col-start-1 row-start-1" :class="{ invisible: !testOn }">Stop</span>
+          <span class="col-start-1 row-start-1" :class="{ invisible: testOn }">{{
+            t('voice.test')
+          }}</span>
+          <span class="col-start-1 row-start-1" :class="{ invisible: !testOn }">{{
+            t('common.stop')
+          }}</span>
         </span>
       </button>
       <p v-if="testError" class="text-xs text-red-300">{{ testError }}</p>

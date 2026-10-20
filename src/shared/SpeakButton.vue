@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount } from 'vue'
+import { t } from './i18n/core'
 import { play, speaking, stop } from './speech'
 
 const props = defineProps<{
@@ -46,7 +47,7 @@ const paths = [
               onHover && 'opacity-0 group-hover:opacity-100',
             ],
     ]"
-    :title="(on ? 'Stop' : 'Play') + (shortcut ? ` (${shortcut})` : '')"
+    :title="(on ? t('common.stop') : t('common.play')) + (shortcut ? ` (${shortcut})` : '')"
     @click="toggle"
   >
     <svg

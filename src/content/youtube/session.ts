@@ -1,5 +1,6 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch, type Ref } from 'vue'
 import { alignTranslation, audioLang, findCueIndex, parseJson3, pickTrack } from '@/shared/captions'
+import { langName, t } from '@/shared/i18n'
 import { translateChunk as requestChunk, type WordInfo } from '@/shared/messages'
 import {
   getSavedItems,
@@ -13,7 +14,6 @@ import {
 } from '@/shared/storage'
 import {
   DEFAULT_SETTINGS,
-  LANGUAGES,
   type CaptionTrack,
   type Cue,
   type Example,
@@ -73,7 +73,7 @@ async function fetchCues(track: CaptionTrack, extra: [string, string][]): Promis
   for (const [k, v] of extra) if (!url.searchParams.has(k)) url.searchParams.set(k, v)
   url.searchParams.set('fmt', 'json3')
   const res = await fetch(url, { credentials: 'include' })
-  if (!res.ok) throw new Error(`Caption download failed (${res.status}).`)
+  if (!res.ok) throw new Error(t('yt.errCaption', { status: String(res.status) }))
   const text = await res.text()
   // Empty answer: the video has no subtitles we can use. The caller hides the extension.
   return text ? parseJson3(JSON.parse(text)) : []
@@ -218,7 +218,7 @@ export function useYoutubeSession() {
         { tries: 25, everyMs: 200 },
       )
       if (token !== loadToken) return
-      if (!info) throw new Error('Could not read the YouTube player.')
+      if (!info) throw new Error(t('yt.errPlayer'))
       title.value = info.title
       // No auto-generated track: the spoken language is unknown, so use the study language.
       const code = audioLang(info.tracks) ?? studyLang
@@ -227,7 +227,7 @@ export function useYoutubeSession() {
       // Nothing to show: the subtitles and the list stay off. The saved choice does not change.
       if (!studyTrack) {
         status.value = 'no-subs'
-        message.value = `No ${LANGUAGES[code] ?? code} subtitles on this video.`
+        message.value = t('yt.noSubs', { lang: langName(code) })
         return
       }
       showSubs.value = regular() && settings.value.showSubtitles
@@ -346,10 +346,10 @@ export function useYoutubeSession() {
       }
     }
     await Promise.all(Array.from({ length: PARALLEL_CHUNKS }, work))
-    if (token !== loadToken) throw new Error('Another video loaded.')
+    if (token !== loadToken) throw new Error(t('yt.errOtherVideo'))
     if (signal?.aborted) return
     if (todo.some(untranslated)) {
-      throw new Error(translationError.value || 'Some lines did not get a translation.')
+      throw new Error(translationError.value || t('yt.errSomeLines'))
     }
   }
 

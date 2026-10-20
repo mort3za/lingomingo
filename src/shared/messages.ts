@@ -1,3 +1,4 @@
+import { t } from './i18n/core'
 import type { Example } from './types'
 
 /** Messages sent from content scripts / pages to the background service worker. */
@@ -77,7 +78,7 @@ export interface ResponseMap {
 export async function send<R extends Request>(req: R): Promise<ResponseMap[R['type']]> {
   const res = (await chrome.runtime.sendMessage(req)) as
     Response<ResponseMap[R['type']]> | undefined
-  if (!res) throw new Error('No answer from background')
+  if (!res) throw new Error(t('err.noBackground'))
   if (!res.ok) throw new Error(res.error)
   return res.data
 }
@@ -120,7 +121,7 @@ export function translateChunk(
       if (msg.type === 'done') resolve(msg.lines)
       else reject(new Error(msg.error))
     })
-    port.onDisconnect.addListener(() => reject(new Error('No answer from background')))
+    port.onDisconnect.addListener(() => reject(new Error(t('err.noBackground'))))
   })
   port.postMessage(req)
   return { done, cancel }

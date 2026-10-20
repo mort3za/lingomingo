@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { T, t } from '@/shared/i18n'
 import { LEVEL_LANGS, WORD_STYLE } from '@/shared/vocab'
 import LanguageFields from '../LanguageFields.vue'
 import ProviderFields from '../ProviderFields.vue'
@@ -18,26 +19,26 @@ const hasLevel = computed(
 const colorOptions = [
   {
     key: 'showKnownGreen',
-    title: 'Known words',
-    on: 'green',
+    title: 'settings.knownWords',
+    on: 'settings.knownOn',
     style: 'KNOWN',
-    hint: 'Words below your level, and words you marked as Known.',
+    hint: 'settings.knownHint',
     needsLevel: false,
   },
   {
     key: 'showSuggested',
-    title: 'Suggested words',
-    on: 'orange',
+    title: 'settings.suggested',
+    on: 'settings.suggestedOn',
     style: 'SUGGESTED',
-    hint: 'The next 1,000 common words above your level. Learn these next.',
+    hint: 'settings.suggestedHint',
     needsLevel: true,
   },
   {
     key: 'darkenRare',
-    title: 'Rare words',
-    on: 'darker',
+    title: 'settings.rare',
+    on: 'settings.rareOn',
     style: 'RARE',
-    hint: 'Words far above your level, or not in the word list. Skip them for now. Recommended.',
+    hint: 'settings.rareHint',
     needsLevel: true,
   },
 ] as const
@@ -51,27 +52,32 @@ const check = 'flex items-center gap-2 text-sm'
   <div class="max-w-3xl space-y-6">
     <div>
       <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-semibold">Settings</h1>
-        <span v-if="saved" class="text-sm text-emerald-400">Saved</span>
+        <h1 class="text-2xl font-semibold">{{ t('nav.settings') }}</h1>
+        <span v-if="saved" class="text-sm text-emerald-400">{{ t('common.saved') }}</span>
       </div>
       <p :class="hint">
-        Changes save automatically. Want help step by step? Open the
-        <RouterLink to="/setup" class="underline hover:text-fg">setup guide</RouterLink>.
+        <T k="settings.intro">
+          <template #link>
+            <RouterLink to="/setup" class="underline hover:text-fg">{{
+              t('settings.setupGuide')
+            }}</RouterLink>
+          </template>
+        </T>
       </p>
     </div>
 
     <section :class="card">
       <div>
-        <h2 class="text-lg font-medium">Languages</h2>
-        <p :class="hint">The language you learn, and the language for translations.</p>
+        <h2 class="text-lg font-medium">{{ t('settings.languages') }}</h2>
+        <p :class="hint">{{ t('settings.languagesHint') }}</p>
       </div>
       <LanguageFields />
     </section>
 
     <section :class="card">
       <div>
-        <h2 class="text-lg font-medium">Vocabulary highlighting</h2>
-        <p :class="hint">Colors in subtitles and texts show which words you know.</p>
+        <h2 class="text-lg font-medium">{{ t('settings.vocab') }}</h2>
+        <p :class="hint">{{ t('settings.vocabHint') }}</p>
       </div>
       <VocabLevelField />
       <div class="space-y-3">
@@ -89,14 +95,14 @@ const check = 'flex items-center gap-2 text-sm'
           />
           <span class="flex-1">
             <span class="flex items-center gap-2 text-sm">
-              {{ opt.title }}
+              {{ t(opt.title) }}
               <span
                 class="rounded bg-surface-deep px-1.5 text-xs"
                 :class="settings[opt.key] ? WORD_STYLE[opt.style] : 'text-neutral-500'"
-                >{{ settings[opt.key] ? opt.on : 'off' }}</span
+                >{{ settings[opt.key] ? t(opt.on) : t('settings.off') }}</span
               >
             </span>
-            <span class="block text-xs text-neutral-500">{{ opt.hint }}</span>
+            <span class="block text-xs text-neutral-500">{{ t(opt.hint) }}</span>
           </span>
         </label>
       </div>
@@ -104,35 +110,31 @@ const check = 'flex items-center gap-2 text-sm'
 
     <section :class="card">
       <div>
-        <h2 class="text-lg font-medium">Subtitles</h2>
-        <p :class="hint">How the subtitle bar works on videos.</p>
+        <h2 class="text-lg font-medium">{{ t('settings.subtitles') }}</h2>
+        <p :class="hint">{{ t('settings.subtitlesHint') }}</p>
       </div>
       <div class="space-y-2">
         <label :class="check">
           <input v-model="settings.autoPause" type="checkbox" />
-          Auto-pause after each subtitle
+          {{ t('settings.autoPause') }}
         </label>
         <label :class="check">
           <input v-model="settings.hideTranslation" type="checkbox" />
-          Hide translation line
+          {{ t('settings.hideTranslation') }}
         </label>
         <label class="flex cursor-pointer items-start gap-2">
           <input v-model="settings.hideSubtitleButtons" type="checkbox" class="mt-1" />
           <span class="flex-1">
-            <span class="block text-sm">Hide buttons on the subtitle bar</span>
-            <span class="block text-xs text-neutral-500">
-              The keyboard shortcuts still work: A previous, S repeat, D next, R save sentence, Q
-              auto-pause, E word hints.
-            </span>
+            <span class="block text-sm">{{ t('settings.hideButtons') }}</span>
+            <span class="block text-xs text-neutral-500">{{ t('settings.hideButtonsHint') }}</span>
           </span>
         </label>
         <label class="flex cursor-pointer items-start gap-2">
           <input v-model="settings.nativeVideosLikeOthers" type="checkbox" class="mt-1" />
           <span class="flex-1">
-            <span class="block text-sm">Treat videos in your translation language like others</span>
+            <span class="block text-sm">{{ t('settings.nativeLikeOthers') }}</span>
             <span class="block text-xs text-neutral-500">
-              Off: these videos start with the subtitles and the list off. You can turn them on in
-              the player, but that choice is not saved for the next videos.
+              {{ t('settings.nativeLikeOthersHint') }}
             </span>
           </span>
         </label>
@@ -142,24 +144,16 @@ const check = 'flex items-center gap-2 text-sm'
 
     <section id="ai" :class="card">
       <div>
-        <h2 class="text-lg font-medium">AI translation</h2>
-        <p :class="hint">
-          Translates the subtitles when YouTube has no subtitles in your translation language. Also
-          used for the word popup, and for translations and example sentences on the Review and
-          Saved pages. LingoMingo never uses YouTube's automatic translation. It can use YouTube's
-          auto-generated subtitles.
-        </p>
+        <h2 class="text-lg font-medium">{{ t('settings.ai') }}</h2>
+        <p :class="hint">{{ t('settings.aiHint') }}</p>
       </div>
       <ProviderFields />
     </section>
 
     <section :class="card">
       <div>
-        <h2 class="text-lg font-medium">Voice</h2>
-        <p :class="hint">
-          Reads words and example sentences aloud when you click a play button, in the word popup
-          and on the Review and Saved pages.
-        </p>
+        <h2 class="text-lg font-medium">{{ t('settings.voice') }}</h2>
+        <p :class="hint">{{ t('settings.voiceHint') }}</p>
       </div>
       <VoiceFields />
     </section>

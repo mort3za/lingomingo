@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
+import { t } from '@/shared/i18n'
 import { cleanFontName } from '@/shared/subtitle-style'
 import { INPUT, LABEL, useSettings } from './settings'
 
@@ -55,9 +56,8 @@ const sameFont = (a: string, b: string) => cleanFontName(a).toLowerCase() === b.
 const status = computed(() => {
   const value = settings.value.subtitleFont
   if (!cleanFontName(value) || installed(value)) return ''
-  if (sameFont(value, YOUTUBE_FONT))
-    return 'Works on videos. Not on this computer, so not in the preview.'
-  return 'Not found on this computer. The default font is used.'
+  if (sameFont(value, YOUTUBE_FONT)) return t('look.youtubeOnly')
+  return t('look.missingFont')
 })
 
 function show() {
@@ -101,7 +101,7 @@ const family = (font: string) =>
 
 <template>
   <div>
-    <label :class="LABEL" for="subtitle-font">Font</label>
+    <label :class="LABEL" for="subtitle-font">{{ t('look.font') }}</label>
     <div class="relative">
       <input
         id="subtitle-font"
@@ -113,7 +113,7 @@ const family = (font: string) =>
         :value="settings.subtitleFont"
         :class="INPUT"
         :style="family(settings.subtitleFont)"
-        placeholder="Default"
+        :placeholder="t('look.defaultFont')"
         autocomplete="off"
         spellcheck="false"
         @input="type"
@@ -140,8 +140,12 @@ const family = (font: string) =>
           @mousedown.prevent="pick(font)"
           @mousemove="active = i"
         >
-          <span class="flex-1 truncate" :style="family(font)">{{ font || 'Default' }}</span>
-          <span v-if="font === YOUTUBE_FONT" class="text-xs text-neutral-500">YouTube font</span>
+          <span class="flex-1 truncate" :style="family(font)">{{
+            font || t('look.defaultFont')
+          }}</span>
+          <span v-if="font === YOUTUBE_FONT" class="text-xs text-neutral-500">{{
+            t('look.youtubeFont')
+          }}</span>
           <!-- Fixed width, so the names line up with and without the check mark. -->
           <span class="w-3 text-accent">{{
             sameFont(settings.subtitleFont, font) ? '✓' : ''

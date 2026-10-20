@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t, uiDir } from '@/shared/i18n'
 import { subtitleStyles } from '@/shared/subtitle-style'
 import { useSettings } from './settings'
 
@@ -33,12 +34,12 @@ const controls = computed(() => '-m-1 p-1 ' + (st.value.dimControls ? 'opacity-4
           <span :class="round">‹</span>
         </div>
         <div class="flex flex-1 flex-col justify-center text-center" :style="[st.font, st.text]">
-          <div class="leading-snug font-medium" :style="st.barSentence">
-            This is how subtitles look
+          <div class="leading-snug font-medium" :style="st.barSentence" :dir="uiDir()">
+            {{ t('look.sample') }}
           </div>
           <hr class="my-1 border-white/20" />
-          <div class="leading-snug text-white/65" :style="st.barTranslation">
-            And this is the translation
+          <div class="leading-snug text-white/65" :style="st.barTranslation" :dir="uiDir()">
+            {{ t('look.sampleTranslation') }}
           </div>
         </div>
         <div
@@ -53,11 +54,15 @@ const controls = computed(() => '-m-1 p-1 ' + (st.value.dimControls ? 'opacity-4
       </div>
     </div>
     <!-- One row of the subtitle list, as it looks next to the video. -->
-    <div class="hidden w-56 bg-surface p-2 sm:block">
-      <div class="text-xs font-medium tracking-wide text-neutral-400 uppercase">List</div>
+    <div class="hidden w-56 bg-surface p-2 sm:block" :dir="uiDir()">
+      <div class="text-xs font-medium tracking-wide text-neutral-400 uppercase">
+        {{ t('look.list') }}
+      </div>
       <div class="mt-2 rounded bg-accent/40 px-2 py-1.5" :style="st.font">
-        <div :style="st.listSentence">This is how subtitles look</div>
-        <div class="text-neutral-400" :style="st.listTranslation">And this is the translation</div>
+        <div :style="st.listSentence">{{ t('look.sample') }}</div>
+        <div class="text-neutral-400" :style="st.listTranslation">
+          {{ t('look.sampleTranslation') }}
+        </div>
       </div>
     </div>
   </div>

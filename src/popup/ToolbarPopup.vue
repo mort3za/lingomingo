@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { footerLinks, iconAttrs, mainLinks } from '@/app/nav'
 import { saveNow, useSettings } from '@/app/settings'
 import StudyLangSwitcher from '@/app/StudyLangSwitcher.vue'
+import { formatNumber, t } from '@/shared/i18n'
 import { ratingDone, REVIEW_URL } from '@/shared/rating'
 import { isDue, learningWords } from '@/shared/review'
 import { getSavedItems, onStorageKey } from '@/shared/storage'
@@ -84,21 +85,21 @@ function closeRating() {
       <div class="min-w-0 flex-1 leading-tight">
         <div class="text-[15px] font-semibold">LingoMingo</div>
         <div class="truncate text-xs text-neutral-400">
-          {{ on ? 'On for YouTube videos' : 'Off. YouTube looks as usual.' }}
+          {{ on ? t('popup.on') : t('popup.off') }}
         </div>
       </div>
       <button
         role="switch"
         :aria-checked="on"
-        aria-label="LingoMingo on YouTube"
-        :title="on ? 'Turn off on YouTube' : 'Turn on for YouTube'"
+        :aria-label="t('popup.switch')"
+        :title="on ? t('popup.turnOff') : t('popup.turnOn')"
         class="relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 outline-none hover:ring-2 hover:ring-fg/15 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         :class="on ? 'bg-accent' : 'bg-fg/15'"
         @click="settings.enabled = !on"
       >
         <span
-          class="absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow-sm shadow-black/30 transition-transform duration-200"
-          :class="on && 'translate-x-5'"
+          class="absolute start-0.5 top-0.5 size-5 rounded-full bg-white shadow-sm shadow-black/30 transition-transform duration-200"
+          :class="on && 'translate-x-5 rtl:-translate-x-5'"
         />
       </button>
     </header>
@@ -117,11 +118,8 @@ function closeRating() {
         <path d="M12 17h.01" />
       </svg>
       <span class="min-w-0 flex-1 leading-tight">
-        <span class="block text-sm font-medium">AI translation is not set up</span>
-        <span class="block text-xs text-yellow-300/70">
-          Without it, videos with no subtitles in your language show no translation. Add an API key
-          or a local model.
-        </span>
+        <span class="block text-sm font-medium">{{ t('popup.aiMissing') }}</span>
+        <span class="block text-xs text-yellow-300/70">{{ t('popup.aiMissingHint') }}</span>
       </span>
     </a>
 
@@ -136,12 +134,12 @@ function closeRating() {
           <svg v-bind="iconAttrs">
             <path v-for="d in link.icon" :key="d" :d="d" />
           </svg>
-          <span class="flex-1">{{ link.label }}</span>
+          <span class="flex-1">{{ t(link.label) }}</span>
           <span
             v-if="link.to === '/review' && due"
             class="rounded-full bg-accent px-2 py-px text-xs font-semibold text-white tabular-nums"
-            :title="`${due} words to review now`"
-            >{{ due }}</span
+            :title="t('popup.due', { n: due })"
+            >{{ formatNumber(due) }}</span
           >
         </a>
       </template>
@@ -165,15 +163,13 @@ function closeRating() {
             <path :d="starIcon" />
           </svg>
         </span>
-        <span class="block text-sm font-medium">Enjoying LingoMingo?</span>
-        <span class="block text-xs text-neutral-400">
-          Rate it on the Chrome Web Store. It helps other learners find it.
-        </span>
+        <span class="block text-sm font-medium">{{ t('popup.rate') }}</span>
+        <span class="block text-xs text-neutral-400">{{ t('popup.rateHint') }}</span>
       </a>
       <button
-        aria-label="Close"
-        title="Close"
-        class="absolute top-1.5 right-1.5 grid size-6 place-items-center rounded-md text-neutral-400 outline-none hover:bg-fg/10 hover:text-fg focus-visible:bg-fg/10 focus-visible:text-fg"
+        :aria-label="t('common.close')"
+        :title="t('common.close')"
+        class="absolute end-1.5 top-1.5 grid size-6 place-items-center rounded-md text-neutral-400 outline-none hover:bg-fg/10 hover:text-fg focus-visible:bg-fg/10 focus-visible:text-fg"
         @click="closeRating"
       >
         <svg v-bind="iconAttrs" class="size-4" aria-hidden="true">

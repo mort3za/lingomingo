@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { t } from '@/shared/i18n'
 import { INPUT } from './settings'
 
 /** Password field for an API key, with a button that shows or hides the value. */
@@ -26,16 +27,16 @@ const eyeOff = [
       :id="id"
       v-model="model"
       :type="shown ? 'text' : 'password'"
-      :class="INPUT + ' pr-10'"
+      :class="INPUT + ' pe-10'"
       :placeholder="placeholder"
       autocomplete="off"
       spellcheck="false"
     />
     <button
       type="button"
-      class="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-neutral-500 hover:text-fg focus-visible:text-fg focus-visible:outline-none"
-      :title="shown ? 'Hide key' : 'Show key'"
-      :aria-label="shown ? 'Hide key' : 'Show key'"
+      class="absolute inset-y-0 end-0 flex w-10 items-center justify-center text-neutral-500 hover:text-fg focus-visible:text-fg focus-visible:outline-none"
+      :title="shown ? t('secret.hide') : t('secret.show')"
+      :aria-label="shown ? t('secret.hide') : t('secret.show')"
       :aria-pressed="shown"
       @click="shown = !shown"
     >

@@ -11,6 +11,7 @@ import {
   needsExtras,
   preview,
 } from '@/shared/review'
+import { formatNumber, locale, t } from '@/shared/i18n'
 import { getSavedItems, getSettings, onStorageKey, setReview, setStage } from '@/shared/storage'
 import {
   DEFAULT_SETTINGS,
@@ -167,7 +168,9 @@ function onKeydown(e: KeyboardEvent) {
   e.preventDefault()
 }
 
-const nextIn = (ms: number) => (ms <= now.value ? 'Due' : `in ${formatSpan(ms - now.value)}`)
+const span = (ms: number) => formatSpan(ms, locale.value)
+const nextIn = (ms: number) =>
+  ms <= now.value ? t('review.dueNow') : t('review.in', { span: span(ms - now.value) })
 
 // Icons: SVG path data in the Lucide style (24×24, stroke), as in the sidebar.
 const icons = {
@@ -199,23 +202,25 @@ const skeleton = 'animate-pulse rounded bg-fg/10'
 <template>
   <div class="mx-auto max-w-3xl space-y-6">
     <div class="flex flex-wrap items-center gap-3">
-      <h1 class="text-2xl font-semibold">Review</h1>
+      <h1 class="text-2xl font-semibold">{{ t('nav.review') }}</h1>
       <span :class="[chip, queue.length ? 'text-orange-300' : 'text-neutral-400']">
-        {{ queue.length }} due
+        {{ t('review.due', { n: queue.length }) }}
       </span>
-      <span :class="[chip, 'text-neutral-400']">{{ words.length }} learning</span>
+      <span :class="[chip, 'text-neutral-400']">{{
+        t('review.learning', { n: words.length })
+      }}</span>
       <!-- Always in the layout, so it does not move the header when it shows. -->
       <button
-        class="ml-auto flex items-center gap-2 rounded-md border border-fg/15 py-1.5 ps-2.5 pe-2 text-sm text-neutral-300 transition-colors hover:border-fg/30 hover:bg-fg/5 hover:text-fg disabled:opacity-50"
+        class="ms-auto flex items-center gap-2 rounded-md border border-fg/15 py-1.5 ps-2.5 pe-2 text-sm text-neutral-300 transition-colors hover:border-fg/30 hover:bg-fg/5 hover:text-fg disabled:opacity-50"
         :class="{ invisible: !last }"
         :disabled="busy || !last"
-        :title="last ? `Undo the answer for “${last.text}”` : ''"
+        :title="last ? t('review.undoTitle', { word: last.text }) : ''"
         @click="undo"
       >
-        <svg v-bind="iconAttrs" class="size-4">
+        <svg v-bind="iconAttrs" class="size-4 rtl:-scale-x-100">
           <path v-for="d in icons.undo" :key="d" :d="d" />
         </svg>
-        Undo
+        {{ t('review.undo') }}
         <span v-if="last" class="max-w-32 truncate text-neutral-500" :dir="dirOf(lang)">
           {{ last.text }}
         </span>
@@ -240,7 +245,8 @@ const skeleton = 'animate-pulse rounded bg-fg/10'
           :class="btn + 'w-full flex-row gap-2 bg-accent text-white hover:brightness-110'"
           @click="revealed = true"
         >
-          Show answer <kbd :class="kbd + ' opacity-70'">Space</kbd>
+          {{ t('review.showAnswer') }}
+          <kbd :class="kbd + ' opacity-70'">{{ t('key.space') }}</kbd>
         </button>
         <div v-else class="grid h-full grid-cols-3 gap-2 sm:grid-cols-5">
           <button
@@ -250,21 +256,23 @@ const skeleton = 'animate-pulse rounded bg-fg/10'
             :disabled="busy"
             @click="rate(g.grade)"
           >
-            {{ g.label }}
+            {{ t(g.label) }}
             <span class="flex items-center gap-1.5 text-xs font-normal tabular-nums opacity-85">
-              {{ due ? formatSpan(due[g.grade] - now) : '' }}
-              <kbd :class="kbd">{{ g.grade === Rating.Good ? `${g.key} / Space` : g.key }}</kbd>
+              {{ due ? span(due[g.grade] - now) : '' }}
+              <kbd :class="kbd">{{
+                g.grade === Rating.Good ? `${g.key} / ${t('key.space')}` : g.key
+              }}</kbd>
             </span>
           </button>
           <button
             :class="btn + 'border border-emerald-400/50 text-emerald-300 hover:bg-emerald-400/10'"
             :disabled="busy"
-            title="Move to Known. It leaves the review."
+            :title="t('review.learnedTitle')"
             @click="learned"
           >
             <span class="flex items-center gap-1">
               <svg v-bind="iconAttrs" class="size-4"><path :d="icons.check[0]" /></svg>
-              Learned
+              {{ t('review.learned') }}
             </span>
             <kbd :class="kbd + ' opacity-85'">K</kbd>
           </button>
@@ -274,22 +282,22 @@ const skeleton = 'animate-pulse rounded bg-fg/10'
 
     <section v-else class="rounded-xl bg-panel p-8 text-center text-neutral-400">
       <template v-if="words.length">
-        All done for now. Next review {{ nextIn(dueAt(words[0]!)) }}.
+        {{ t('review.allDone', { when: nextIn(dueAt(words[0]!)) }) }}
       </template>
       <template v-else>
-        No words to review. Click a word in the YouTube subtitles and choose “Learn”.
+        {{ t('review.empty') }}
       </template>
     </section>
 
     <section v-if="words.length" class="space-y-2 pt-2">
-      <h2 class="text-lg font-semibold">Words</h2>
-      <table class="w-full text-left text-sm">
+      <h2 class="text-lg font-semibold">{{ t('review.words') }}</h2>
+      <table class="w-full text-start text-sm">
         <thead class="text-xs text-neutral-500 uppercase">
           <tr>
-            <th class="p-2 font-medium">Word</th>
-            <th class="p-2 font-medium">Translation</th>
-            <th class="p-2 font-medium">Next review</th>
-            <th class="hidden p-2 text-right font-medium sm:table-cell">Reviews</th>
+            <th class="p-2 text-start font-medium">{{ t('review.word') }}</th>
+            <th class="p-2 text-start font-medium">{{ t('review.translation') }}</th>
+            <th class="p-2 text-start font-medium">{{ t('review.next') }}</th>
+            <th class="hidden p-2 text-end font-medium sm:table-cell">{{ t('review.reps') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -305,10 +313,10 @@ const skeleton = 'animate-pulse rounded bg-fg/10'
               class="p-2 tabular-nums"
               :class="dueAt(w) <= now ? 'text-orange-300' : 'text-neutral-400'"
             >
-              {{ w.review ? nextIn(dueAt(w)) : 'New' }}
+              {{ w.review ? nextIn(dueAt(w)) : t('review.new') }}
             </td>
-            <td class="hidden p-2 text-right text-neutral-400 tabular-nums sm:table-cell">
-              {{ w.review?.reps ?? 0 }}
+            <td class="hidden p-2 text-end text-neutral-400 tabular-nums sm:table-cell">
+              {{ formatNumber(w.review?.reps ?? 0) }}
             </td>
           </tr>
         </tbody>

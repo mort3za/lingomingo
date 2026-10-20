@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { t } from '@/shared/i18n'
 import ShortcutsDialog from './ShortcutsDialog.vue'
 import StudyLangSwitcher from './StudyLangSwitcher.vue'
 import { footerLinks, iconAttrs, mainLinks } from './nav'
@@ -69,8 +70,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown, true))
       <header class="sticky top-0 z-30 flex h-14 items-center gap-1 bg-surface px-2 md:hidden">
         <button
           class="rounded p-2 text-neutral-300 hover:bg-panel hover:text-fg"
-          title="Menu"
-          aria-label="Open the menu"
+          :title="t('app.menu')"
+          :aria-label="t('app.openMenu')"
           @click="menuOpen = true"
         >
           <svg v-bind="iconAttrs">
@@ -110,15 +111,15 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown, true))
           <svg v-bind="iconAttrs">
             <path v-for="d in link.icon" :key="d" :d="d" />
           </svg>
-          {{ link.label }}
+          {{ t(link.label) }}
         </RouterLink>
       </template>
       <button :class="[linkClass, 'mt-auto text-sm text-neutral-500']" @click="help = true">
         <svg v-bind="iconAttrs">
           <path v-for="d in keyboardIcon" :key="d" :d="d" />
         </svg>
-        Shortcuts
-        <kbd class="ml-auto rounded border border-fg/20 px-1.5 font-sans text-xs">?</kbd>
+        {{ t('app.shortcuts') }}
+        <kbd class="ms-auto rounded border border-fg/20 px-1.5 font-sans text-xs">?</kbd>
       </button>
     </nav>
     <main class="min-w-0 flex-1 p-4 md:p-6">

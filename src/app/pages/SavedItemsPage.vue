@@ -2,16 +2,10 @@
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { download } from '@/shared/download'
 import { toAnki, toCsv, toJson } from '@/shared/export'
+import { formatNumber, langLabel, t } from '@/shared/i18n'
 import { getSavedItems, onStorageKey, removeItems, setStage } from '@/shared/storage'
 import SpeakButton from '@/shared/SpeakButton.vue'
-import {
-  dirOf,
-  EXPRESSION_TAG,
-  LANGUAGES,
-  type SavedItem,
-  type SavedWord,
-  type Stage,
-} from '@/shared/types'
+import { dirOf, EXPRESSION_TAG, type SavedItem, type SavedWord, type Stage } from '@/shared/types'
 import { ignoreKey } from '../shortcuts'
 import WordDialog from '../WordDialog.vue'
 
@@ -96,7 +90,7 @@ async function bulkStage(stage: Stage) {
 }
 async function bulkDelete() {
   const n = picked.value.size
-  if (!confirm(`Delete ${n} ${n === 1 ? 'item' : 'items'}? You cannot undo this.`)) return
+  if (!confirm(t('saved.confirmDelete', { n }))) return
   await removeItems([...picked.value])
   picked.value = new Set()
 }
@@ -130,11 +124,7 @@ const stageColor: Record<Stage, string> = {
   LEARNING: 'text-orange-300',
   SKIPPED: 'text-violet-300/70',
 }
-const stageLabel: Record<Stage, string> = {
-  KNOWN: 'Known',
-  LEARNING: 'Learning',
-  SKIPPED: "Don't learn",
-}
+const stageLabel = (s: Stage) => t(`stage.${s}` as const)
 const translationOf = (i: SavedItem) =>
   i.itemType === 'WORD' ? i.translations.join(', ') : (i.translation ?? '')
 const watchUrl = (i: SavedItem) =>
@@ -159,8 +149,8 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
     <div class="flex flex-wrap items-center gap-2">
       <button
         v-for="t in [
-          ['WORD', 'Saved Words'],
-          ['PHRASE', 'Saved Sentences'],
+          ['WORD', t('saved.words')],
+          ['PHRASE', t('saved.sentences')],
         ] as const"
         :key="t[0]"
         :class="btn + (tab === t[0] ? 'bg-panel text-fg' : 'text-neutral-400')"
@@ -169,18 +159,28 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
         {{ t[1] }}
       </button>
       <div class="flex-1" />
-      <button :class="btn + 'border border-fg/20'" @click="exportCsv">Export CSV</button>
-      <button :class="btn + 'border border-fg/20'" @click="exportAnki">Export Anki</button>
+      <button :class="btn + 'border border-fg/20'" @click="exportCsv">
+        {{ t('saved.exportCsv') }}
+      </button>
+      <button :class="btn + 'border border-fg/20'" @click="exportAnki">
+        {{ t('saved.exportAnki') }}
+      </button>
       <button :class="btn + 'bg-accent text-white [--color-fg:white]'" @click="exportJson">
-        Export JSON
+        {{ t('saved.exportJson') }}
       </button>
     </div>
 
     <div class="flex flex-wrap items-center gap-4">
-      <input ref="search" v-model="query" type="search" :class="field" placeholder="Search (/)" />
+      <input
+        ref="search"
+        v-model="query"
+        type="search"
+        :class="field"
+        :placeholder="t('saved.search')"
+      />
       <select v-model="lang" :class="field">
-        <option value="">All languages</option>
-        <option v-for="l in langs" :key="l" :value="l">{{ LANGUAGES[l] ?? l }}</option>
+        <option value="">{{ t('saved.allLanguages') }}</option>
+        <option v-for="l in langs" :key="l" :value="l">{{ langLabel(l) }}</option>
       </select>
       <label
         v-for="s in ['KNOWN', 'LEARNING', 'SKIPPED'] as const"
@@ -188,7 +188,7 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
         class="flex items-center gap-1 text-sm"
       >
         <input v-model="stages[s]" type="checkbox" />
-        <span :class="stageColor[s]">{{ stageLabel[s] }} ({{ count(s) }})</span>
+        <span :class="stageColor[s]">{{ stageLabel(s) }} ({{ formatNumber(count(s)) }})</span>
       </label>
     </div>
 
@@ -197,44 +197,50 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
       class="sticky top-14 z-10 flex flex-wrap items-center gap-2 rounded px-3 py-2 text-sm transition-colors md:top-0"
       :class="picked.size ? 'bg-accent text-white [--color-fg:white]' : 'bg-panel text-neutral-400'"
     >
-      <span class="mr-2 tabular-nums">
+      <span class="me-2 tabular-nums">
         {{
-          picked.size ? `${picked.size} selected` : `${shown.length} shown · click rows to select`
+          picked.size
+            ? t('saved.selected', { n: picked.size })
+            : t('saved.shown', { n: shown.length })
         }}
       </span>
       <button :class="bulkBtn" :disabled="!picked.size" title="K" @click="bulkStage('KNOWN')">
-        ✓ Known
+        ✓ {{ stageLabel('KNOWN') }}
       </button>
       <button :class="bulkBtn" :disabled="!picked.size" title="L" @click="bulkStage('LEARNING')">
-        Learning
+        {{ stageLabel('LEARNING') }}
       </button>
       <button :class="bulkBtn" :disabled="!picked.size" title="N" @click="bulkStage('SKIPPED')">
-        ⊘ Don't learn
+        ⊘ {{ stageLabel('SKIPPED') }}
       </button>
       <div class="flex-1" />
-      <button v-if="picked.size" :class="btn" title="Esc" @click="picked = new Set()">Clear</button>
+      <button v-if="picked.size" :class="btn" title="Esc" @click="picked = new Set()">
+        {{ t('saved.clear') }}
+      </button>
       <button :class="bulkBtn" :disabled="!picked.size" title="Delete" @click="bulkDelete">
-        Delete
+        {{ t('saved.delete') }}
       </button>
     </div>
 
     <p v-if="!shown.length" class="py-12 text-center text-neutral-500">
-      <template v-if="tabCount">No items match the filters.</template>
-      <template v-else>Nothing here yet. Save words and sentences while watching YouTube.</template>
+      <template v-if="tabCount">{{ t('saved.noMatch') }}</template>
+      <template v-else>{{ t('saved.empty') }}</template>
     </p>
 
-    <table v-else class="w-full text-left text-sm">
+    <table v-else class="w-full text-start text-sm">
       <thead class="text-xs text-neutral-400 uppercase">
         <tr>
           <th class="w-8 p-2">
             <input type="checkbox" :checked="allPicked" @change="toggleAll" />
           </th>
-          <th class="p-2">{{ tab === 'WORD' ? 'Word' : 'Sentence' }}</th>
-          <th class="p-2">Translation</th>
-          <th class="hidden p-2 sm:table-cell">Stage</th>
-          <th class="hidden p-2 md:table-cell">Source</th>
+          <th class="p-2 text-start">
+            {{ tab === 'WORD' ? t('review.word') : t('saved.sentence') }}
+          </th>
+          <th class="p-2 text-start">{{ t('review.translation') }}</th>
+          <th class="hidden p-2 text-start sm:table-cell">{{ t('saved.stage') }}</th>
+          <th class="hidden p-2 text-start md:table-cell">{{ t('saved.source') }}</th>
           <th class="w-10 p-2">
-            <span class="sr-only">{{ tab === 'WORD' ? 'Card' : 'Play' }}</span>
+            <span class="sr-only">{{ tab === 'WORD' ? t('saved.card') : t('common.play') }}</span>
           </th>
         </tr>
       </thead>
@@ -248,14 +254,18 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
           @click="onRowClick(i.id, $event)"
         >
           <td class="p-2">
-            <input type="checkbox" :checked="picked.has(i.id)" :aria-label="`Select ${i.text}`" />
+            <input
+              type="checkbox"
+              :checked="picked.has(i.id)"
+              :aria-label="t('saved.select', { text: i.text })"
+            />
           </td>
           <td class="p-2 text-start" :class="stageColor[i.stage]" :dir="dirOf(i.langCode)">
             {{ (i.itemType === 'WORD' && i.headword) || i.text }}
             <span
               v-if="i.itemType === 'WORD' && i.tags?.includes(EXPRESSION_TAG)"
               class="ms-1 rounded bg-fg/10 px-1.5 py-0.5 align-middle text-[10px] font-medium tracking-wide text-fg/60 uppercase"
-              >Expression</span
+              >{{ t('common.expression') }}</span
             >
             <div
               v-if="i.itemType === 'WORD' && (i.ipa || i.plural)"
@@ -263,7 +273,7 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
             >
               <span v-if="i.ipa" dir="ltr">/{{ i.ipa }}/</span>
               <template v-if="i.ipa && i.plural"> · </template>
-              <template v-if="i.plural">pl. {{ i.plural }}</template>
+              <template v-if="i.plural">{{ t('saved.pluralOf', { plural: i.plural }) }}</template>
             </div>
             <div v-if="i.itemType === 'WORD' && i.context" class="text-xs text-neutral-500">
               {{ i.context.sentence }}
@@ -273,7 +283,7 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
             {{ translationOf(i) }}
           </td>
           <td class="hidden p-2 sm:table-cell" :class="stageColor[i.stage]">
-            {{ stageLabel[i.stage] }}
+            {{ stageLabel(i.stage) }}
           </td>
           <td class="hidden p-2 text-start md:table-cell" dir="auto">
             <a
@@ -296,8 +306,8 @@ const bulkBtn = btn + 'bg-fg/15 disabled:pointer-events-none disabled:opacity-40
             <button
               v-else
               class="grid size-7 place-items-center rounded text-neutral-400 opacity-0 transition-colors group-hover:opacity-100 hover:bg-fg/10 hover:text-fg focus-visible:opacity-100"
-              title="Show card"
-              :aria-label="`Show the card of ${i.text}`"
+              :title="t('saved.showCard')"
+              :aria-label="t('saved.showCardOf', { text: i.text })"
               @click.stop="cardId = i.id"
             >
               <svg

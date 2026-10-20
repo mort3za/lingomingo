@@ -5,12 +5,24 @@ import {
   type Request,
   type Response,
 } from '@/shared/messages'
+import { resolveUiLang, setMessages, type Messages } from '@/shared/i18n/core'
 import { markInstalled } from '@/shared/rating'
 import { getSettings, onStorageKey } from '@/shared/storage'
 import { translateLines, translateWord, wordExtras } from './llm'
 import { speak, TTS_TTL, type CachedAudio } from './tts'
 
 const APP_URL = chrome.runtime.getURL('src/app/index.html')
+
+// All languages in the bundle: a service worker cannot load modules later (no `import()`).
+const LOCALES = import.meta.glob<Messages>('../shared/i18n/locales/*.ts', {
+  eager: true,
+  import: 'default',
+})
+/** Errors go back in the interface language. */
+function useLocale(pref: string) {
+  const lang = resolveUiLang(pref)
+  setMessages(lang, LOCALES[`../shared/i18n/locales/${lang}.ts`]!)
+}
 
 /** "off" on the toolbar button while LingoMingo is off, so the user sees it without the popup. */
 async function showOnOff() {
@@ -34,6 +46,7 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
 
 async function handle(req: Request): Promise<unknown> {
   const settings = await getSettings()
+  useLocale(settings.uiLang)
   if (req.type === 'speak') return speak(settings, req.text, req.lang)
   if (req.type === 'translate-lines') {
     return translateLines(settings, req.lines, req.studyLang, req.nativeLang)
@@ -51,6 +64,7 @@ async function translateChunk(
   onLine: (index: number, text: string) => void,
 ): Promise<string[]> {
   const settings = await getSettings()
+  useLocale(settings.uiLang)
   // Translations of a video are cached by chunk for 7 days, so a reload costs nothing.
   // `v2`: lines translated before the line copy check can be in the wrong place.
   const key = `tr:v2:${req.videoId}:${req.studyLang}:${req.nativeLang}:${req.chunk}`

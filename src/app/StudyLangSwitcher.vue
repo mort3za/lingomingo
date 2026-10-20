@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { formatNumber, langLabel, sortedLangs, t, type Key } from '@/shared/i18n'
 import { getSavedItems, onStorageKey } from '@/shared/storage'
-import { LANGUAGES } from '@/shared/types'
 import { useSettings } from './settings'
 
 /** `inline`: the list opens in the page flow, not as a popover (the toolbar popup does not grow
@@ -12,12 +12,12 @@ const { inline = false, field = 'studyLang' } = defineProps<{
 }>()
 const open = ref(false)
 
-const TEXT = {
-  studyLang: { label: 'Studying', name: 'Study language', title: 'Change the study language' },
+const TEXT: Record<typeof field, { label: Key; name: Key; title: Key }> = {
+  studyLang: { label: 'lang.studying', name: 'lang.study', title: 'lang.changeStudy' },
   nativeLang: {
-    label: 'Translating to',
-    name: 'Translation language',
-    title: 'Change the translation language',
+    label: 'lang.translatingTo',
+    name: 'lang.translation',
+    title: 'lang.changeTranslation',
   },
 }
 const text = computed(() => TEXT[field])
@@ -43,12 +43,12 @@ onMounted(() => {
 onBeforeUnmount(() => stop())
 
 // Languages with words to learn first, so the usual switch is one short move.
-const codes = Object.keys(LANGUAGES)
 const groups = computed(() => {
+  const codes = sortedLangs()
   const mine = codes.filter((c) => counts.value[c] || c === current.value)
   return [
-    { title: 'Your languages', codes: mine },
-    { title: 'More languages', codes: codes.filter((c) => !mine.includes(c)) },
+    { title: t('lang.yours'), codes: mine },
+    { title: t('lang.more'), codes: codes.filter((c) => !mine.includes(c)) },
   ].filter((g) => g.codes.length)
 })
 
@@ -115,17 +115,17 @@ const popoverClass =
     :aria-expanded="inline ? open : undefined"
     aria-haspopup="listbox"
     class="group mb-2 flex w-full items-center gap-3 rounded-lg border border-fg/5 bg-panel/50 px-2.5 py-2 text-start transition-colors [anchor-name:--study-lang] hover:border-fg/15 hover:bg-panel focus-visible:border-accent focus-visible:outline-none"
-    :title="text.title"
+    :title="t(text.title)"
     @click="toggleInline"
     @keydown.enter.space.stop
   >
     <span :class="badge + ' size-9 bg-accent text-sm text-white'">{{ current }}</span>
     <span class="min-w-0 flex-1 leading-tight">
       <span class="block text-[11px] font-medium tracking-wider text-neutral-500 uppercase">
-        {{ text.label }}
+        {{ t(text.label) }}
       </span>
       <span class="block truncate text-[15px] font-medium text-fg">
-        {{ LANGUAGES[current] ?? current }}
+        {{ langLabel(current) }}
       </span>
     </span>
     <svg
@@ -148,7 +148,7 @@ const popoverClass =
     ref="menu"
     :popover.attr="inline ? null : ''"
     role="listbox"
-    :aria-label="text.name"
+    :aria-label="t(text.name)"
     :class="[menuClass, inline ? 'mb-2 max-h-64' : popoverClass]"
     @toggle="onToggle"
     @keydown="onMenuKeydown"
@@ -178,12 +178,12 @@ const popoverClass =
           ]"
           >{{ code }}</span
         >
-        <span class="min-w-0 flex-1 truncate">{{ LANGUAGES[code] }}</span>
+        <span class="min-w-0 flex-1 truncate">{{ langLabel(code) }}</span>
         <span
           v-if="counts[code]"
           class="text-xs text-neutral-500 tabular-nums"
-          :title="`${counts[code]} words to learn`"
-          >{{ counts[code] }}</span
+          :title="t('lang.toLearn', { n: counts[code] })"
+          >{{ formatNumber(counts[code]) }}</span
         >
         <svg
           v-if="code === current"

@@ -1,4 +1,5 @@
 import { dropDubbed, type AudioTrack } from '@/shared/captions'
+import { t } from '@/shared/i18n/core'
 import type { CaptionTrack } from '@/shared/types'
 
 export interface Channel {
@@ -4677,16 +4678,16 @@ export function channelUrl(input: string): string | null {
  */
 export async function findChannel(input: string): Promise<Channel> {
   const url = channelUrl(input)
-  if (!url) throw new Error('This is not a YouTube channel link, @handle or channel ID.')
+  if (!url) throw new Error(t('media.errNotChannel'))
   // ucbcb=1: in the EU, without it the page redirects to consent.youtube.com (no CORS access).
   const res = await fetch(`${url}?ucbcb=1`)
-  if (res.status === 404) throw new Error('Channel not found.')
-  if (!res.ok || !res.body) throw new Error(`Could not load the channel page (HTTP ${res.status}).`)
+  if (res.status === 404) throw new Error(t('media.errNotFound'))
+  if (!res.ok || !res.body) throw new Error(t('media.errPage', { status: String(res.status) }))
   const reader = res.body.pipeThrough(new TextDecoderStream()).getReader()
   let html = ''
   for (;;) {
     const { done, value } = await reader.read()
-    if (done) throw new Error('Channel not found.')
+    if (done) throw new Error(t('media.errNotFound'))
     html += value
     const m = html.match(
       /<meta property="og:title" content="([^"]*)"[\s\S]*?<meta property="og:url" content="https:\/\/www\.youtube\.com\/channel\/(UC[\w-]{22})"/,

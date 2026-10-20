@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { T, t, type Key } from '@/shared/i18n'
 import { send } from '@/shared/messages'
 import type { Provider } from '@/shared/types'
 import SecretInput from './SecretInput.vue'
@@ -50,251 +51,228 @@ const languagesIcon = [
 ]
 
 // Cost, limits and privacy of each provider. `warn` items are shown in a warning color.
-const PER_REQUEST =
-  'One request translates about 40 subtitle lines. Each word that you open in the word popup is one more request.'
-const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
-  claude: [
-    { text: 'Paid: you pay for each request. You can set a spend limit in the Anthropic Console.' },
-    { text: 'Anthropic does not train its models on API data.' },
-  ],
-  openai: [
-    { text: 'Paid: you pay for each request. You can set a budget in the OpenAI dashboard.' },
-    { text: 'OpenAI does not train its models on API data, unless you allow it.' },
-  ],
-  grok: [
-    { text: 'Paid: you pay for each request. You can set a spend limit in the xAI Console.' },
-    {
-      text: 'xAI does not train on API data without your permission. It keeps requests for 30 days.',
-    },
-  ],
-  deepseek: [
-    { text: 'Paid: you pay for each request. The price is low.' },
-    { text: 'DeepSeek keeps your data on servers in China.', warn: true },
-  ],
+const NOTES: Partial<Record<Provider, { text: Key; warn?: boolean }[]>> = {
+  claude: [{ text: 'ai.claudeCost' }, { text: 'ai.claudeTrain' }],
+  openai: [{ text: 'ai.openaiCost' }, { text: 'ai.openaiTrain' }],
+  grok: [{ text: 'ai.grokCost' }, { text: 'ai.grokTrain' }],
+  deepseek: [{ text: 'ai.deepseekCost' }, { text: 'ai.deepseekChina', warn: true }],
   gemini: [
-    {
-      text: 'Free tier: no cost, but with daily limits. Google shows your limits in Google AI Studio. When you get error 429, wait, or try again tomorrow.',
-    },
-    { text: PER_REQUEST },
-    {
-      text: 'On the free tier, Google uses your requests to improve its products, and people at Google can read them. To stop this, turn on billing in Google AI Studio. Then you pay for each request.',
-      warn: true,
-    },
-    {
-      text: 'In the EU (EEA), Switzerland and the UK, the Google terms allow only the paid tier.',
-      warn: true,
-    },
+    { text: 'ai.geminiFree' },
+    { text: 'ai.perRequest' },
+    { text: 'ai.geminiTrain', warn: true },
+    { text: 'ai.geminiEu', warn: true },
   ],
   openrouter: [
-    {
-      text: 'Free models (names that end in ":free") have no cost. Limits: 20 requests per minute and 50 per day. After you buy 10 USD of credit one time: 1000 per day. Other models are paid.',
-    },
-    { text: PER_REQUEST },
-    {
-      text: 'Free models can keep your requests and use them for training. You must allow this in your OpenRouter privacy settings, or free models do not work.',
-      warn: true,
-    },
-    { text: 'Free models change often. If a model stops working, select a different model.' },
+    { text: 'ai.openrouterFree' },
+    { text: 'ai.perRequest' },
+    { text: 'ai.openrouterTrain', warn: true },
+    { text: 'ai.openrouterChange' },
   ],
 }
+
+const example = 'ms-1 font-mono text-neutral-400 underline hover:text-fg'
+const code = 'font-mono text-neutral-300'
+const link = 'underline hover:text-fg'
 </script>
 
 <template>
   <div class="space-y-4">
     <div>
-      <label :class="label" for="provider">Provider</label>
+      <label :class="label" for="provider">{{ t('ai.provider') }}</label>
       <select id="provider" v-model="settings.provider" :class="input">
         <option value="claude">Claude API</option>
         <option value="openai">OpenAI API (ChatGPT)</option>
         <option value="grok">xAI API (Grok)</option>
         <option value="deepseek">DeepSeek API</option>
-        <option value="gemini">Google Gemini API (free tier)</option>
-        <option value="openrouter">OpenRouter (free models)</option>
-        <option value="ollama">Ollama (local)</option>
-        <option value="lmstudio">LM Studio (local)</option>
-        <option value="local">Other local server (llama.cpp, vLLM, ...)</option>
+        <option value="gemini">{{ t('ai.optGemini') }}</option>
+        <option value="openrouter">{{ t('ai.optOpenrouter') }}</option>
+        <option value="ollama">{{ t('ai.optOllama') }}</option>
+        <option value="lmstudio">{{ t('ai.optLmstudio') }}</option>
+        <option value="local">{{ t('ai.optLocal') }}</option>
       </select>
     </div>
 
     <template v-if="settings.provider === 'claude'">
       <div>
-        <label :class="label" for="key">API key</label>
+        <label :class="label" for="key">{{ t('ai.apiKey') }}</label>
         <SecretInput id="key" v-model="settings.claudeKey" placeholder="sk-ant-..." />
-        <p class="mt-1 text-xs text-neutral-500">Stored only in this browser.</p>
+        <p class="mt-1 text-xs text-neutral-500">{{ t('ai.stored') }}</p>
       </div>
       <div>
-        <label :class="label" for="cmodel">Model</label>
+        <label :class="label" for="cmodel">{{ t('ai.model') }}</label>
         <input id="cmodel" v-model="settings.claudeModel" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
-          Examples:
+          {{ t('common.examples') }}
           <button
             v-for="m in ['claude-haiku-5-5', 'claude-sonnet-5-5', 'claude-opus-5-5']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
+            :class="example"
             @click="settings.claudeModel = m"
           >
             {{ m }}
           </button>
-          — Haiku is the cheapest and fastest.
+          — {{ t('ai.claudeTip') }}
         </p>
       </div>
     </template>
 
     <template v-else-if="settings.provider === 'openai'">
       <div>
-        <label :class="label" for="okey">API key</label>
+        <label :class="label" for="okey">{{ t('ai.apiKey') }}</label>
         <SecretInput id="okey" v-model="settings.openaiKey" placeholder="sk-..." />
-        <p class="mt-1 text-xs text-neutral-500">Stored only in this browser.</p>
+        <p class="mt-1 text-xs text-neutral-500">{{ t('ai.stored') }}</p>
       </div>
       <div>
-        <label :class="label" for="omodel">Model</label>
+        <label :class="label" for="omodel">{{ t('ai.model') }}</label>
         <input id="omodel" v-model="settings.openaiModel" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
-          Examples:
+          {{ t('common.examples') }}
           <button
             v-for="m in ['gpt-6-luna', 'gpt-6.1-sol']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
+            :class="example"
             @click="settings.openaiModel = m"
           >
             {{ m }}
           </button>
-          — Luna is the cheapest and fastest.
+          — {{ t('ai.openaiTip') }}
         </p>
       </div>
     </template>
 
     <template v-else-if="settings.provider === 'grok'">
       <div>
-        <label :class="label" for="gkey">API key</label>
+        <label :class="label" for="gkey">{{ t('ai.apiKey') }}</label>
         <SecretInput id="gkey" v-model="settings.grokKey" placeholder="xai-..." />
-        <p class="mt-1 text-xs text-neutral-500">Stored only in this browser.</p>
+        <p class="mt-1 text-xs text-neutral-500">{{ t('ai.stored') }}</p>
       </div>
       <div>
-        <label :class="label" for="gmodel">Model</label>
+        <label :class="label" for="gmodel">{{ t('ai.model') }}</label>
         <input id="gmodel" v-model="settings.grokModel" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
-          Examples:
+          {{ t('common.examples') }}
           <button
             v-for="m in ['grok-4.3', 'grok-4.20-0309-non-reasoning', 'grok-4.7']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
+            :class="example"
             @click="settings.grokModel = m"
           >
             {{ m }}
           </button>
-          — Non-reasoning is the fastest.
+          — {{ t('ai.grokTip') }}
         </p>
       </div>
     </template>
 
     <template v-else-if="settings.provider === 'deepseek'">
       <div>
-        <label :class="label" for="dkey">API key</label>
+        <label :class="label" for="dkey">{{ t('ai.apiKey') }}</label>
         <SecretInput id="dkey" v-model="settings.deepseekKey" placeholder="sk-..." />
-        <p class="mt-1 text-xs text-neutral-500">Stored only in this browser.</p>
+        <p class="mt-1 text-xs text-neutral-500">{{ t('ai.stored') }}</p>
       </div>
       <div>
-        <label :class="label" for="dmodel">Model</label>
+        <label :class="label" for="dmodel">{{ t('ai.model') }}</label>
         <input id="dmodel" v-model="settings.deepseekModel" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
-          Examples:
+          {{ t('common.examples') }}
           <button
             v-for="m in ['deepseek-flash', 'deepseek-v4-pro']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
+            :class="example"
             @click="settings.deepseekModel = m"
           >
             {{ m }}
           </button>
-          — Flash is the cheapest and fastest.
+          — {{ t('ai.deepseekTip') }}
         </p>
       </div>
     </template>
 
     <template v-else-if="settings.provider === 'gemini'">
       <div>
-        <label :class="label" for="gekey">API key</label>
-        <SecretInput id="gekey" v-model="settings.geminiKey" placeholder="AQ... or AIza..." />
+        <label :class="label" for="gekey">{{ t('ai.apiKey') }}</label>
+        <SecretInput id="gekey" v-model="settings.geminiKey" placeholder="AQ... / AIza..." />
         <p class="mt-1 text-xs text-neutral-500">
-          Stored only in this browser. Get a free key in
-          <a
-            href="https://aistudio.google.com/api-keys"
-            target="_blank"
-            class="underline hover:text-fg"
-            >Google AI Studio</a
-          >.
+          <T k="ai.geminiKeyHint">
+            <template #link>
+              <a href="https://aistudio.google.com/api-keys" target="_blank" :class="link"
+                >Google AI Studio</a
+              >
+            </template>
+          </T>
         </p>
       </div>
       <div>
-        <label :class="label" for="gemodel">Model</label>
+        <label :class="label" for="gemodel">{{ t('ai.model') }}</label>
         <input id="gemodel" v-model="settings.geminiModel" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
-          Examples:
+          {{ t('common.examples') }}
           <button
             v-for="m in ['gemini-3.5-flash-lite', 'gemini-3.5-flash']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
+            :class="example"
             @click="settings.geminiModel = m"
           >
             {{ m }}
           </button>
-          — Flash-Lite is the fastest, and has the highest free limits.
+          — {{ t('ai.geminiTip') }}
         </p>
       </div>
     </template>
 
     <template v-else-if="settings.provider === 'openrouter'">
       <div>
-        <label :class="label" for="orkey">API key</label>
+        <label :class="label" for="orkey">{{ t('ai.apiKey') }}</label>
         <SecretInput id="orkey" v-model="settings.openrouterKey" placeholder="sk-or-..." />
         <p class="mt-1 text-xs text-neutral-500">
-          Stored only in this browser. Get a key on
-          <a href="https://openrouter.ai/keys" target="_blank" class="underline hover:text-fg"
-            >openrouter.ai</a
-          >.
+          <T k="ai.openrouterKeyHint">
+            <template #link>
+              <a href="https://openrouter.ai/keys" target="_blank" :class="link">openrouter.ai</a>
+            </template>
+          </T>
         </p>
       </div>
       <div>
-        <label :class="label" for="ormodel">Model</label>
+        <label :class="label" for="ormodel">{{ t('ai.model') }}</label>
         <input id="ormodel" v-model="settings.openrouterModel" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
-          Examples:
+          {{ t('common.examples') }}
           <button
             v-for="m in ['google/gemma-4-31b-it:free', 'openrouter/free']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
+            :class="example"
             @click="settings.openrouterModel = m"
           >
             {{ m }}
           </button>
-          — <span class="font-mono">openrouter/free</span> selects a free model at random. See all
-          free models on
-          <a
-            href="https://openrouter.ai/models?max_price=0"
-            target="_blank"
-            class="underline hover:text-fg"
-            >openrouter.ai</a
-          >.
+          —
+          <T k="ai.openrouterTip">
+            <template #model><span class="font-mono">openrouter/free</span></template>
+            <template #link>
+              <a href="https://openrouter.ai/models?max_price=0" target="_blank" :class="link"
+                >openrouter.ai</a
+              >
+            </template>
+          </T>
         </p>
       </div>
     </template>
 
     <template v-else-if="settings.provider === 'ollama'">
       <div>
-        <label :class="label" for="obase">Base URL</label>
+        <label :class="label" for="obase">{{ t('ai.baseUrl') }}</label>
         <input id="obase" v-model="settings.ollamaBaseUrl" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
-          Default:
+          {{ t('common.default') }}
           <button
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
+            :class="example"
             @click="settings.ollamaBaseUrl = 'http://localhost:11434/v1'"
           >
             http://localhost:11434/v1
@@ -302,7 +280,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
         </p>
       </div>
       <div>
-        <label :class="label" for="olmodel">Model name</label>
+        <label :class="label" for="olmodel">{{ t('ai.modelName') }}</label>
         <input
           id="olmodel"
           v-model="settings.ollamaModel"
@@ -312,22 +290,10 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
         <div class="mt-1 space-y-1 text-xs text-neutral-500">
           <p
             v-for="m in [
-              {
-                name: 'translategemma:4b',
-                badge: 'Fastest',
-                why: 'Needs about 4 GB of memory. Very low delay, good for slow computers.',
-              },
-              {
-                name: 'translategemma:12b',
-                badge: 'Recommended',
-                why: 'Needs about 8 GB of memory. Better with idioms and slang, and still fast.',
-              },
-              {
-                name: 'gemma4:26b',
-                badge: 'Best',
-                why: 'Needs about 20 GB of memory. Highest quality, and still fast.',
-              },
-            ]"
+              { name: 'translategemma:4b', badge: 'ai.fastest', why: 'ai.ollama4b' },
+              { name: 'translategemma:12b', badge: 'ai.recommended', why: 'ai.ollama12b' },
+              { name: 'gemma4:26b', badge: 'ai.best', why: 'ai.ollama26b' },
+            ] as const"
             :key="m.name"
           >
             <button
@@ -337,47 +303,56 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
             >
               {{ m.name }}
             </button>
-            <span class="ml-1 rounded bg-fg/10 px-1.5 py-0.5 text-neutral-300">{{ m.badge }}</span>
-            — {{ m.why }}
+            <span class="ms-1 rounded bg-fg/10 px-1.5 py-0.5 text-neutral-300">{{
+              t(m.badge)
+            }}</span>
+            — {{ t(m.why) }}
           </p>
         </div>
       </div>
       <div class="rounded border border-fg/10 p-3 text-xs text-neutral-400">
-        <p class="font-medium text-neutral-300">Set up Ollama</p>
-        <ol class="mt-2 list-decimal space-y-1 pl-4">
+        <p class="font-medium text-neutral-300">{{ t('ai.ollamaSetup') }}</p>
+        <ol class="mt-2 list-decimal space-y-1 ps-4">
           <li>
-            Install Ollama from
-            <a href="https://ollama.com/download" target="_blank" class="underline hover:text-fg"
-              >ollama.com</a
-            >.
+            <T k="ai.ollamaStep1">
+              <template #link>
+                <a href="https://ollama.com/download" target="_blank" :class="link">ollama.com</a>
+              </template>
+            </T>
           </li>
           <li>
-            Download a model:
-            <code class="font-mono text-neutral-300">ollama pull translategemma:12b</code>
+            <T k="ai.ollamaStep2">
+              <template #cmd><code :class="code">ollama pull translategemma:12b</code></template>
+            </T>
           </li>
           <li>
-            Stop Ollama if it runs. Then start it, and allow the extension to connect:
-            <code class="font-mono break-all text-neutral-300"
-              >OLLAMA_ORIGINS="chrome-extension://*" ollama serve</code
-            >
+            <T k="ai.ollamaStep3">
+              <template #cmd>
+                <code :class="code + ' break-all'"
+                  >OLLAMA_ORIGINS="chrome-extension://*" ollama serve</code
+                >
+              </template>
+            </T>
           </li>
-          <li>Keep the terminal open while you use LingoMingo.</li>
+          <li>{{ t('ai.ollamaStep4') }}</li>
         </ol>
         <p class="mt-2 text-neutral-500">
-          Error 403 means that Ollama runs without <code class="font-mono">OLLAMA_ORIGINS</code>.
+          <T k="ai.ollama403">
+            <template #env><code class="font-mono">OLLAMA_ORIGINS</code></template>
+          </T>
         </p>
       </div>
     </template>
 
     <template v-else-if="settings.provider === 'lmstudio'">
       <div>
-        <label :class="label" for="lsbase">Base URL</label>
+        <label :class="label" for="lsbase">{{ t('ai.baseUrl') }}</label>
         <input id="lsbase" v-model="settings.lmstudioBaseUrl" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
-          Default:
+          {{ t('common.default') }}
           <button
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
+            :class="example"
             @click="settings.lmstudioBaseUrl = 'http://localhost:1234/v1'"
           >
             http://localhost:1234/v1
@@ -385,7 +360,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
         </p>
       </div>
       <div>
-        <label :class="label" for="lsmodel">Model name</label>
+        <label :class="label" for="lsmodel">{{ t('ai.modelName') }}</label>
         <input
           id="lsmodel"
           v-model="settings.lmstudioModel"
@@ -393,51 +368,49 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
           placeholder="google/gemma-4-26b-a4b"
         />
         <p class="mt-1 text-xs text-neutral-500">
-          Examples:
+          {{ t('common.examples') }}
           <button
             v-for="m in ['google/gemma-4-26b-a4b', 'qwen/qwen3.6-35b-a3b']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
+            :class="example"
             @click="settings.lmstudioModel = m"
           >
             {{ m }}
           </button>
-          — Both are fast and good at translation.
+          — {{ t('ai.lmstudioTip') }}
         </p>
-        <p class="mt-1 text-xs text-neutral-500">
-          LingoMingo turns off thinking (needs LM Studio 0.4.8 or newer). Some models always think,
-          for example DeepSeek R1: they are very slow for subtitles.
-        </p>
+        <p class="mt-1 text-xs text-neutral-500">{{ t('ai.lmstudioThinking') }}</p>
       </div>
       <div class="rounded border border-fg/10 p-3 text-xs text-neutral-400">
-        <p class="font-medium text-neutral-300">Set up LM Studio</p>
-        <ol class="mt-2 list-decimal space-y-1 pl-4">
+        <p class="font-medium text-neutral-300">{{ t('ai.lmstudioSetup') }}</p>
+        <ol class="mt-2 list-decimal space-y-1 ps-4">
           <li>
-            Install LM Studio from
-            <a href="https://lmstudio.ai/download" target="_blank" class="underline hover:text-fg"
-              >lmstudio.ai</a
-            >.
+            <T k="ai.lmstudioStep1">
+              <template #link>
+                <a href="https://lmstudio.ai/download" target="_blank" :class="link">lmstudio.ai</a>
+              </template>
+            </T>
           </li>
           <li>
-            Download a model in the Discover tab, or run
-            <code class="font-mono text-neutral-300">lms get google/gemma-4-26b-a4b</code>
+            <T k="ai.lmstudioStep2">
+              <template #cmd><code :class="code">lms get google/gemma-4-26b-a4b</code></template>
+            </T>
           </li>
           <li>
-            Start the server in the Developer tab, or run
-            <code class="font-mono text-neutral-300">lms server start</code>
+            <T k="ai.lmstudioStep3">
+              <template #cmd><code :class="code">lms server start</code></template>
+            </T>
           </li>
-          <li>Use the model name that the Developer tab shows.</li>
+          <li>{{ t('ai.lmstudioStep4') }}</li>
         </ol>
-        <p class="mt-2 text-neutral-500">
-          If requests fail, turn on Enable CORS in the server settings.
-        </p>
+        <p class="mt-2 text-neutral-500">{{ t('ai.lmstudioCors') }}</p>
       </div>
     </template>
 
     <template v-else>
       <div>
-        <label :class="label" for="base">Base URL (OpenAI-compatible)</label>
+        <label :class="label" for="base">{{ t('ai.baseUrlCompat') }}</label>
         <input id="base" v-model="settings.localBaseUrl" :class="input" />
         <p class="mt-1 text-xs text-neutral-500">
           <span
@@ -460,61 +433,71 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
         </p>
       </div>
       <div>
-        <label :class="label" for="lmodel">Model name</label>
+        <label :class="label" for="lmodel">{{ t('ai.modelName') }}</label>
         <input id="lmodel" v-model="settings.localModel" :class="input" placeholder="gemma4" />
         <p class="mt-1 text-xs text-neutral-500">
-          Examples:
+          {{ t('common.examples') }}
           <button
             v-for="m in ['gemma4', 'google/gemma-4-26B-A4B-it']"
             :key="m"
             type="button"
-            class="ml-1 font-mono text-neutral-400 underline hover:text-fg"
+            :class="example"
             @click="settings.localModel = m"
           >
             {{ m }}
           </button>
-          — llama.cpp: the <span class="font-mono">--alias</span> value. vLLM: the Hugging Face
-          name.
+          —
+          <T k="ai.localTip">
+            <template #alias><span class="font-mono">--alias</span></template>
+          </T>
         </p>
       </div>
       <div class="rounded border border-fg/10 p-3 text-xs text-neutral-400">
-        <p class="font-medium text-neutral-300">Set up llama.cpp</p>
-        <ol class="mt-2 list-decimal space-y-1 pl-4">
+        <p class="font-medium text-neutral-300">{{ t('ai.llamaSetup') }}</p>
+        <ol class="mt-2 list-decimal space-y-1 ps-4">
           <li>
-            Install llama.cpp:
-            <code class="font-mono text-neutral-300">brew install llama.cpp</code>, or get it from
-            <a
-              href="https://github.com/ggml-org/llama.cpp/releases"
-              target="_blank"
-              class="underline hover:text-fg"
-              >GitHub</a
-            >.
+            <T k="ai.llamaStep1">
+              <template #cmd><code :class="code">brew install llama.cpp</code></template>
+              <template #link>
+                <a
+                  href="https://github.com/ggml-org/llama.cpp/releases"
+                  target="_blank"
+                  :class="link"
+                  >GitHub</a
+                >
+              </template>
+            </T>
           </li>
           <li>
-            Start the server. It downloads the model the first time:
-            <code class="font-mono break-all text-neutral-300"
-              >llama-server -hf ggml-org/gemma-4-26B-A4B-it-GGUF:Q4_0 --alias gemma4 --port
-              8080</code
-            >
+            <T k="ai.llamaStep2">
+              <template #cmd>
+                <code :class="code + ' break-all'"
+                  >llama-server -hf ggml-org/gemma-4-26B-A4B-it-GGUF:Q4_0 --alias gemma4 --port
+                  8080</code
+                >
+              </template>
+            </T>
           </li>
-          <li>Use the <code class="font-mono">--alias</code> value as the model name.</li>
+          <li>
+            <T k="ai.llamaStep3">
+              <template #alias><code class="font-mono">--alias</code></template>
+            </T>
+          </li>
         </ol>
-        <p class="mt-2 text-neutral-500">
-          Other servers work too, if they have an OpenAI-compatible API.
-        </p>
+        <p class="mt-2 text-neutral-500">{{ t('ai.llamaOther') }}</p>
       </div>
     </template>
 
     <ul
       v-if="NOTES[settings.provider]"
-      class="list-disc space-y-1 rounded border border-fg/10 p-3 pl-7 text-xs text-neutral-400"
+      class="list-disc space-y-1 rounded border border-fg/10 p-3 ps-7 text-xs text-neutral-400"
     >
       <li
         v-for="n in NOTES[settings.provider]"
         :key="n.text"
         :class="n.warn ? 'text-yellow-300' : undefined"
       >
-        {{ n.text }}
+        {{ t(n.text) }}
       </li>
     </ul>
 
@@ -522,8 +505,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
       v-if="!['ollama', 'lmstudio', 'local'].includes(settings.provider)"
       class="text-xs text-neutral-500"
     >
-      LingoMingo sends subtitle lines, and the words and sentences that you open in the word popup,
-      to this provider. The privacy policy of the provider applies.
+      {{ t('ai.privacy') }}
     </p>
 
     <div class="space-y-2">
@@ -548,7 +530,7 @@ const NOTES: Partial<Record<Provider, { text: string; warn?: boolean }[]>> = {
         >
           <path v-for="d in languagesIcon" :key="d" :d="d" />
         </svg>
-        Test translation
+        {{ t('ai.test') }}
       </button>
       <p v-if="testError" class="text-xs text-red-300">{{ testError }}</p>
       <div v-else-if="testResult" class="space-y-1 rounded border border-fg/10 p-3 text-xs">
