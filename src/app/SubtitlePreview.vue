@@ -14,8 +14,10 @@ const controls = computed(() => '-m-1 p-1 ' + (st.value.dimControls ? 'opacity-4
 </script>
 
 <template>
-  <!-- A picture, not controls: hidden from screen readers and from the pointer. -->
+  <!-- A picture, not controls: hidden from screen readers and from the pointer. Left to right
+       as on YouTube, where the bar and the list keep their places in all languages. -->
   <div
+    dir="ltr"
     class="pointer-events-none flex overflow-hidden rounded-xl shadow-2xl ring-1 ring-fg/10"
     aria-hidden="true"
   >

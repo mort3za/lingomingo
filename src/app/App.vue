@@ -12,7 +12,7 @@ const keyboardIcon = [
   'M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10',
 ]
 const linkClass =
-  'flex items-center gap-3 rounded border-l-2 border-transparent px-3 py-2.5 text-[15px] text-neutral-300 hover:bg-panel hover:text-fg'
+  'flex items-center gap-3 rounded border-s-2 border-transparent px-3 py-2.5 text-[15px] text-neutral-300 hover:bg-panel hover:text-fg'
 
 const menuIcon = ['M4 6h16', 'M4 12h16', 'M4 18h16']
 
@@ -91,8 +91,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown, true))
     </template>
     <nav
       v-if="route.path !== '/setup'"
-      class="fixed inset-y-0 left-0 z-50 flex h-screen w-56 shrink-0 flex-col gap-1 overflow-y-auto bg-surface p-3 transition-[translate,visibility] md:sticky md:translate-x-0 md:shadow-none md:transition-none"
-      :class="menuOpen ? 'shadow-xl shadow-black/50' : 'invisible -translate-x-full md:visible'"
+      class="fixed inset-y-0 start-0 z-50 flex h-screen w-56 shrink-0 flex-col gap-1 overflow-y-auto bg-surface p-3 transition-[translate,visibility] md:sticky md:translate-x-0 md:shadow-none md:transition-none"
+      :class="
+        menuOpen
+          ? 'shadow-xl shadow-black/50'
+          : 'invisible -translate-x-full md:visible rtl:translate-x-full md:rtl:translate-x-0'
+      "
     >
       <RouterLink to="/media" class="mb-3 flex items-center gap-2 px-3 py-2">
         <img src="/icons/icon.svg" alt="" class="size-7" />

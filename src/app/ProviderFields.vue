@@ -419,7 +419,7 @@ const link = 'underline hover:text-fg'
               ['vLLM', 'http://localhost:8000/v1'],
             ]"
             :key="url"
-            class="mr-3 inline-block"
+            class="me-3 inline-block"
           >
             {{ name }}:
             <button

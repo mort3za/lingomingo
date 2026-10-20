@@ -64,7 +64,7 @@ textarea {
   unicode-bidi: plaintext;
 }
 
-/* Dropdowns: own chevron instead of the browser one. Not in a layer, so the right padding
+/* Dropdowns: own chevron instead of the browser one. Not in a layer, so the end padding
    wins over `px-*` utilities and the text never runs under the chevron. */
 select {
   appearance: none;
@@ -74,6 +74,18 @@ select {
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 1rem;
+}
+select:dir(rtl) {
+  background-position: left 0.75rem center;
+}
+
+/* Commands, keys and model names are left to right also in a right-to-left interface. Isolated,
+   so the text around them keeps its order. */
+code,
+kbd,
+.font-mono {
+  unicode-bidi: isolate;
+  direction: ltr;
 }
 
 /* Checkboxes: own box and check mark instead of the browser ones. Hover changes only the

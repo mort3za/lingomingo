@@ -148,7 +148,7 @@ function closeRating() {
     <div v-if="rating" class="rating relative mt-2">
       <a
         :href="REVIEW_URL"
-        class="block rounded-lg border border-accent/25 bg-accent/10 py-2.5 pr-9 pl-3 outline-none hover:border-accent/50 focus-visible:border-accent"
+        class="block rounded-lg border border-accent/25 bg-accent/10 py-2.5 ps-3 pe-9 outline-none hover:border-accent/50 focus-visible:border-accent"
         @click.prevent="rate"
       >
         <span class="mb-1 flex gap-0.5 text-accent" aria-hidden="true">

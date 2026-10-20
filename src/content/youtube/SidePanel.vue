@@ -123,7 +123,7 @@ watch(
       <!-- Scrollbar shows only on hover. Its space is always kept, so the rows do not move. -->
       <div
         ref="list"
-        class="relative h-full [scrollbar-color:transparent_transparent] [scrollbar-gutter:stable] space-y-1 overflow-y-auto overscroll-contain p-2 pr-1 hover:[scrollbar-color:color-mix(in_srgb,var(--color-fg)_30%,transparent)_transparent]"
+        class="relative h-full [scrollbar-color:transparent_transparent] [scrollbar-gutter:stable] space-y-1 overflow-y-auto overscroll-contain p-2 pe-1 hover:[scrollbar-color:color-mix(in_srgb,var(--color-fg)_30%,transparent)_transparent]"
         @scroll="updateAway"
       >
         <!-- Sticky in the list, so it lines up with the rows whatever the scrollbar width is.
@@ -140,10 +140,13 @@ watch(
         <div v-if="s.status.value !== 'ready'" class="p-2 text-[15px] text-neutral-400">
           {{ s.message.value || t('common.loading') }}
         </div>
+        <!-- The row goes in the direction of the subtitle language, not the interface: the text
+             starts at its own side and its buttons are at its end. -->
         <div
           v-for="(c, i) in s.cues.value"
           :key="i"
           :ref="(el) => el && rows.set(i, el as HTMLElement)"
+          :dir="dirOf(s.lang.value)"
           :class="
             'group flex cursor-pointer gap-2 rounded px-2 py-1.5 text-[15px] hover:bg-fg/10 ' +
             (i === s.activeIdx.value ? 'bg-accent/40' : 'bg-panel')

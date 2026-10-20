@@ -40,7 +40,9 @@ const round = 'grid size-8 place-items-center rounded-full bg-fg/10 text-fg hove
 </script>
 
 <template>
+  <!-- Left to right in all interface languages: media controls are not mirrored. -->
   <div
+    dir="ltr"
     :class="
       s.settings.value.subtitlesOnTop ? 'top-14' : s.onShorts.value ? 'bottom-36' : 'bottom-16'
     "

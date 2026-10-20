@@ -332,7 +332,7 @@ const iconAttrs = {
   'stroke-linecap': 'round',
   'stroke-linejoin': 'round',
 } as const
-const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm hover:bg-fg/5 '
+const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-start text-sm hover:bg-fg/5 '
 </script>
 
 <template>
@@ -496,7 +496,7 @@ const row = 'flex w-full items-center gap-3 rounded px-2 py-2 text-left text-sm 
           <div class="relative min-w-48 flex-1">
             <svg
               v-bind="iconAttrs"
-              class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400"
+              class="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400"
             >
               <path v-for="d in searchIcon" :key="d" :d="d" />
             </svg>
