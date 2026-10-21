@@ -57,6 +57,8 @@ const linkIcon = [
   'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71',
   'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71',
 ]
+const checkIcon = ['M20 6 9 17l-5-5']
+const externalIcon = ['M7 7h10v10', 'M7 17 17 7']
 
 const iconAttrs = {
   viewBox: '0 0 24 24',
@@ -67,7 +69,7 @@ const iconAttrs = {
   'stroke-linejoin': 'round',
 } as const
 const tileClass =
-  'group flex flex-col gap-2 rounded-lg bg-panel p-4 text-start text-sm transition-colors hover:bg-fg/10'
+  'group relative flex flex-col gap-2 rounded-lg bg-panel p-4 text-start text-sm transition-colors outline-none hover:bg-fg/10 focus-visible:ring-2 focus-visible:ring-accent'
 
 const copied = ref(false)
 async function copyLink() {
@@ -76,6 +78,8 @@ async function copyLink() {
   setTimeout(() => (copied.value = false), 2000)
 }
 
+// Crypto donation is hidden for now. Set to true to show it again.
+const showCrypto = false
 // The NOWPayments widget loads only when the dialog opens: no third-party request before.
 const cryptoOpen = ref(false)
 function onKeydown(e: KeyboardEvent) {
@@ -105,7 +109,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
           <a
             href="https://github.com/sponsors/mort3za"
             target="_blank"
-            class="group inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 font-medium text-white shadow-lg shadow-accent/20 transition hover:brightness-110"
+            class="group inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 font-medium text-white shadow-lg shadow-accent/20 transition outline-none hover:brightness-110 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             <svg
               v-bind="iconAttrs"
@@ -118,6 +122,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
             {{ t('donate.sponsor') }}
           </a>
           <button
+            v-if="showCrypto"
             class="group inline-flex items-center gap-2 rounded-lg border border-fg/20 px-5 py-2.5 font-medium text-fg transition hover:border-fg/40 hover:bg-fg/5"
             @click="cryptoOpen = true"
           >
@@ -129,14 +134,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
             </svg>
             {{ t('donate.crypto') }}
           </button>
-        </div>
-        <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm text-neutral-400">
-          <span class="flex items-center gap-1.5">
+          <span class="flex items-center gap-1.5 text-sm text-neutral-400">
             <svg v-bind="iconAttrs" class="size-4">
               <path v-for="d in githubIcon" :key="d" :d="d" />
             </svg>
             {{ t('donate.monthly') }}
           </span>
+        </div>
+        <div v-if="showCrypto" class="flex flex-wrap gap-x-5 gap-y-1 text-sm text-neutral-400">
           <span class="flex items-center gap-1.5">
             <svg v-bind="iconAttrs" class="size-4">
               <path v-for="d in bitcoinIcon" :key="d" :d="d" />
@@ -150,11 +155,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
     <section class="space-y-3">
       <h2 class="text-lg font-medium">{{ t('donate.paysFor') }}</h2>
       <div class="grid gap-3 sm:grid-cols-3">
-        <div
-          v-for="item in helps"
-          :key="item.label"
-          class="flex items-center gap-3 rounded-lg bg-panel p-4 text-sm"
-        >
+        <div v-for="item in helps" :key="item.label" class="flex items-center gap-3 text-sm">
           <span
             class="grid size-9 shrink-0 place-items-center rounded-full bg-accent/15 text-accent"
           >
@@ -180,6 +181,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
           </svg>
           <span class="font-medium">{{ t('donate.star') }}</span>
           <span class="text-neutral-400">{{ t('donate.starHint') }}</span>
+          <svg
+            v-bind="iconAttrs"
+            class="absolute end-4 top-4 size-4 text-neutral-400 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 rtl:-scale-x-100"
+          >
+            <path v-for="d in externalIcon" :key="d" :d="d" />
+          </svg>
         </a>
         <a :href="`${repo}/issues/new`" target="_blank" :class="tileClass">
           <svg
@@ -190,13 +197,20 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
           </svg>
           <span class="font-medium">{{ t('donate.report') }}</span>
           <span class="text-neutral-400">{{ t('donate.reportHint') }}</span>
+          <svg
+            v-bind="iconAttrs"
+            class="absolute end-4 top-4 size-4 text-neutral-400 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 rtl:-scale-x-100"
+          >
+            <path v-for="d in externalIcon" :key="d" :d="d" />
+          </svg>
         </a>
         <button :class="tileClass" @click="copyLink">
           <svg
             v-bind="iconAttrs"
-            class="size-5 text-neutral-400 transition-colors group-hover:text-fg"
+            class="size-5 transition-colors"
+            :class="copied ? 'text-green-400' : 'text-neutral-400 group-hover:text-fg'"
           >
-            <path v-for="d in linkIcon" :key="d" :d="d" />
+            <path v-for="d in copied ? checkIcon : linkIcon" :key="d" :d="d" />
           </svg>
           <span class="font-medium">{{ t('donate.tell') }}</span>
           <span :class="copied ? 'text-green-400' : 'text-neutral-400'">
