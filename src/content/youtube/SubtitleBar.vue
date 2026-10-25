@@ -78,9 +78,10 @@ const round = 'grid size-8 place-items-center rounded-full bg-fg/10 text-fg hove
           </div>
           <template v-if="s.translates.value && !s.settings.value.hideTranslation">
             <hr class="my-1 border-fg/20" />
+            <!-- The player sets user-select: none, and the shadow root does not stop it. -->
             <div
               v-if="translation"
-              class="leading-snug text-neutral-400"
+              class="leading-snug text-neutral-400 select-text"
               :style="st.barTranslation"
               :dir="dirOf(s.settings.value.nativeLang)"
             >
