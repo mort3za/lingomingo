@@ -30,4 +30,15 @@ for dir in ${OLLAMA_MODELS:+"$OLLAMA_MODELS"} "$HOME/.ollama/models" /usr/share/
   break
 done
 
+# Port in use (often a llama-server that still runs): llama-server only says "couldn't bind".
+if pid=$(lsof -nP -t -iTCP:8080 -sTCP:LISTEN 2>/dev/null | head -n 1) && [ -n "$pid" ]; then
+  echo "Port 8080 is already in use by process $pid:" >&2
+  echo "  $(ps -o command= -p "$pid")" >&2
+  echo "If it is llama-server, it already works: use http://localhost:8080/v1." >&2
+  echo "To restart it, stop it and run this script again:" >&2
+  echo "  kill $pid" >&2
+  echo "  bun run llama" >&2
+  exit 1
+fi
+
 exec llama-server "${model[@]}" --alias gemma4 --port 8080 -c 8192 -np 1 --reasoning off
