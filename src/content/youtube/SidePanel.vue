@@ -148,12 +148,18 @@ watch(
           :ref="(el) => el && rows.set(i, el as HTMLElement)"
           :dir="dirOf(s.lang.value)"
           :class="
-            'group flex cursor-pointer gap-2 rounded px-2 py-1.5 text-[15px] hover:bg-fg/10 ' +
+            'group relative cursor-pointer rounded px-2 py-1.5 text-[15px] hover:bg-fg/10 ' +
             (i === s.activeIdx.value ? 'bg-accent/40' : 'bg-panel')
           "
           @click="s.goTo(i)"
         >
-          <div class="flex-1" :style="st.font">
+          <div :style="st.font">
+            <!-- A saved star always shows: keep its space at the end of the first line only. -->
+            <span
+              v-if="s.savedPhraseIds.value.has(s.phraseKey(i))"
+              class="float-end h-[1lh] w-5"
+              aria-hidden="true"
+            />
             <div :style="st.listSentence" :dir="dirOf(s.lang.value)">
               <WordText
                 :text="c.text"
@@ -175,8 +181,11 @@ watch(
               {{ s.translationOf(i) }}
             </div>
           </div>
-          <!-- In one line, so the buttons do not make a short row taller. -->
-          <div class="flex items-center gap-1.5 self-start">
+          <!-- Over the text, so the text has the full width. The background is the color of the
+               hovered row, so the text under the buttons does not show through. -->
+          <div
+            class="absolute end-1 top-1 flex items-center gap-1.5 rounded-md p-1 group-hover:bg-[color-mix(in_srgb,var(--color-fg)_10%,var(--color-surface))]"
+          >
             <SpeakButton
               class="-m-1 transition-none!"
               :text="c.text"
