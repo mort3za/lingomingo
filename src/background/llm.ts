@@ -393,6 +393,9 @@ async function askLines(
   return false
 }
 
+/** Most translations of a word in the popup: the meaning in the sentence, then the other ones. */
+const MAX_MEANINGS = 6
+
 /** `before` and `after` = the subtitle lines around the sentence, if any. */
 export async function translateWord(
   settings: Settings,
@@ -407,13 +410,15 @@ export async function translateWord(
     `using the sentence for meaning. "before" and "after" are the subtitle lines around the ` +
     `sentence: when the sentence continues there, read them as one sentence. The word can be ` +
     `a name: then keep it as it is. Never ` +
-    `translate a different word of the sentence. Answer with ONLY JSON: {"translations":["best","alt1","alt2"],` +
+    `translate a different word of the sentence. Answer with ONLY JSON: {"translations":["in this sentence","other meaning","other meaning"],` +
     (noun
       ? `"pos":"<part of speech of the word in this sentence>",` +
         `"headword":"<noun with article>","plural":"<plural with article>",`
       : '') +
     `"ipa":"<pronunciation>","phrase":{"text":"<expression>","translation":"<its translation>"}} ` +
-    `(1 to 3 short items, the word in its dictionary form if it helps). ` +
+    `(1 to ${MAX_MEANINGS} short items, the word in its dictionary form if it helps). The first ` +
+    `item is the meaning in this sentence. Then the other common meanings of the word, as a ` +
+    `dictionary lists them, without near-synonyms of an item that is already there. ` +
     (noun
       ? `"pos" is one word, like "noun", "verb" or "adjective". Add "headword" and "plural" ` +
         `only when "pos" is "noun": the ` +
@@ -434,7 +439,7 @@ export async function translateWord(
   const user = JSON.stringify({ word, before, sentence, after })
   const schema = object(
     {
-      translations: strings(1, 3),
+      translations: strings(1, MAX_MEANINGS),
       ...(noun ? { pos: OPTIONAL, headword: OPTIONAL, plural: OPTIONAL } : {}),
       ipa: OPTIONAL,
       phrase: {
@@ -474,7 +479,7 @@ export function parseWordAnswer(text: string, word: string): WordTranslation {
   const headword = noun && /\s|['’]/.test(str(out.headword)) ? str(out.headword) : null
   const ipa = str(out.ipa).replace(/^[/[]+|[/\]]+$/g, '')
   return {
-    translations: out.translations.map(String).slice(0, 3),
+    translations: out.translations.map(String).slice(0, MAX_MEANINGS),
     headword,
     plural: (headword && str(out.plural)) || null,
     ipa: ipa || null,
