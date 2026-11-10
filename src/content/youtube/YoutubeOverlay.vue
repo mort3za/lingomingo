@@ -15,8 +15,15 @@ import WordPopup from './WordPopup.vue'
 
 const s = useYoutubeSession()
 // `inDock`: the word is in the docked subtitles list. The player clips its children, so the popup
-// for such a word shows outside the player (see `popupHost`).
-const selected = ref<{ word: string; idx: number; rect: DOMRect; inDock: boolean } | null>(null)
+// for such a word shows outside the player (see `popupHost`). `sentence`: the word is from an
+// example in the popup, not from the subtitle `idx`.
+const selected = ref<{
+  word: string
+  idx: number
+  rect: DOMRect
+  inDock: boolean
+  sentence?: string
+} | null>(null)
 // No subtitles on the video: hide our toggles too. A click would only show an empty bar and
 // change the saved choice for the next videos.
 const active = computed(() => s.status.value !== 'idle' && s.status.value !== 'no-subs')
@@ -208,6 +215,13 @@ function openWord(word: string, el: HTMLElement, idx = s.activeIdx.value) {
   selected.value = { word, idx, rect: el.getBoundingClientRect(), inDock }
 }
 
+// A word in an example of the popup: a new popup in its place, with the example as the sentence.
+function openExampleWord(word: string, el: HTMLElement, sentence: string) {
+  if (!selected.value) return
+  const { idx, inDock } = selected.value
+  selected.value = { word, idx, rect: el.getBoundingClientRect(), inDock, sentence }
+}
+
 const savedItem = computed(() =>
   selected.value ? (s.savedWordOf(selected.value.word) ?? null) : null,
 )
@@ -328,22 +342,25 @@ onBeforeUnmount(() => {
       <WordPopup
         v-if="selected"
         ref="popup"
-        :key="selected.word + selected.idx"
+        :key="selected.word + selected.idx + (selected.sentence ?? '')"
         class="pointer-events-auto"
         :word="selected.word"
-        :sentence="s.cues.value[selected.idx]?.text ?? ''"
-        :before="s.cues.value[selected.idx - 1]?.text"
-        :after="s.cues.value[selected.idx + 1]?.text"
+        :sentence="selected.sentence ?? s.cues.value[selected.idx]?.text ?? ''"
+        :before="selected.sentence ? undefined : s.cues.value[selected.idx - 1]?.text"
+        :after="selected.sentence ? undefined : s.cues.value[selected.idx + 1]?.text"
         :rect="selected.rect"
         :study-lang="s.lang.value"
         :native-lang="s.settings.value.nativeLang"
         :saved-item="savedItem"
         :stage-of="stageOf"
+        :example-saved="s.exampleSaved"
         @stage="setStage"
         @remove="s.unmarkWord(selected.word)"
         @save-phrase="savePhrase"
         @remove-phrase="s.unmarkWord"
         @close="selected = null"
+        @word="openExampleWord"
+        @toggle-example="(e) => s.toggleExample(e, selected!.idx)"
       />
     </Teleport>
   </div>

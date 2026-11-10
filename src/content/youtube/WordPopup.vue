@@ -12,6 +12,7 @@ import { send, type Phrase, type WordInfo, type WordTranslation } from '@/shared
 import { dirOf, type Example, type SavedItem, type Stage } from '@/shared/types'
 import SpeakButton from '@/shared/SpeakButton.vue'
 import { play, speaking, stop } from '@/shared/speech'
+import { tokenize } from '@/shared/tokenize'
 
 const props = defineProps<{
   word: string
@@ -25,6 +26,8 @@ const props = defineProps<{
   savedItem: SavedItem | null
   /** Stage of a saved item with this text, for the expression. */
   stageOf: (text: string) => Stage | undefined
+  /** True: the example is saved as a sentence. */
+  exampleSaved: (example: Example) => boolean
 }>()
 const emit = defineEmits<{
   stage: [stage: Stage, translations: string[], examples: Example[], info: WordInfo]
@@ -32,6 +35,9 @@ const emit = defineEmits<{
   savePhrase: [phrase: Phrase]
   removePhrase: [text: string]
   close: []
+  /** A word in an example was clicked: open it, with the example as its sentence. */
+  word: [word: string, el: HTMLElement, sentence: string]
+  toggleExample: [example: Example]
 }>()
 
 // Saved translations and examples only when they are in the current translation language.
@@ -121,12 +127,14 @@ async function loadExamples() {
   }
 }
 
-// The AI marks the word in an example with `*`.
+// The AI marks the word in an example with `*`. Each part in tokens, so each word can be clicked.
 const parts = (sentence: string) =>
   sentence
     .split(/\*([^*]+)\*/)
-    .map((text, i) => ({ text, hit: i % 2 === 1 }))
+    .map((text, i) => ({ text, hit: i % 2 === 1, tokens: tokenize(text, props.studyLang) }))
     .filter((p) => p.text)
+const openExampleWord = (word: string, e: MouseEvent, sentence: string) =>
+  emit('word', word, e.currentTarget as HTMLElement, sentence.replaceAll('*', ''))
 
 const stage = computed(() => props.savedItem?.stage)
 // A click on the active stage button removes the word from the saved items.
@@ -363,19 +371,51 @@ const stages: { stage: Stage; label: Key; key: string; icon: string }[] = [
         >
           <div class="min-w-0 flex-1">
             <p class="text-sm leading-5 text-fg/90" :dir="dirOf(studyLang)">
-              <template v-for="(t, j) in parts(e.sentence)" :key="j">
-                <mark
-                  v-if="t.hit"
-                  class="rounded-sm bg-orange-300/15 px-0.5 font-medium text-orange-300"
-                  >{{ t.text }}</mark
+              <template v-for="(p, j) in parts(e.sentence)" :key="j">
+                <component
+                  :is="p.hit ? 'mark' : 'span'"
+                  :class="p.hit && 'rounded-sm bg-orange-300/15 px-0.5 font-medium text-orange-300'"
+                  ><template v-for="(tk, k) in p.tokens" :key="k"
+                    ><span
+                      v-if="tk.isWord"
+                      class="cursor-pointer rounded-sm hover:bg-fg/20"
+                      @click="openExampleWord(tk.text, $event, e.sentence)"
+                      >{{ tk.text }}</span
+                    ><template v-else>{{ tk.text }}</template></template
+                  ></component
                 >
-                <template v-else>{{ t.text }}</template>
               </template>
             </p>
             <p class="mt-0.5 text-xs leading-4 text-fg/50" :dir="dirOf(nativeLang)">
               {{ e.translation }}
             </p>
           </div>
+          <button
+            class="-mt-0.5 shrink-0 rounded-md p-1 transition-[color,background-color,opacity] hover:bg-fg/10 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-fg/40"
+            :class="
+              exampleSaved(e)
+                ? 'text-yellow-300 hover:text-yellow-100'
+                : 'text-fg/40 opacity-0 group-hover:opacity-100 hover:text-fg'
+            "
+            :title="t('sc.saveSentence')"
+            @click="emit('toggleExample', e)"
+          >
+            <!-- Lucide star, the same set and size as the play button next to it. -->
+            <svg
+              class="size-4"
+              viewBox="0 0 24 24"
+              :fill="exampleSaved(e) ? 'currentColor' : 'none'"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
+              />
+            </svg>
+          </button>
           <SpeakButton
             class="-me-1.5 -mt-0.5"
             :text="e.sentence"

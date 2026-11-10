@@ -46,6 +46,11 @@ export function phraseId(lang: string, videoId: string, startMs: number): string
   return `p:${lang}:${videoId}:${startMs}`
 }
 
+/** An AI example saved as a sentence: no subtitle time of its own, so the text is the id. */
+export function examplePhraseId(lang: string, text: string): string {
+  return `p:${lang}:example:${text}`
+}
+
 /** Add an item, or replace the one with the same id (keeps the first `createdAt`). */
 export function upsertItem(item: SavedItem): Promise<void> {
   return serial(async () => {

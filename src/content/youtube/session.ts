@@ -6,6 +6,7 @@ import {
   getSavedItems,
   getSettings,
   onStorageKey,
+  examplePhraseId,
   patchSettings,
   phraseId,
   removeItems,
@@ -465,6 +466,29 @@ export function useYoutubeSession() {
     })
   }
 
+  // An example of the word popup, saved as a sentence. Its source is the subtitle of the word.
+  async function toggleExample(e: Example, idx: number) {
+    if (!videoId.value) return
+    const text = e.sentence.replaceAll('*', '')
+    const id = examplePhraseId(lang.value, text)
+    if (savedPhraseIds.value.has(id)) return removeItems([id])
+    const now = Date.now()
+    await upsertItem({
+      id,
+      itemType: 'PHRASE',
+      langCode: lang.value,
+      translationLang: settings.value.nativeLang,
+      stage: 'LEARNING',
+      createdAt: now,
+      updatedAt: now,
+      text,
+      translation: e.translation,
+      source: videoRef(idx),
+    })
+  }
+  const exampleSaved = (e: Example) =>
+    savedPhraseIds.value.has(examplePhraseId(lang.value, e.sentence.replaceAll('*', '')))
+
   async function markWord(
     word: string,
     idx: number,
@@ -583,6 +607,8 @@ export function useYoutubeSession() {
     toggleAutoPause,
     toggleSubtitlesOnTop,
     togglePhrase,
+    toggleExample,
+    exampleSaved,
     markWord,
     unmarkWord,
     phraseKey,
