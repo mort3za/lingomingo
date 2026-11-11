@@ -34,8 +34,9 @@ export async function countOpen(): Promise<boolean> {
   const s = (await getState()) ?? { installedAt: Date.now(), opens: 0 }
   const next = { ...s, opens: s.opens + 1 }
   await chrome.storage.local.set({ [KEY]: next })
-  // `bun run dev` and `bun run build:dev` always show it, to see and test it.
-  return import.meta.env.MODE === 'development' || showRating(next, Date.now())
+  // `bun run dev` and `bun run build:dev` show it until it is done, to see and test it.
+  if (import.meta.env.MODE === 'development') return !next.done
+  return showRating(next, Date.now())
 }
 
 export async function ratingDone(): Promise<void> {
