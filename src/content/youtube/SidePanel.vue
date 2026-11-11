@@ -180,6 +180,18 @@ watch(
             >
               {{ s.translationOf(i) }}
             </div>
+            <!-- One line of the translation size, so the row does not grow when the text comes. -->
+            <div
+              v-else-if="s.translationLoading(i)"
+              class="flex h-[1lh] items-center"
+              :style="st.listTranslation"
+              aria-hidden="true"
+            >
+              <span
+                class="h-[0.7em] animate-pulse rounded bg-fg/10"
+                :style="{ width: `${Math.min(90, 30 + c.text.length)}%` }"
+              />
+            </div>
           </div>
           <!-- Over the text, so the text has the full width. The background is the color of the
                hovered row, so the text under the buttons does not show through. -->

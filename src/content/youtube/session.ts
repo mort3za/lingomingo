@@ -203,6 +203,7 @@ export function useYoutubeSession() {
     requested.clear()
     cancels.forEach((c) => c())
     cancels.clear()
+    loadingChunks.value = new Set()
     showSubs.value = false
     showPanel.value = false
     if (!id || !settings.value.enabled) {
@@ -262,6 +263,17 @@ export function useYoutubeSession() {
   // ---- AI translation, by chunks of cues ----
   const requested = new Map<number, Promise<void> | number>() // chunk -> open request | time of failure
   const cancels = new Set<() => void>() // open chunk requests, closed on the next load
+  // Chunks with an open request, for the loading skeleton of their lines.
+  const loadingChunks = shallowRef(new Set<number>())
+  const setLoading = (chunk: number, on: boolean) => {
+    const next = new Set(loadingChunks.value)
+    if (on) next.add(chunk)
+    else next.delete(chunk)
+    loadingChunks.value = next
+  }
+  /** The AI translation of line `i` is on its way. */
+  const translationLoading = (i: number) =>
+    translationOf(i) === null && loadingChunks.value.has(Math.floor(i / CHUNK))
   /**
    * `retry`: try again also when the last request failed a short time ago. `signal` stops a new
    * request with no error; an open request started by someone else does not stop.
@@ -275,6 +287,7 @@ export function useYoutubeSession() {
     if (!retry && last && Date.now() - last < RETRY_MS) return Promise.resolve()
     const open = requestChunkOf(id, chunk, slice, signal)
     requested.set(chunk, open)
+    setLoading(chunk, true)
     return open
   }
   async function requestChunkOf(id: string, chunk: number, slice: Cue[], signal?: AbortSignal) {
@@ -314,6 +327,7 @@ export function useYoutubeSession() {
     } finally {
       cancels.delete(cancel)
       signal?.removeEventListener('abort', cancel)
+      if (token === loadToken) setLoading(chunk, false)
     }
   }
 
@@ -592,6 +606,7 @@ export function useYoutubeSession() {
     translates,
     translationError,
     translationOf,
+    translationLoading,
     translateAll,
     humanTranslation,
     vocab,
