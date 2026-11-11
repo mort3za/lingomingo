@@ -171,13 +171,13 @@ export default {
   'sync.badFile': 'Tämä ei ole LingoMingon varmuuskopiotiedosto.',
   'sync.settings': 'Asetusten synkronointi',
   'sync.settingsHint':
-    'Asetukset synkronoidaan Chromen synkronoinnin kautta niiden Chrome-selainten välillä, jotka käyttävät samaa Google-tiliä. Brave pitää ne tällä tietokoneella: siirrä ne varmuuskopiotiedoston avulla.',
+    'Asetukset synkronoidaan Google Drive -synkronoinnin kautta (alla). Saman Google-tilin Chrome-selainten välillä ne synkronoidaan myös Chromen synkronoinnin kautta.',
   'sync.keys': 'Synkronoi myös API-avaimet',
   'sync.keysHint':
-    'Tallentaa API-avaimesi Chromen synkronointiin ja varmuuskopiotiedostoihin. Pois: avaimet pysyvät tällä tietokoneella.',
+    'Tallentaa API-avaimesi Google Drive -synkronointiin, Chromen synkronointiin ja varmuuskopiotiedostoihin. Pois: avaimet pysyvät tällä tietokoneella.',
   'sync.drive': 'Google Drive -synkronointi',
   'sync.driveHint':
-    'Synkronoi tallennetut sanasi ja lauseesi sekä kertauksen edistymisesi Google Driveesi piilotetun sovelluskansion kautta. LingoMingo ei näe muita tiedostojasi. Toimii Chromessa ja Bravessa.',
+    'Synkronoi tallennetut sanasi ja lauseesi, kertauksen edistymisesi ja asetuksesi Google Driveesi piilotetun sovelluskansion kautta. LingoMingo ei näe muita tiedostojasi. Toimii Chromessa ja Bravessa.',
   'sync.connect': 'Yhdistä Google Drive',
   'sync.signInAgain': 'Kirjaudu uudelleen',
   'sync.signInNeeded':

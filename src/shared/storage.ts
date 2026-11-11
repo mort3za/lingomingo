@@ -16,10 +16,20 @@ export async function getSettings(): Promise<Settings> {
   return s
 }
 
-export function patchSettings(patch: Partial<Settings>): Promise<void> {
+/** `at`: time of the change, for the Drive sync. A change from another device keeps its time. */
+export function patchSettings(patch: Partial<Settings>, at = Date.now()): Promise<void> {
   return serial(async () => {
-    await chrome.storage.local.set({ settings: { ...(await getSettings()), ...patch } })
+    await chrome.storage.local.set({
+      settings: { ...(await getSettings()), ...patch },
+      settingsAt: at,
+    })
   })
+}
+
+/** Time of the last settings change. 0: never changed (new install). */
+export async function getSettingsAt(): Promise<number> {
+  const { settingsAt } = await chrome.storage.local.get('settingsAt')
+  return (settingsAt as number | undefined) ?? 0
 }
 
 export async function getSavedItems(): Promise<SavedItem[]> {

@@ -163,12 +163,13 @@ export default {
   'sync.badFile': '这不是 LingoMingo 备份文件。',
   'sync.settings': '设置同步',
   'sync.settingsHint':
-    '设置通过 Chrome 同步，在使用同一个 Google 账号的 Chrome 浏览器之间同步。Brave 只把设置保存在这台电脑上：请用备份文件来转移。',
+    '设置通过 Google Drive 同步（见下方）来同步。在使用同一个 Google 账号的 Chrome 浏览器之间，设置也会通过 Chrome 同步来同步。',
   'sync.keys': '同时同步 API 密钥',
-  'sync.keysHint': '把你的 API 密钥放进 Chrome 同步和备份文件。关闭时，密钥只留在这台电脑上。',
+  'sync.keysHint':
+    '把你的 API 密钥放进 Google Drive 同步、Chrome 同步和备份文件。关闭时，密钥只留在这台电脑上。',
   'sync.drive': 'Google Drive 同步',
   'sync.driveHint':
-    '通过你 Google Drive 中的隐藏应用文件夹，同步你保存的单词和句子以及复习进度。LingoMingo 看不到你的其他文件。可在 Chrome 和 Brave 中使用。',
+    '通过你 Google Drive 中的隐藏应用文件夹，同步你保存的单词和句子、复习进度以及设置。LingoMingo 看不到你的其他文件。可在 Chrome 和 Brave 中使用。',
   'sync.connect': '连接 Google Drive',
   'sync.signInAgain': '重新登录',
   'sync.signInNeeded': 'Google 要求你重新登录。在此之前，同步已暂停。',

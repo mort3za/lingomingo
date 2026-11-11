@@ -17,6 +17,10 @@ export interface DriveState {
   lastSyncAt?: number
   /** `signin`: Google wants the user to sign in again. Else the error text. */
   error?: string
+  /** Why the sign-in without a window failed, from Google or Chrome. */
+  signinReason?: string
+  /** Google account of the sync, so a new token comes without a window also with more accounts. */
+  email?: string
 }
 
 export const DRIVE_KEY = 'driveSync'

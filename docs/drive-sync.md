@@ -1,6 +1,6 @@
 # Google Drive sync: setup
 
-The saved items sync through one file (`lingomingo-sync.json`) in the hidden app folder of the
+The saved items and the settings sync through one file (`lingomingo-sync.json`) in the hidden app folder of the
 user's Google Drive (scope `drive.appdata`). The app cannot see other Drive files. Sign-in uses
 `chrome.identity.launchWebAuthFlow`, so it works in Chrome and Brave. The code is in
 `src/background/drive-sync.ts`.
@@ -34,10 +34,31 @@ The Drive part of Settings shows only when `GOOGLE_CLIENT_ID` in `src/shared/dri
 4. Brave: if no Google window opens, check `brave://settings/extensions` > "Allow Google login
    for extensions".
 
+## See the file
+
+The file is not in the Drive file list: the app folder is hidden. In Drive on the web, open
+Settings (gear) > Settings > Manage apps > LingoMingo > Options: it shows the size of the hidden
+app data, and can delete it.
+
+To see the content, open the LingoMingo service worker console (`chrome://extensions` >
+LingoMingo > "service worker") after a sync, and run:
+
+```js
+const { driveToken } = await chrome.storage.session.get('driveToken')
+const headers = { Authorization: `Bearer ${driveToken.value}` }
+const list = 'https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&fields=files(id,name,modifiedTime,size)'
+const { files } = await (await fetch(list, { headers })).json()
+const data = await (await fetch(`https://www.googleapis.com/drive/v3/files/${files[0].id}?alt=media`, { headers })).json()
+console.log(files, data.items.length, 'items,', data.items.filter((i) => i.review).length, 'with review', data.settings)
+```
+
 ## How the sync works
 
-- A change to the saved items starts a sync after 30 seconds. A sync also runs every 15 minutes,
+- A change to the saved items or the settings starts a sync after 30 seconds. A sync also runs every 15 minutes,
   at browser start, and on **Sync now**.
+- Settings: the newer settings win as a whole (`settingsAt`). On the first sync after Connect, the
+  settings in Drive win. API keys are in the file only with "Sync API keys too". An empty key on
+  this device takes the key from the file.
 - Per item, the newer `updatedAt` wins. A delete is kept as a tombstone (`deletedItems`) for one
   year, so another device does not bring the item back.
 - The access token lasts one hour and is in `chrome.storage.session`. A new token comes without a

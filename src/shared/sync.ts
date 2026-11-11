@@ -73,7 +73,7 @@ export function makeBackup(settings: Settings, data: ItemsData, now = Date.now()
     app: 'lingomingo',
     version: 1,
     exportedAt: now,
-    settings: settings.syncKeys ? settings : withoutSecrets(settings),
+    settings: shareableSettings(settings),
     items: data.items,
     deleted: data.deleted,
   }
@@ -131,14 +131,45 @@ export function restoreSettings(file: Partial<Settings>): Partial<Settings> {
   return out
 }
 
+/** Settings for a file that leaves the device: the API keys only with `syncKeys`. */
+export const shareableSettings = (s: Settings): Partial<Settings> =>
+  s.syncKeys ? s : withoutSecrets(s)
+
+/**
+ * Settings from another device (the Drive file) to put in here. `at` = time of the last settings
+ * change. The newer settings win as a whole. When the settings here win, an empty API key here
+ * still takes the key from the other device. `patch` can be empty when only the time is newer.
+ * Returns null when nothing changes.
+ */
+export function mergeSettings(
+  local: Settings,
+  localAt: number,
+  remote: Record<string, unknown> | undefined,
+  remoteAt: number,
+): { patch: Partial<Settings>; at: number } | null {
+  if (!remote) return null
+  const theirs = restoreSettings(knownSettings(remote))
+  const pick: Partial<Settings> =
+    remoteAt > localAt
+      ? theirs
+      : Object.fromEntries(
+          SECRET_KEYS.filter((k) => !local[k] && theirs[k]).map((k) => [k, theirs[k]]),
+        )
+  const patch = changedEntries(pick, local) as Partial<Settings>
+  const at = Math.max(localAt, remoteAt)
+  if (!Object.keys(patch).length && at === localAt) return null
+  return { patch, at }
+}
+
 // ---- chrome.storage.sync: one key per setting (8 KB limit per key) ----
 
 export const SYNC_PREFIX = 's:'
 
 /** The `chrome.storage.sync` keys and values for these settings. */
 export function toSyncEntries(s: Settings): Record<string, unknown> {
-  const pick = s.syncKeys ? s : withoutSecrets(s)
-  return Object.fromEntries(Object.entries(pick).map(([k, v]) => [SYNC_PREFIX + k, v]))
+  return Object.fromEntries(
+    Object.entries(shareableSettings(s)).map(([k, v]) => [SYNC_PREFIX + k, v]),
+  )
 }
 
 /** Settings from `chrome.storage.sync` entries. Other keys and unknown settings are left out. */

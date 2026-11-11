@@ -167,13 +167,13 @@ export default {
   'sync.badFile': 'LingoMingo 백업 파일이 아닙니다.',
   'sync.settings': '설정 동기화',
   'sync.settingsHint':
-    '설정은 같은 Google 계정을 쓰는 Chrome 브라우저 사이에서 Chrome 동기화로 동기화됩니다. Brave는 설정을 이 컴퓨터에만 보관합니다. 옮기려면 백업 파일을 사용하세요.',
+    '설정은 Google Drive 동기화(아래)로 동기화됩니다. 같은 Google 계정을 쓰는 Chrome 브라우저 사이에서는 Chrome 동기화로도 동기화됩니다.',
   'sync.keys': 'API 키도 동기화',
   'sync.keysHint':
-    'API 키를 Chrome 동기화와 백업 파일에 포함합니다. 끄면 키는 이 컴퓨터에만 남습니다.',
+    'API 키를 Google Drive 동기화, Chrome 동기화, 백업 파일에 포함합니다. 끄면 키는 이 컴퓨터에만 남습니다.',
   'sync.drive': 'Google Drive 동기화',
   'sync.driveHint':
-    'Google Drive의 숨겨진 앱 폴더를 통해 저장한 단어와 문장, 복습 진행 상황을 동기화합니다. LingoMingo는 다른 파일을 볼 수 없습니다. Chrome과 Brave에서 작동합니다.',
+    'Google Drive의 숨겨진 앱 폴더를 통해 저장한 단어와 문장, 복습 진행 상황, 설정을 동기화합니다. LingoMingo는 다른 파일을 볼 수 없습니다. Chrome과 Brave에서 작동합니다.',
   'sync.connect': 'Google Drive 연결',
   'sync.signInAgain': '다시 로그인',
   'sync.signInNeeded': 'Google에서 다시 로그인하라고 요청합니다. 그때까지 동기화가 일시중지됩니다.',

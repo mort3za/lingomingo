@@ -177,13 +177,13 @@ export default {
   'sync.badFile': 'Bu bir LingoMingo yedek dosyası değil.',
   'sync.settings': 'Ayar eşitleme',
   'sync.settingsHint':
-    'Ayarlar, aynı Google hesabını kullanan Chrome tarayıcıları arasında Chrome eşitlemesi ile eşitlenir. Brave bunları bu bilgisayarda tutar: taşımak için bir yedek dosyası kullanın.',
+    'Ayarlar Google Drive eşitlemesi (aşağıda) ile eşitlenir. Aynı Google hesabını kullanan Chrome tarayıcıları arasında Chrome eşitlemesi ile de eşitlenir.',
   'sync.keys': 'API anahtarlarını da eşitle',
   'sync.keysHint':
-    'API anahtarlarınızı Chrome eşitlemesine ve yedek dosyalarına koyar. Kapalı: anahtarlar bu bilgisayarda kalır.',
+    'API anahtarlarınızı Google Drive eşitlemesine, Chrome eşitlemesine ve yedek dosyalarına koyar. Kapalı: anahtarlar bu bilgisayarda kalır.',
   'sync.drive': 'Google Drive eşitleme',
   'sync.driveHint':
-    "Kaydedilen kelimelerinizi ve cümlelerinizi ve tekrar ilerlemenizi Google Drive'ınızdaki gizli bir uygulama klasörü üzerinden eşitler. LingoMingo diğer dosyalarınızı göremez. Chrome ve Brave'de çalışır.",
+    "Kaydedilen kelimelerinizi ve cümlelerinizi, tekrar ilerlemenizi ve ayarlarınızı Google Drive'ınızdaki gizli bir uygulama klasörü üzerinden eşitler. LingoMingo diğer dosyalarınızı göremez. Chrome ve Brave'de çalışır.",
   'sync.connect': 'Google Drive’ı bağla',
   'sync.signInAgain': 'Yeniden oturum aç',
   'sync.signInNeeded':

@@ -183,13 +183,13 @@ export default {
   'sync.badFile': 'To nie jest plik kopii zapasowej LingoMingo.',
   'sync.settings': 'Synchronizacja ustawień',
   'sync.settingsHint':
-    'Ustawienia synchronizują się przez synchronizację Chrome, między przeglądarkami Chrome z tym samym kontem Google. Brave trzyma je na tym komputerze: aby je przenieść, użyj pliku kopii zapasowej.',
+    'Ustawienia synchronizują się przez synchronizację z Google Drive (poniżej). Między przeglądarkami Chrome z tym samym kontem Google synchronizują się też przez synchronizację Chrome.',
   'sync.keys': 'Synchronizuj także klucze API',
   'sync.keysHint':
-    'Umieszcza Twoje klucze API w synchronizacji Chrome i w plikach kopii zapasowej. Wyłączone: klucze zostają na tym komputerze.',
+    'Umieszcza Twoje klucze API w synchronizacji z Google Drive, w synchronizacji Chrome i w plikach kopii zapasowej. Wyłączone: klucze zostają na tym komputerze.',
   'sync.drive': 'Synchronizacja z Google Drive',
   'sync.driveHint':
-    'Synchronizuje zapisane słowa i zdania oraz postępy w powtórkach przez ukryty folder aplikacji na Twoim Dysku Google. LingoMingo nie widzi Twoich innych plików. Działa w Chrome i Brave.',
+    'Synchronizuje zapisane słowa i zdania, postępy w powtórkach i ustawienia przez ukryty folder aplikacji na Twoim Dysku Google. LingoMingo nie widzi Twoich innych plików. Działa w Chrome i Brave.',
   'sync.connect': 'Połącz z Google Drive',
   'sync.signInAgain': 'Zaloguj się ponownie',
   'sync.signInNeeded':

@@ -185,13 +185,13 @@ const en = {
   'sync.badFile': 'This is not a LingoMingo backup file.',
   'sync.settings': 'Settings sync',
   'sync.settingsHint':
-    'Settings sync through Chrome sync, between Chrome browsers that use the same Google account. Brave keeps them on this computer: use a backup file to move them.',
+    'Settings sync through Google Drive sync (below). Between Chrome browsers that use the same Google account, they also sync through Chrome sync.',
   'sync.keys': 'Sync API keys too',
   'sync.keysHint':
-    'Puts your API keys in Chrome sync and in backup files. Off: the keys stay on this computer.',
+    'Puts your API keys in Google Drive sync, Chrome sync and backup files. Off: the keys stay on this computer.',
   'sync.drive': 'Google Drive sync',
   'sync.driveHint':
-    'Syncs your saved words and sentences and your review progress through a hidden app folder in your Google Drive. LingoMingo cannot see your other files. Works in Chrome and Brave.',
+    'Syncs your saved words and sentences, your review progress and your settings through a hidden app folder in your Google Drive. LingoMingo cannot see your other files. Works in Chrome and Brave.',
   'sync.connect': 'Connect Google Drive',
   'sync.signInAgain': 'Sign in again',
   'sync.signInNeeded': 'Google wants you to sign in again. Until then, the sync is paused.',

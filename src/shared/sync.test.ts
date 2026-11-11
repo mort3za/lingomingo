@@ -4,6 +4,7 @@ import {
   fromSyncEntries,
   makeBackup,
   mergeItems,
+  mergeSettings,
   parseBackup,
   restoreSettings,
   TOMBSTONE_TTL,
@@ -139,4 +140,28 @@ test('changedEntries compares by value', () => {
   expect(changedEntries({ a: [1], b: 2, c: { x: 1 } }, { a: [1], b: 3, c: { x: 1 } })).toEqual({
     b: 2,
   })
+})
+
+test('mergeSettings: newer settings from Drive win, an empty key does not clear one here', () => {
+  const local = { ...DEFAULT_SETTINGS, claudeKey: 'mine', studyLang: 'de' }
+  const remote = { ...DEFAULT_SETTINGS, claudeKey: '', studyLang: 'fr', syncKeys: true }
+  expect(mergeSettings(local, 100, remote, 200)).toEqual({
+    patch: { studyLang: 'fr', syncKeys: true },
+    at: 200,
+  })
+})
+
+test('mergeSettings: older settings from Drive only fill empty API keys', () => {
+  const local = { ...DEFAULT_SETTINGS, studyLang: 'de' }
+  const remote = { ...DEFAULT_SETTINGS, studyLang: 'fr', deepseekKey: 'k' }
+  expect(mergeSettings(local, 300, remote, 200)).toEqual({ patch: { deepseekKey: 'k' }, at: 300 })
+  expect(mergeSettings({ ...local, deepseekKey: 'x' }, 300, remote, 200)).toBeNull()
+})
+
+test('mergeSettings: same settings with a newer time take the time', () => {
+  expect(mergeSettings(DEFAULT_SETTINGS, 100, { ...DEFAULT_SETTINGS }, 200)).toEqual({
+    patch: {},
+    at: 200,
+  })
+  expect(mergeSettings(DEFAULT_SETTINGS, 100, undefined, 200)).toBeNull()
 })

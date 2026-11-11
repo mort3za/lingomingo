@@ -5,7 +5,8 @@ import {
   type Request,
   type Response,
 } from '@/shared/messages'
-import { resolveUiLang, setMessages, type Messages } from '@/shared/i18n/core'
+import { DRIVE_KEY, getDriveState } from '@/shared/drive'
+import { resolveUiLang, setMessages, t, type Messages } from '@/shared/i18n/core'
 import { markInstalled } from '@/shared/rating'
 import { getSettings, onStorageKey } from '@/shared/storage'
 import { connectDrive, disconnectDrive, startDriveSync, syncDrive } from './drive-sync'
@@ -26,15 +27,25 @@ function useLocale(pref: string) {
   setMessages(lang, LOCALES[`../shared/i18n/locales/${lang}.ts`]!)
 }
 
-/** "off" on the toolbar button while LingoMingo is off, so the user sees it without the popup. */
+/**
+ * "off" on the toolbar button while LingoMingo is off, and "!" while the Google Drive sync is
+ * stopped, so the user sees it without the popup.
+ */
 async function showOnOff() {
-  const { enabled } = await getSettings()
-  await chrome.action.setBadgeText({ text: enabled ? '' : 'off' })
+  const [{ enabled, uiLang }, drive] = await Promise.all([getSettings(), getDriveState()])
+  const stopped = drive.connected && !!drive.error
+  await chrome.action.setBadgeText({ text: !enabled ? 'off' : stopped ? '!' : '' })
+  useLocale(uiLang)
+  const why = drive.error === 'signin' ? t('sync.signInNeeded') : drive.error
+  await chrome.action.setTitle({
+    title: stopped ? `LingoMingo · ${t('sync.drive')}: ${why}` : 'LingoMingo',
+  })
 }
 // `--color-panel` theme token. The CSS variable is not available here.
 void chrome.action.setBadgeBackgroundColor({ color: '#2b2d31' })
 void chrome.action.setBadgeTextColor({ color: '#ffffff' })
 onStorageKey('settings', () => void showOnOff())
+onStorageKey(DRIVE_KEY, () => void showOnOff())
 chrome.runtime.onStartup.addListener(() => void showOnOff())
 chrome.runtime.onInstalled.addListener(() => void showOnOff())
 
