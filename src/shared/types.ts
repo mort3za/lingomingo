@@ -162,6 +162,8 @@ export interface Settings {
   customChannels: Record<string, { id: string; name: string }[]>
   /** Media page: hide YouTube Shorts from the video list. */
   hideShorts: boolean
+  /** Put the API keys in Chrome sync and in backup files too. */
+  syncKeys: boolean
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -214,7 +216,18 @@ export const DEFAULT_SETTINGS: Settings = {
   pinnedChannels: [],
   customChannels: {},
   hideShorts: false,
+  syncKeys: false,
 }
+
+/** API keys: they leave the device only with `syncKeys`. */
+export const SECRET_KEYS = [
+  'claudeKey',
+  'openaiKey',
+  'grokKey',
+  'deepseekKey',
+  'geminiKey',
+  'openrouterKey',
+] as const satisfies (keyof Settings)[]
 
 /** The AI provider has what it needs to send a request: an API key, or a local model name. */
 export function aiConfigured(s: Settings): boolean {

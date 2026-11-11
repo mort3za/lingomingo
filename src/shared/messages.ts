@@ -28,6 +28,10 @@ export type Request =
   | { type: 'speak'; text: string; lang: string }
   /** Subtitle lines without the cache, to test the AI provider. */
   | { type: 'translate-lines'; lines: string[]; studyLang: string; nativeLang: string }
+  /** Google Drive sync of the saved items. */
+  | { type: 'drive-connect' }
+  | { type: 'drive-sync' }
+  | { type: 'drive-disconnect' }
 
 export interface Have {
   translations: string[]
@@ -73,6 +77,9 @@ export interface ResponseMap {
   /** Base64 audio. null = no AI voice: use a browser voice. */
   speak: string | null
   'translate-lines': string[]
+  'drive-connect': void
+  'drive-sync': void
+  'drive-disconnect': void
 }
 
 export async function send<R extends Request>(req: R): Promise<ResponseMap[R['type']]> {

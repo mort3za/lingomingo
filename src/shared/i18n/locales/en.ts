@@ -168,6 +168,38 @@ const en = {
   'settings.voiceHint':
     'Reads words and example sentences aloud when you click a play button, in the word popup and on the Review and Saved pages.',
 
+  'settings.sync': 'Backup and sync',
+  'settings.syncHint':
+    'Keep your saved words, sentences and settings safe, and use them on your other computers.',
+
+  // ---- backup and sync ----
+  'sync.backup': 'Backup file',
+  'sync.backupHint':
+    'One file with your saved words and sentences, your review progress and your settings. A restore joins the file with the data here: for each item, the newer change wins.',
+  'sync.download': 'Download backup',
+  'sync.restore': 'Restore from file',
+  'sync.restored': {
+    one: 'Backup restored. You have {n} saved item now.',
+    other: 'Backup restored. You have {n} saved items now.',
+  },
+  'sync.badFile': 'This is not a LingoMingo backup file.',
+  'sync.settings': 'Settings sync',
+  'sync.settingsHint':
+    'Settings sync through Chrome sync, between Chrome browsers that use the same Google account. Brave keeps them on this computer: use a backup file to move them.',
+  'sync.keys': 'Sync API keys too',
+  'sync.keysHint':
+    'Puts your API keys in Chrome sync and in backup files. Off: the keys stay on this computer.',
+  'sync.drive': 'Google Drive sync',
+  'sync.driveHint':
+    'Syncs your saved words and sentences and your review progress through a hidden app folder in your Google Drive. LingoMingo cannot see your other files. Works in Chrome and Brave.',
+  'sync.connect': 'Connect Google Drive',
+  'sync.signInAgain': 'Sign in again',
+  'sync.signInNeeded': 'Google wants you to sign in again. Until then, the sync is paused.',
+  'sync.syncNow': 'Sync now',
+  'sync.disconnect': 'Disconnect',
+  'sync.syncing': 'Syncing…',
+  'sync.lastSync': 'Last sync: {time}',
+
   // ---- vocabulary level ----
   'vocab.levelFor': 'Vocabulary level · {lang}',
   'vocab.notSet': 'Not set. Set it to see the words you know in color.',

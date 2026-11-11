@@ -149,6 +149,33 @@ export default {
     '当 YouTube 没有你的翻译语言字幕时翻译字幕。也用于单词弹窗，以及复习和已保存页面上的翻译和例句。LingoMingo 从不使用 YouTube 的自动翻译，但可以使用 YouTube 自动生成的字幕。',
   'settings.voice': '语音',
   'settings.voiceHint': '点击播放按钮时朗读单词和例句，用于单词弹窗以及复习和已保存页面。',
+  'settings.sync': '备份与同步',
+  'settings.syncHint': '保护好你保存的单词、句子和设置，并在其他电脑上使用它们。',
+
+  'sync.backup': '备份文件',
+  'sync.backupHint':
+    '一个文件，包含你保存的单词和句子、复习进度以及设置。恢复时，文件会与这里的数据合并：每一项以较新的改动为准。',
+  'sync.download': '下载备份',
+  'sync.restore': '从文件恢复',
+  'sync.restored': {
+    other: '备份已恢复。你现在有 {n} 个已保存项目。',
+  },
+  'sync.badFile': '这不是 LingoMingo 备份文件。',
+  'sync.settings': '设置同步',
+  'sync.settingsHint':
+    '设置通过 Chrome 同步，在使用同一个 Google 账号的 Chrome 浏览器之间同步。Brave 只把设置保存在这台电脑上：请用备份文件来转移。',
+  'sync.keys': '同时同步 API 密钥',
+  'sync.keysHint': '把你的 API 密钥放进 Chrome 同步和备份文件。关闭时，密钥只留在这台电脑上。',
+  'sync.drive': 'Google Drive 同步',
+  'sync.driveHint':
+    '通过你 Google Drive 中的隐藏应用文件夹，同步你保存的单词和句子以及复习进度。LingoMingo 看不到你的其他文件。可在 Chrome 和 Brave 中使用。',
+  'sync.connect': '连接 Google Drive',
+  'sync.signInAgain': '重新登录',
+  'sync.signInNeeded': 'Google 要求你重新登录。在此之前，同步已暂停。',
+  'sync.syncNow': '立即同步',
+  'sync.disconnect': '断开连接',
+  'sync.syncing': '正在同步…',
+  'sync.lastSync': '上次同步：{time}',
 
   'vocab.levelFor': '词汇量 · {lang}',
   'vocab.notSet': '未设置。设置后可以用颜色看到你认识的单词。',

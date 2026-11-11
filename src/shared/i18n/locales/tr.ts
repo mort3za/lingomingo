@@ -161,6 +161,37 @@ export default {
   'settings.voice': 'Ses',
   'settings.voiceHint':
     'Bir oynatma düğmesine tıkladığınızda kelimeleri ve örnek cümleleri sesli okur; kelime penceresinde ve Tekrar ile Kaydedilenler sayfalarında.',
+  'settings.sync': 'Yedekleme ve eşitleme',
+  'settings.syncHint':
+    'Kaydettiğiniz kelimeleri, cümleleri ve ayarları güvende tutun ve diğer bilgisayarlarınızda kullanın.',
+
+  'sync.backup': 'Yedek dosyası',
+  'sync.backupHint':
+    'Kaydedilen kelimelerinizi ve cümlelerinizi, tekrar ilerlemenizi ve ayarlarınızı içeren tek bir dosya. Geri yükleme, dosyayı buradaki verilerle birleştirir: her öğe için daha yeni değişiklik geçerli olur.',
+  'sync.download': 'Yedeği indir',
+  'sync.restore': 'Dosyadan geri yükle',
+  'sync.restored': {
+    one: 'Yedek geri yüklendi. Artık {n} kayıtlı öğeniz var.',
+    other: 'Yedek geri yüklendi. Artık {n} kayıtlı öğeniz var.',
+  },
+  'sync.badFile': 'Bu bir LingoMingo yedek dosyası değil.',
+  'sync.settings': 'Ayar eşitleme',
+  'sync.settingsHint':
+    'Ayarlar, aynı Google hesabını kullanan Chrome tarayıcıları arasında Chrome eşitlemesi ile eşitlenir. Brave bunları bu bilgisayarda tutar: taşımak için bir yedek dosyası kullanın.',
+  'sync.keys': 'API anahtarlarını da eşitle',
+  'sync.keysHint':
+    'API anahtarlarınızı Chrome eşitlemesine ve yedek dosyalarına koyar. Kapalı: anahtarlar bu bilgisayarda kalır.',
+  'sync.drive': 'Google Drive eşitleme',
+  'sync.driveHint':
+    "Kaydedilen kelimelerinizi ve cümlelerinizi ve tekrar ilerlemenizi Google Drive'ınızdaki gizli bir uygulama klasörü üzerinden eşitler. LingoMingo diğer dosyalarınızı göremez. Chrome ve Brave'de çalışır.",
+  'sync.connect': 'Google Drive’ı bağla',
+  'sync.signInAgain': 'Yeniden oturum aç',
+  'sync.signInNeeded':
+    'Google yeniden oturum açmanızı istiyor. O zamana kadar eşitleme duraklatıldı.',
+  'sync.syncNow': 'Şimdi eşitle',
+  'sync.disconnect': 'Bağlantıyı kes',
+  'sync.syncing': 'Eşitleniyor…',
+  'sync.lastSync': 'Son eşitleme: {time}',
 
   'vocab.levelFor': 'Kelime seviyesi · {lang}',
   'vocab.notSet': 'Ayarlanmadı. Bildiğiniz kelimeleri renkli görmek için ayarlayın.',

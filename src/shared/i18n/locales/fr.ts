@@ -158,6 +158,37 @@ export default {
   'settings.voice': 'Voix',
   'settings.voiceHint':
     "Lit à voix haute les mots et les phrases d'exemple quand vous cliquez sur un bouton de lecture, dans la fenêtre de mot et sur les pages Révision et Enregistrés.",
+  'settings.sync': 'Sauvegarde et synchronisation',
+  'settings.syncHint':
+    'Gardez vos mots, vos phrases et vos paramètres enregistrés en sécurité, et utilisez-les sur vos autres ordinateurs.',
+
+  'sync.backup': 'Fichier de sauvegarde',
+  'sync.backupHint':
+    "Un seul fichier avec vos mots et phrases enregistrés, votre progression en révision et vos paramètres. Une restauration fusionne le fichier avec les données d'ici : pour chaque élément, la modification la plus récente l'emporte.",
+  'sync.download': 'Télécharger la sauvegarde',
+  'sync.restore': 'Restaurer depuis un fichier',
+  'sync.restored': {
+    one: 'Sauvegarde restaurée. Vous avez maintenant {n} élément enregistré.',
+    other: 'Sauvegarde restaurée. Vous avez maintenant {n} éléments enregistrés.',
+  },
+  'sync.badFile': "Ce n'est pas un fichier de sauvegarde LingoMingo.",
+  'sync.settings': 'Synchronisation des paramètres',
+  'sync.settingsHint':
+    'Les paramètres sont synchronisés via la synchronisation Chrome, entre les navigateurs Chrome qui utilisent le même compte Google. Brave les garde sur cet ordinateur : utilisez un fichier de sauvegarde pour les déplacer.',
+  'sync.keys': 'Synchroniser aussi les clés API',
+  'sync.keysHint':
+    'Place vos clés API dans la synchronisation Chrome et dans les fichiers de sauvegarde. Désactivé : les clés restent sur cet ordinateur.',
+  'sync.drive': 'Synchronisation Google Drive',
+  'sync.driveHint':
+    "Synchronise vos mots et phrases enregistrés et votre progression en révision via un dossier d'application caché dans votre Google Drive. LingoMingo ne peut pas voir vos autres fichiers. Fonctionne dans Chrome et Brave.",
+  'sync.connect': 'Connecter Google Drive',
+  'sync.signInAgain': 'Se reconnecter',
+  'sync.signInNeeded':
+    'Google demande que vous vous reconnectiez. Jusque-là, la synchronisation est en pause.',
+  'sync.syncNow': 'Synchroniser maintenant',
+  'sync.disconnect': 'Déconnecter',
+  'sync.syncing': 'Synchronisation…',
+  'sync.lastSync': 'Dernière synchronisation : {time}',
 
   'vocab.levelFor': 'Niveau de vocabulaire · {lang}',
   'vocab.notSet': 'Non défini. Définissez-le pour voir en couleur les mots que vous connaissez.',

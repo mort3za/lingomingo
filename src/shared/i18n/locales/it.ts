@@ -154,6 +154,37 @@ export default {
   'settings.voice': 'Voce',
   'settings.voiceHint':
     'Legge ad alta voce parole e frasi di esempio quando fai clic su un pulsante di riproduzione, nella finestra parola e nelle pagine Ripasso e Salvati.',
+  'settings.sync': 'Backup e sincronizzazione',
+  'settings.syncHint':
+    'Tieni al sicuro le parole, le frasi e le impostazioni salvate e usale sugli altri computer.',
+
+  'sync.backup': 'File di backup',
+  'sync.backupHint':
+    'Un unico file con le tue parole e frasi salvate, i progressi nel ripasso e le impostazioni. Un ripristino unisce il file ai dati presenti qui: per ogni elemento vince la modifica più recente.',
+  'sync.download': 'Scarica il backup',
+  'sync.restore': 'Ripristina da file',
+  'sync.restored': {
+    one: 'Backup ripristinato. Ora hai {n} elemento salvato.',
+    other: 'Backup ripristinato. Ora hai {n} elementi salvati.',
+  },
+  'sync.badFile': 'Questo non è un file di backup di LingoMingo.',
+  'sync.settings': 'Sincronizzazione delle impostazioni',
+  'sync.settingsHint':
+    'Le impostazioni si sincronizzano tramite la sincronizzazione di Chrome, tra browser Chrome che usano lo stesso account Google. Brave le tiene su questo computer: usa un file di backup per spostarle.',
+  'sync.keys': 'Sincronizza anche le chiavi API',
+  'sync.keysHint':
+    'Mette le tue chiavi API nella sincronizzazione di Chrome e nei file di backup. Disattivato: le chiavi restano su questo computer.',
+  'sync.drive': 'Sincronizzazione con Google Drive',
+  'sync.driveHint':
+    "Sincronizza le tue parole e frasi salvate e i progressi nel ripasso tramite una cartella nascosta dell'app nel tuo Google Drive. LingoMingo non può vedere gli altri tuoi file. Funziona in Chrome e Brave.",
+  'sync.connect': 'Collega Google Drive',
+  'sync.signInAgain': 'Accedi di nuovo',
+  'sync.signInNeeded':
+    'Google chiede di accedere di nuovo. Fino ad allora la sincronizzazione è in pausa.',
+  'sync.syncNow': 'Sincronizza ora',
+  'sync.disconnect': 'Scollega',
+  'sync.syncing': 'Sincronizzazione…',
+  'sync.lastSync': 'Ultima sincronizzazione: {time}',
 
   'vocab.levelFor': 'Livello di vocabolario · {lang}',
   'vocab.notSet': 'Non impostato. Impostalo per vedere a colori le parole che conosci.',

@@ -155,6 +155,37 @@ export default {
   'settings.voice': 'Ääni',
   'settings.voiceHint':
     'Lukee sanat ja esimerkkilauseet ääneen, kun napsautat toistopainiketta, sanaikkunassa sekä Kertaus- ja Tallennetut-sivuilla.',
+  'settings.sync': 'Varmuuskopiointi ja synkronointi',
+  'settings.syncHint':
+    'Pidä tallennetut sanasi, lauseesi ja asetuksesi turvassa ja käytä niitä muilla tietokoneillasi.',
+
+  'sync.backup': 'Varmuuskopiotiedosto',
+  'sync.backupHint':
+    'Yksi tiedosto, jossa ovat tallennetut sanasi ja lauseesi, kertauksen edistymisesi ja asetuksesi. Palautus yhdistää tiedoston täällä oleviin tietoihin: jokaisessa kohteessa uudempi muutos voittaa.',
+  'sync.download': 'Lataa varmuuskopio',
+  'sync.restore': 'Palauta tiedostosta',
+  'sync.restored': {
+    one: 'Varmuuskopio palautettu. Sinulla on nyt {n} tallennettu kohde.',
+    other: 'Varmuuskopio palautettu. Sinulla on nyt {n} tallennettua kohdetta.',
+  },
+  'sync.badFile': 'Tämä ei ole LingoMingon varmuuskopiotiedosto.',
+  'sync.settings': 'Asetusten synkronointi',
+  'sync.settingsHint':
+    'Asetukset synkronoidaan Chromen synkronoinnin kautta niiden Chrome-selainten välillä, jotka käyttävät samaa Google-tiliä. Brave pitää ne tällä tietokoneella: siirrä ne varmuuskopiotiedoston avulla.',
+  'sync.keys': 'Synkronoi myös API-avaimet',
+  'sync.keysHint':
+    'Tallentaa API-avaimesi Chromen synkronointiin ja varmuuskopiotiedostoihin. Pois: avaimet pysyvät tällä tietokoneella.',
+  'sync.drive': 'Google Drive -synkronointi',
+  'sync.driveHint':
+    'Synkronoi tallennetut sanasi ja lauseesi sekä kertauksen edistymisesi Google Driveesi piilotetun sovelluskansion kautta. LingoMingo ei näe muita tiedostojasi. Toimii Chromessa ja Bravessa.',
+  'sync.connect': 'Yhdistä Google Drive',
+  'sync.signInAgain': 'Kirjaudu uudelleen',
+  'sync.signInNeeded':
+    'Google haluaa sinun kirjautuvan uudelleen. Siihen asti synkronointi on tauolla.',
+  'sync.syncNow': 'Synkronoi nyt',
+  'sync.disconnect': 'Katkaise yhteys',
+  'sync.syncing': 'Synkronoidaan…',
+  'sync.lastSync': 'Viimeksi synkronoitu: {time}',
 
   'vocab.levelFor': 'Sanastotaso · {lang}',
   'vocab.notSet': 'Ei asetettu. Aseta se, niin näet osaamasi sanat värillisinä.',

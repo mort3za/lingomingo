@@ -1,3 +1,4 @@
+import { mergeItems, type Deleted, type ItemsData } from './sync'
 import { wordKey } from './tokenize'
 import {
   DEFAULT_SETTINGS,
@@ -30,6 +31,33 @@ async function setSavedItems(items: SavedItem[]): Promise<void> {
   await chrome.storage.local.set({ savedItems: items })
 }
 
+async function getDeleted(): Promise<Deleted> {
+  const { deletedItems } = await chrome.storage.local.get('deletedItems')
+  return (deletedItems as Deleted | undefined) ?? {}
+}
+
+/** Saved items and the ids deleted on this device, for sync and backup. */
+export async function getItemsData(): Promise<ItemsData> {
+  const [items, deleted] = await Promise.all([getSavedItems(), getDeleted()])
+  return { items, deleted }
+}
+
+/** Join `other` (a backup file, the sync file) into the saved items here. Returns the result. */
+export function mergeIntoLocal(other: ItemsData): Promise<ItemsData> {
+  return serial(async () => {
+    const local = await getItemsData()
+    const merged = mergeItems(local, other)
+    const patch: Record<string, unknown> = {}
+    if (JSON.stringify(merged.items) !== JSON.stringify(local.items))
+      patch.savedItems = merged.items
+    if (JSON.stringify(merged.deleted) !== JSON.stringify(local.deleted)) {
+      patch.deletedItems = merged.deleted
+    }
+    if (Object.keys(patch).length) await chrome.storage.local.set(patch)
+    return merged
+  })
+}
+
 // Run read-modify-write updates one after another, so fast clicks do not lose a change.
 let queue: Promise<unknown> = Promise.resolve()
 function serial<T>(fn: () => Promise<T>): Promise<T> {
@@ -59,12 +87,26 @@ export function upsertItem(item: SavedItem): Promise<void> {
     if (i === -1) items.push(item)
     else items[i] = { ...item, createdAt: items[i]!.createdAt }
     await setSavedItems(items)
+    // Saved again after a delete.
+    const deleted = await getDeleted()
+    if (item.id in deleted) {
+      delete deleted[item.id]
+      await chrome.storage.local.set({ deletedItems: deleted })
+    }
   })
 }
 
 export function removeItems(ids: string[]): Promise<void> {
   const drop = new Set(ids)
-  return serial(async () => setSavedItems((await getSavedItems()).filter((x) => !drop.has(x.id))))
+  const now = Date.now()
+  return serial(async () => {
+    const { items, deleted } = await getItemsData()
+    for (const id of ids) deleted[id] = now
+    await chrome.storage.local.set({
+      savedItems: items.filter((x) => !drop.has(x.id)),
+      deletedItems: deleted,
+    })
+  })
 }
 
 export function setStage(ids: string[], stage: SavedItem['stage']): Promise<void> {

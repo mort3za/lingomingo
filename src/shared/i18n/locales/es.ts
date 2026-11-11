@@ -155,6 +155,37 @@ export default {
   'settings.voice': 'Voz',
   'settings.voiceHint':
     'Lee en voz alta palabras y frases de ejemplo cuando pulsas un botón de reproducir, en la ventana de palabra y en las páginas Repaso y Guardados.',
+  'settings.sync': 'Copia de seguridad y sincronización',
+  'settings.syncHint':
+    'Mantén a salvo tus palabras, frases y ajustes guardados, y úsalos en tus otros ordenadores.',
+
+  'sync.backup': 'Archivo de copia de seguridad',
+  'sync.backupHint':
+    'Un archivo con tus palabras y frases guardadas, tu progreso de repaso y tus ajustes. Al restaurar, el archivo se une a los datos de aquí: en cada elemento gana el cambio más reciente.',
+  'sync.download': 'Descargar copia de seguridad',
+  'sync.restore': 'Restaurar desde archivo',
+  'sync.restored': {
+    one: 'Copia restaurada. Ahora tienes {n} elemento guardado.',
+    other: 'Copia restaurada. Ahora tienes {n} elementos guardados.',
+  },
+  'sync.badFile': 'Este no es un archivo de copia de seguridad de LingoMingo.',
+  'sync.settings': 'Sincronización de ajustes',
+  'sync.settingsHint':
+    'Los ajustes se sincronizan con la sincronización de Chrome, entre navegadores Chrome con la misma cuenta de Google. Brave los guarda en este ordenador: usa un archivo de copia de seguridad para moverlos.',
+  'sync.keys': 'Sincronizar también las claves de API',
+  'sync.keysHint':
+    'Pone tus claves de API en la sincronización de Chrome y en los archivos de copia de seguridad. Desactivado: las claves se quedan en este ordenador.',
+  'sync.drive': 'Sincronización con Google Drive',
+  'sync.driveHint':
+    'Sincroniza tus palabras y frases guardadas y tu progreso de repaso mediante una carpeta oculta de la aplicación en tu Google Drive. LingoMingo no puede ver tus otros archivos. Funciona en Chrome y Brave.',
+  'sync.connect': 'Conectar Google Drive',
+  'sync.signInAgain': 'Iniciar sesión de nuevo',
+  'sync.signInNeeded':
+    'Google quiere que inicies sesión de nuevo. Hasta entonces, la sincronización está en pausa.',
+  'sync.syncNow': 'Sincronizar ahora',
+  'sync.disconnect': 'Desconectar',
+  'sync.syncing': 'Sincronizando…',
+  'sync.lastSync': 'Última sincronización: {time}',
 
   'vocab.levelFor': 'Nivel de vocabulario · {lang}',
   'vocab.notSet': 'Sin definir. Defínelo para ver en color las palabras que conoces.',

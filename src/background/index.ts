@@ -8,7 +8,9 @@ import {
 import { resolveUiLang, setMessages, type Messages } from '@/shared/i18n/core'
 import { markInstalled } from '@/shared/rating'
 import { getSettings, onStorageKey } from '@/shared/storage'
+import { connectDrive, disconnectDrive, startDriveSync, syncDrive } from './drive-sync'
 import { translateLines, translateWord, wordExtras } from './llm'
+import { startSettingsSync } from './settings-sync'
 import { speak, TTS_TTL, type CachedAudio } from './tts'
 
 const APP_URL = chrome.runtime.getURL('src/app/index.html')
@@ -44,9 +46,15 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
   }
 })
 
+startSettingsSync()
+startDriveSync()
+
 async function handle(req: Request): Promise<unknown> {
   const settings = await getSettings()
   useLocale(settings.uiLang)
+  if (req.type === 'drive-connect') return connectDrive()
+  if (req.type === 'drive-sync') return syncDrive()
+  if (req.type === 'drive-disconnect') return disconnectDrive()
   if (req.type === 'speak') return speak(settings, req.text, req.lang)
   if (req.type === 'translate-lines') {
     return translateLines(settings, req.lines, req.studyLang, req.nativeLang)

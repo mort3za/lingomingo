@@ -153,6 +153,36 @@ export default {
   'settings.voice': 'Röst',
   'settings.voiceHint':
     'Läser upp ord och exempelmeningar när du klickar på en uppspelningsknapp, i ordfönstret och på sidorna Repetera och Sparat.',
+  'settings.sync': 'Säkerhetskopiering och synkronisering',
+  'settings.syncHint':
+    'Håll dina sparade ord, meningar och inställningar säkra och använd dem på dina andra datorer.',
+
+  'sync.backup': 'Säkerhetskopia',
+  'sync.backupHint':
+    'En fil med dina sparade ord och meningar, dina framsteg i repetitionen och dina inställningar. Vid en återställning slås filen ihop med data här: för varje objekt gäller den nyaste ändringen.',
+  'sync.download': 'Ladda ner säkerhetskopia',
+  'sync.restore': 'Återställ från fil',
+  'sync.restored': {
+    one: 'Säkerhetskopian är återställd. Du har nu {n} sparat objekt.',
+    other: 'Säkerhetskopian är återställd. Du har nu {n} sparade objekt.',
+  },
+  'sync.badFile': 'Det här är inte en säkerhetskopia från LingoMingo.',
+  'sync.settings': 'Synkronisering av inställningar',
+  'sync.settingsHint':
+    'Inställningar synkas via Chrome-synkronisering, mellan Chrome-webbläsare som använder samma Google-konto. Brave behåller dem på den här datorn: använd en säkerhetskopia för att flytta dem.',
+  'sync.keys': 'Synkronisera även API-nycklar',
+  'sync.keysHint':
+    'Lägger dina API-nycklar i Chrome-synkroniseringen och i säkerhetskopior. Av: nycklarna stannar på den här datorn.',
+  'sync.drive': 'Google Drive-synkronisering',
+  'sync.driveHint':
+    'Synkar dina sparade ord och meningar och dina framsteg i repetitionen via en dold appmapp i din Google Drive. LingoMingo kan inte se dina andra filer. Fungerar i Chrome och Brave.',
+  'sync.connect': 'Anslut Google Drive',
+  'sync.signInAgain': 'Logga in igen',
+  'sync.signInNeeded': 'Google vill att du loggar in igen. Tills dess är synkroniseringen pausad.',
+  'sync.syncNow': 'Synkronisera nu',
+  'sync.disconnect': 'Koppla från',
+  'sync.syncing': 'Synkroniserar…',
+  'sync.lastSync': 'Senast synkroniserad: {time}',
 
   'vocab.levelFor': 'Ordförrådsnivå · {lang}',
   'vocab.notSet': 'Inte inställd. Ställ in den för att se orden du kan i färg.',

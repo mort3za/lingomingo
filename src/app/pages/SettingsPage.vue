@@ -5,6 +5,7 @@ import { LEVEL_LANGS, WORD_STYLE } from '@/shared/vocab'
 import LanguageFields from '../LanguageFields.vue'
 import ProviderFields from '../ProviderFields.vue'
 import SubtitleAppearanceFields from '../SubtitleAppearanceFields.vue'
+import SyncFields from '../SyncFields.vue'
 import VocabLevelField from '../VocabLevelField.vue'
 import VoiceFields from '../VoiceFields.vue'
 import { useSettings } from '../settings'
@@ -156,6 +157,14 @@ const check = 'flex items-center gap-2 text-sm'
         <p :class="hint">{{ t('settings.voiceHint') }}</p>
       </div>
       <VoiceFields />
+    </section>
+
+    <section :class="card">
+      <div>
+        <h2 class="text-lg font-medium">{{ t('settings.sync') }}</h2>
+        <p :class="hint">{{ t('settings.syncHint') }}</p>
+      </div>
+      <SyncFields />
     </section>
   </div>
 </template>

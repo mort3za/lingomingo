@@ -156,6 +156,37 @@ export default {
   'settings.voice': 'Stimme',
   'settings.voiceHint':
     'Liest Wörter und Beispielsätze vor, wenn du auf eine Abspieltaste klickst – im Wortfenster und auf den Seiten Wiederholen und Gespeichert.',
+  'settings.sync': 'Backup und Synchronisierung',
+  'settings.syncHint':
+    'Halte deine gespeicherten Wörter, Sätze und Einstellungen sicher und nutze sie auf deinen anderen Computern.',
+
+  'sync.backup': 'Backup-Datei',
+  'sync.backupHint':
+    'Eine Datei mit deinen gespeicherten Wörtern und Sätzen, deinem Lernfortschritt bei der Wiederholung und deinen Einstellungen. Beim Wiederherstellen wird die Datei mit den Daten hier zusammengeführt: Bei jedem Eintrag gewinnt die neuere Änderung.',
+  'sync.download': 'Backup herunterladen',
+  'sync.restore': 'Aus Datei wiederherstellen',
+  'sync.restored': {
+    one: 'Backup wiederhergestellt. Du hast jetzt {n} gespeicherten Eintrag.',
+    other: 'Backup wiederhergestellt. Du hast jetzt {n} gespeicherte Einträge.',
+  },
+  'sync.badFile': 'Das ist keine LingoMingo-Backup-Datei.',
+  'sync.settings': 'Einstellungen synchronisieren',
+  'sync.settingsHint':
+    'Die Einstellungen werden über Chrome-Synchronisierung zwischen Chrome-Browsern mit demselben Google-Konto abgeglichen. Brave behält sie auf diesem Computer: Nutze eine Backup-Datei, um sie zu übertragen.',
+  'sync.keys': 'API-Schlüssel auch synchronisieren',
+  'sync.keysHint':
+    'Legt deine API-Schlüssel in die Chrome-Synchronisierung und in Backup-Dateien. Aus: Die Schlüssel bleiben auf diesem Computer.',
+  'sync.drive': 'Google Drive-Synchronisierung',
+  'sync.driveHint':
+    'Synchronisiert deine gespeicherten Wörter und Sätze und deinen Lernfortschritt über einen versteckten App-Ordner in deinem Google Drive. LingoMingo kann deine anderen Dateien nicht sehen. Funktioniert in Chrome und Brave.',
+  'sync.connect': 'Google Drive verbinden',
+  'sync.signInAgain': 'Erneut anmelden',
+  'sync.signInNeeded':
+    'Google möchte, dass du dich erneut anmeldest. Bis dahin ist die Synchronisierung pausiert.',
+  'sync.syncNow': 'Jetzt synchronisieren',
+  'sync.disconnect': 'Trennen',
+  'sync.syncing': 'Synchronisiere …',
+  'sync.lastSync': 'Zuletzt synchronisiert: {time}',
 
   'vocab.levelFor': 'Wortschatzniveau · {lang}',
   'vocab.notSet': 'Nicht festgelegt. Lege es fest, um die Wörter, die du kennst, farbig zu sehen.',

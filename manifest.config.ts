@@ -34,7 +34,8 @@ export default defineManifest(({ command, mode }) => {
       type: 'module',
     },
     // unlimitedStorage: subtitle translations are cached per video.
-    permissions: ['storage', 'unlimitedStorage'],
+    // identity, alarms: Google Drive sync of the saved items. Both show no install warning.
+    permissions: ['storage', 'unlimitedStorage', 'identity', 'alarms'],
     // The background calls the Claude, OpenAI, xAI (Grok), DeepSeek, Gemini and OpenRouter APIs, and a local model (Ollama, llama.cpp).
     // The Media page reads YouTube channel RSS feeds.
     host_permissions: [
