@@ -1,2 +1,16 @@
 title: LingoMingo
-description: Learn languages with YouTube.
+description: Learn languages with the YouTube videos you love. Free, open source Chrome extension.
+store_url: https://chromewebstore.google.com/detail/lingomingo/ecodbdmdfdpodfiifnacmnahkdaijkln
+repo_url: https://github.com/mort3za/lingomingo
+# YouTube ID of the promo video (the part after `v=`). Empty: the page shows a screenshot.
+video_id: 'pnVSXIEBl7M'
+
+defaults:
+  - scope:
+      path: ''
+    values:
+      layout: default
+  - scope:
+      path: privacy.md
+    values:
+      prose: true

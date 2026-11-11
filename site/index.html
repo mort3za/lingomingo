@@ -1,0 +1,144 @@
+---
+title: LingoMingo
+---
+{% capture store_badge %}
+<a class="store-badge" href="{{ site.store_url }}">
+  <svg class="chrome-logo" viewBox="0 0 48 48" aria-hidden="true">
+    <path fill="#ea4335" d="M24 24 4.95 13A22 22 0 0 1 43.05 13Z" />
+    <path fill="#fbbc04" d="M24 24 43.05 13A22 22 0 0 1 24 46Z" />
+    <path fill="#34a853" d="M24 24 24 46A22 22 0 0 1 4.95 13Z" />
+    <circle cx="24" cy="24" r="10.5" fill="#fff" />
+    <circle cx="24" cy="24" r="8" fill="#1a73e8" />
+  </svg>
+  <span class="badge-text"><small>Available in the</small><strong>Chrome Web Store</strong></span>
+</a>
+{% endcapture %}
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow">Free Chrome extension</p>
+      <h1>Learn languages with the <span class="accent">YouTube videos</span> you love</h1>
+      <p class="lead">
+        Watch with two subtitles at once. Click any word to see what it means in that sentence, save
+        it, and review it just before you would forget it.
+      </p>
+      <div class="cta-row">
+        {{ store_badge }}
+        <a class="button ghost" href="#features">See the features</a>
+      </div>
+      <ul class="ticks">
+        <li>No account</li>
+        <li>No ads or tracking</li>
+        <li>Open source</li>
+      </ul>
+    </div>
+
+    <div class="hero-media">
+      {% if site.video_id != '' %}
+      <button class="video" type="button" data-id="{{ site.video_id }}" aria-label="Play the LingoMingo video">
+        <img src="{{ '/assets/video-poster.jpg' | relative_url }}" alt="" width="1280" height="720" />
+        <span class="play" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" /></svg>
+        </span>
+      </button>
+      {% else %}
+      <img class="shot" src="{{ '/assets/screenshot-1.jpg' | relative_url }}" alt="LingoMingo on YouTube: two subtitles, word colors, word popup and the subtitle list" width="1280" height="800" />
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section id="features" class="section">
+  <div class="wrap">
+    <h2 class="section-title">Everything you need to learn from real videos</h2>
+    <div class="features">
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="14" x="3" y="5" rx="2" /><path d="M7 15h4M15 15h2M7 11h2M13 11h4" /></svg>
+        <h3>Two subtitles at once</h3>
+        <p>Read each line in your new language, with your own language below it. Replay a line, pause after each line, or hide the translation to test yourself.</p>
+      </article>
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v14" /><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" /></svg>
+        <h3>Understand any word</h3>
+        <p>Click a word to see what it means in this sentence, with example sentences and the sound of the word.</p>
+      </article>
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5" /><circle cx="17.5" cy="10.5" r=".5" /><circle cx="8.5" cy="7.5" r=".5" /><circle cx="6.5" cy="12.5" r=".5" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" /></svg>
+        <h3>See what you already know</h3>
+        <p>Set your level once. Words you know turn green, and the words to learn next turn orange.</p>
+      </article>
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+        <h3>Remember what you learn</h3>
+        <p>Save words and lines with one click. Flashcards come back just before you would forget them. Export to Anki or CSV.</p>
+      </article>
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="15" x="2" y="7" rx="2" ry="2" /><path d="m17 2-5 5-5-5" /></svg>
+        <h3>Find something to watch</h3>
+        <p>Browse new videos from hand-picked channels in 18 languages, and see which videos have subtitles made by people.</p>
+      </article>
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /></svg>
+        <h3>The AI you choose</h3>
+        <p>Use your own key for Claude, OpenAI, Gemini, DeepSeek, Grok or OpenRouter, or run a free model on your own computer.</p>
+      </article>
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></svg>
+        <h3>Sync and backup</h3>
+        <p>Sync your words, review progress and settings through your own Google Drive, or keep a backup file.</p>
+      </article>
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" /></svg>
+        <h3>19 languages</h3>
+        <p>Arabic, Chinese, Dutch, English, Finnish, French, German, Hebrew, Hindi, Italian, Korean, Persian, Polish, Portuguese, Russian, Spanish, Swedish, Turkish and Ukrainian.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="wrap">
+    <h2 class="section-title">A closer look</h2>
+    <div class="gallery">
+      <figure><img src="{{ '/assets/screenshot-2.jpg' | relative_url }}" alt="Media page with channels and videos in the study language" width="1280" height="800" loading="lazy" /><figcaption>Videos to watch in your language</figcaption></figure>
+      <figure><img src="{{ '/assets/screenshot-3.jpg' | relative_url }}" alt="Saved words with stage, sentence and source video" width="1280" height="800" loading="lazy" /><figcaption>Your saved words, with their sentence and video</figcaption></figure>
+      <figure><img src="{{ '/assets/screenshot-4.jpg' | relative_url }}" alt="Review page with flashcards" width="1280" height="800" loading="lazy" /><figcaption>Flashcards that come back at the right time</figcaption></figure>
+      <figure><img src="{{ '/assets/screenshot-5.jpg' | relative_url }}" alt="Vocabulary level dialog" width="1280" height="800" loading="lazy" /><figcaption>Set your vocabulary level once</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap privacy-box">
+    <svg class="icon big" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg>
+    <div>
+      <h2>Your data stays yours</h2>
+      <p>LingoMingo has no server. Your words and settings stay in your browser, and the text you translate goes only to the AI service you choose. The Google Drive sync uses a hidden folder in your own Drive and cannot see your other files.</p>
+      <a class="text-link" href="{{ '/privacy.html' | relative_url }}">Read the privacy policy →</a>
+    </div>
+  </div>
+</section>
+
+<section class="section final">
+  <div class="wrap center">
+    <h2>Start learning with your next video</h2>
+    <p class="lead">Free. Works in Chrome, Brave, Edge and other Chromium browsers.</p>
+    <div class="cta-row center">{{ store_badge }}</div>
+  </div>
+</section>
+
+{% if site.video_id != '' %}
+<script>
+  document.querySelector('.video')?.addEventListener('click', (e) => {
+    const box = e.currentTarget
+    const frame = document.createElement('iframe')
+    frame.src = `https://www.youtube-nocookie.com/embed/${box.dataset.id}?autoplay=1&rel=0`
+    frame.title = 'LingoMingo video'
+    frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen'
+    frame.allowFullscreen = true
+    box.replaceWith(Object.assign(document.createElement('div'), { className: 'video playing' }))
+    document.querySelector('.video.playing').append(frame)
+  })
+</script>
+{% endif %}

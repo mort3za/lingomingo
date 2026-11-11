@@ -21,7 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: cp PRIVACY.md site/privacy.md
+      # Front matter, so Jekyll makes privacy.html with the site layout.
+      - run: "{ printf -- '---\\ntitle: Privacy policy\\n---\\n'; cat PRIVACY.md; } > site/privacy.md"
       - uses: actions/configure-pages@v5
       - uses: actions/jekyll-build-pages@v1
         with:
