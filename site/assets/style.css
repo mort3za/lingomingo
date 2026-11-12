@@ -229,6 +229,8 @@ h1 {
   display: flex;
   flex-direction: column;
   line-height: 1.15;
+  /* The same in the centered last section as in the hero. */
+  text-align: start;
 }
 
 .badge-text small {
