@@ -9,7 +9,7 @@ export default defineManifest(({ command, mode }) => {
     manifest_version: 3,
     // The name is the brand and stays the same in all languages. The description is in
     // public/_locales/<language>/messages.json.
-    name: 'LingoMingo',
+    name: 'LingoMingo - Dual Subtitles, AI Translation & Word Lookup for YouTube',
     description: '__MSG_extDescription__',
     default_locale: 'en',
     version: pkg.version,
