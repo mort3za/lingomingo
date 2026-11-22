@@ -10,6 +10,8 @@ Text and images for the **Store listing** page of the Chrome Web Store developer
 
 Copy all of [`description.md`](description.md). The store shows plain text (no Markdown), and it keeps the line breaks.
 
+Translations are in [`description/`](description/), one file per locale (same codes as `public/_locales/`). In the dashboard, select the language, then paste its file.
+
 ### Category
 
 Education
