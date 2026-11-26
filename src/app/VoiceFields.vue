@@ -53,11 +53,12 @@ const SERVERS = [
     voice: 'thorsten',
   },
 ] as const
-// Setup commands in the help. Speaches restarts with Docker; the curl waits until it is ready.
+// Setup commands in the help. The Speaches command replaces an old container (downloaded voices
+// stay in the volume) and restarts with Docker; the curl waits until the server is ready.
 const CMD = {
   kokoro: 'docker run -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-cpu:latest',
   speaches:
-    'docker run --detach --restart unless-stopped --name speaches -p 8808:8000 -v hf-hub-cache:/home/ubuntu/.cache/huggingface/hub ghcr.io/speaches-ai/speaches:latest-cpu',
+    'docker rm -f speaches 2>/dev/null; docker run --detach --restart unless-stopped --name speaches -p 8808:8000 -v hf-hub-cache:/home/ubuntu/.cache/huggingface/hub ghcr.io/speaches-ai/speaches:latest-cpu',
   piperVoice:
     'curl --retry 10 --retry-all-errors -X POST http://localhost:8808/v1/models/speaches-ai/piper-de_DE-thorsten-medium',
 }
