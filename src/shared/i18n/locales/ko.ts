@@ -297,14 +297,16 @@ export default {
   'voice.kokoroSetup': 'Kokoro-FastAPI 설정',
   'voice.kokoroStep1': '{link}를 설치하세요.',
   'voice.startServer': '서버를 시작하세요: {cmd}',
-  'voice.kokoroStep3':
-    '위의 {name}을 클릭하세요. 음성 이름은 언어로 시작합니다: {a}/{b} 영어, {e} 스페인어, {f} 프랑스어, {i} 이탈리아어, {p} 포르투갈어, {j} 일본어, {z} 중국어. 모든 음성은 {link}에서 보세요.',
+  'voice.fillStep': '{button} 버튼을 클릭하세요. 위의 칸이 채워집니다.',
+  'voice.fillIn': '대신 채우기',
+  'voice.kokoroVoices':
+    '음성 이름은 언어로 시작합니다: {a}/{b} 영어, {e} 스페인어, {f} 프랑스어, {i} 이탈리아어, {p} 포르투갈어, {j} 일본어, {z} 중국어. 모든 음성은 {link}에서 보세요.',
   'voice.kokoroGpu': 'NVIDIA GPU 사용 시: {image}와 {flag}. 자세한 내용은 {link}.',
   'voice.kokoroGuide': 'Kokoro-FastAPI 안내',
   'voice.piperSetup': 'Speaches + Piper 설정 (독일어 등)',
   'voice.piperStep2': '음성을 내려받으세요: {cmd}',
-  'voice.piperStep3':
-    '위의 {name}을 클릭하세요. 다른 언어는 {link}에서 음성을 찾아 2단계처럼 내려받으세요. 모델 이름은 {prefix} + 음성입니다(예: {model}). 음성 이름은 가운데 부분입니다(예: {voice}).',
+  'voice.piperOther':
+    '다른 언어는 {link}에서 음성을 찾아 3단계처럼 내려받으세요. 모델 이름은 {prefix} + 음성입니다(예: {model}). 음성 이름은 가운데 부분입니다(예: {voice}).',
   'voice.piperList': 'Piper 음성 목록',
   'voice.moreIn': '자세한 내용은 {link}.',
   'voice.speachesGuide': 'Speaches 안내',

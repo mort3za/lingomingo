@@ -303,14 +303,16 @@ export default {
   'voice.kokoroSetup': 'Kokoro-FastAPI सेट करें',
   'voice.kokoroStep1': '{link} इंस्टॉल करें।',
   'voice.startServer': 'सर्वर शुरू करें: {cmd}',
-  'voice.kokoroStep3':
-    'ऊपर {name} पर क्लिक करें। आवाज़ों के नाम भाषा से शुरू होते हैं: {a}/{b} अंग्रेज़ी, {e} स्पेनिश, {f} फ़्रेंच, {i} इतालवी, {p} पुर्तगाली, {j} जापानी, {z} चीनी। सभी आवाज़ें {link} पर देखें।',
+  'voice.fillStep': '{button} पर क्लिक करें। इससे ऊपर के फ़ील्ड भर जाएँगे।',
+  'voice.fillIn': 'मेरे लिए भरें',
+  'voice.kokoroVoices':
+    'आवाज़ों के नाम भाषा से शुरू होते हैं: {a}/{b} अंग्रेज़ी, {e} स्पेनिश, {f} फ़्रेंच, {i} इतालवी, {p} पुर्तगाली, {j} जापानी, {z} चीनी। सभी आवाज़ें {link} पर देखें।',
   'voice.kokoroGpu': 'NVIDIA GPU के साथ: {image} और {flag}। ज़्यादा जानकारी {link} में।',
   'voice.kokoroGuide': 'Kokoro-FastAPI गाइड',
   'voice.piperSetup': 'Speaches और Piper सेट करें (जर्मन और अन्य)',
   'voice.piperStep2': 'एक आवाज़ डाउनलोड करें: {cmd}',
-  'voice.piperStep3':
-    'ऊपर {name} पर क्लिक करें। दूसरी भाषा के लिए {link} में एक आवाज़ खोजें, और उसे चरण 2 की तरह डाउनलोड करें। मॉडल का नाम {prefix} + आवाज़ है, जैसे {model}। आवाज़ का नाम उसका बीच वाला हिस्सा है, जैसे {voice}।',
+  'voice.piperOther':
+    'दूसरी भाषा के लिए {link} में एक आवाज़ खोजें, और उसे चरण 3 की तरह डाउनलोड करें। मॉडल का नाम {prefix} + आवाज़ है, जैसे {model}। आवाज़ का नाम उसका बीच वाला हिस्सा है, जैसे {voice}।',
   'voice.piperList': 'Piper आवाज़ सूची',
   'voice.moreIn': 'ज़्यादा जानकारी {link} में।',
   'voice.speachesGuide': 'Speaches गाइड',

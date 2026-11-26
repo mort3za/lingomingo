@@ -317,14 +317,16 @@ export default {
   'voice.kokoroSetup': 'Настройка Kokoro-FastAPI',
   'voice.kokoroStep1': 'Установите {link}.',
   'voice.startServer': 'Запустите сервер: {cmd}',
-  'voice.kokoroStep3':
-    'Нажмите {name} выше. Названия голосов начинаются с языка: {a}/{b} английский, {e} испанский, {f} французский, {i} итальянский, {p} португальский, {j} японский, {z} китайский. Все голоса — на {link}.',
+  'voice.fillStep': 'Нажмите {button}. Поля выше заполнятся сами.',
+  'voice.fillIn': 'Заполнить за меня',
+  'voice.kokoroVoices':
+    'Названия голосов начинаются с языка: {a}/{b} английский, {e} испанский, {f} французский, {i} итальянский, {p} португальский, {j} японский, {z} китайский. Все голоса — на {link}.',
   'voice.kokoroGpu': 'С видеокартой NVIDIA: {image} с {flag}. Подробнее — {link}.',
   'voice.kokoroGuide': 'руководство Kokoro-FastAPI',
   'voice.piperSetup': 'Настройка Speaches с Piper (немецкий и другие)',
   'voice.piperStep2': 'Скачайте голос: {cmd}',
-  'voice.piperStep3':
-    'Нажмите {name} выше. Для другого языка найдите голос: {link}, и скачайте его, как в шаге 2. Название модели — {prefix} + голос, например {model}. Название голоса — его средняя часть, например {voice}.',
+  'voice.piperOther':
+    'Для другого языка найдите голос: {link}, и скачайте его, как в шаге 3. Название модели — {prefix} + голос, например {model}. Название голоса — его средняя часть, например {voice}.',
   'voice.piperList': 'список голосов Piper',
   'voice.moreIn': 'Подробнее — {link}.',
   'voice.speachesGuide': 'руководство Speaches',

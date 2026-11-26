@@ -310,14 +310,16 @@ export default {
   'voice.kokoroSetup': 'راه‌اندازی Kokoro-FastAPI',
   'voice.kokoroStep1': 'برنامهٔ {link} را نصب کنید.',
   'voice.startServer': 'سرور را اجرا کنید: {cmd}',
-  'voice.kokoroStep3':
-    'روی {name} در بالا کلیک کنید. نام صداها با زبان شروع می‌شود: {a}/{b} انگلیسی، {e} اسپانیایی، {f} فرانسوی، {i} ایتالیایی، {p} پرتغالی، {j} ژاپنی، {z} چینی. همهٔ صداها را در {link} ببینید.',
+  'voice.fillStep': 'روی {button} کلیک کنید. فیلدهای بالا خودکار پر می‌شوند.',
+  'voice.fillIn': 'برایم پر کن',
+  'voice.kokoroVoices':
+    'نام صداها با زبان شروع می‌شود: {a}/{b} انگلیسی، {e} اسپانیایی، {f} فرانسوی، {i} ایتالیایی، {p} پرتغالی، {j} ژاپنی، {z} چینی. همهٔ صداها را در {link} ببینید.',
   'voice.kokoroGpu': 'با کارت گرافیک NVIDIA: {image} با {flag}. بیشتر در {link}.',
   'voice.kokoroGuide': 'راهنمای Kokoro-FastAPI',
   'voice.piperSetup': 'راه‌اندازی Speaches با Piper (آلمانی و بیشتر)',
   'voice.piperStep2': 'یک صدا دانلود کنید: {cmd}',
-  'voice.piperStep3':
-    'روی {name} در بالا کلیک کنید. برای زبانی دیگر، یک صدا در {link} پیدا کنید و مثل گام ۲ دانلودش کنید. نام مدل {prefix} + نام صداست، مثل {model}. نام صدا بخش میانی آن است، مثل {voice}.',
+  'voice.piperOther':
+    'برای زبانی دیگر، یک صدا در {link} پیدا کنید و مثل گام ۳ دانلودش کنید. نام مدل {prefix} + نام صداست، مثل {model}. نام صدا بخش میانی آن است، مثل {voice}.',
   'voice.piperList': 'فهرست صداهای Piper',
   'voice.moreIn': 'بیشتر در {link}.',
   'voice.speachesGuide': 'راهنمای Speaches',

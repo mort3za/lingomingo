@@ -311,14 +311,16 @@ export default {
   'voice.kokoroSetup': 'Kokoro-FastAPI kurulumu',
   'voice.kokoroStep1': '{link} kurun.',
   'voice.startServer': 'Sunucuyu başlatın: {cmd}',
-  'voice.kokoroStep3':
-    'Yukarıda {name} seçeneğine tıklayın. Ses adları dille başlar: {a}/{b} İngilizce, {e} İspanyolca, {f} Fransızca, {i} İtalyanca, {p} Portekizce, {j} Japonca, {z} Çince. Tüm sesler: {link}.',
+  'voice.fillStep': '{button} düğmesine tıklayın. Yukarıdaki alanlar doldurulur.',
+  'voice.fillIn': 'Benim için doldur',
+  'voice.kokoroVoices':
+    'Ses adları dille başlar: {a}/{b} İngilizce, {e} İspanyolca, {f} Fransızca, {i} İtalyanca, {p} Portekizce, {j} Japonca, {z} Çince. Tüm sesler: {link}.',
   'voice.kokoroGpu': 'NVIDIA GPU ile: {image} ve {flag}. Daha fazlası: {link}.',
   'voice.kokoroGuide': 'Kokoro-FastAPI rehberi',
   'voice.piperSetup': 'Speaches ve Piper kurulumu (Almanca ve dahası)',
   'voice.piperStep2': 'Bir ses indirin: {cmd}',
-  'voice.piperStep3':
-    'Yukarıda {name} seçeneğine tıklayın. Başka bir dil için şuradan bir ses bulun: {link}, ve 2. adımdaki gibi indirin. Model adı {prefix} + ses, örneğin {model}. Ses adı ortadaki kısımdır, örneğin {voice}.',
+  'voice.piperOther':
+    'Başka bir dil için şuradan bir ses bulun: {link}, ve 3. adımdaki gibi indirin. Model adı {prefix} + ses, örneğin {model}. Ses adı ortadaki kısımdır, örneğin {voice}.',
   'voice.piperList': 'Piper ses listesi',
   'voice.moreIn': 'Daha fazlası: {link}.',
   'voice.speachesGuide': 'Speaches rehberi',

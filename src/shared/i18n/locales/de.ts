@@ -313,14 +313,16 @@ export default {
   'voice.kokoroSetup': 'Kokoro-FastAPI einrichten',
   'voice.kokoroStep1': 'Installiere {link}.',
   'voice.startServer': 'Starte den Server: {cmd}',
-  'voice.kokoroStep3':
-    'Klicke oben auf {name}. Stimmennamen beginnen mit der Sprache: {a}/{b} Englisch, {e} Spanisch, {f} Französisch, {i} Italienisch, {p} Portugiesisch, {j} Japanisch, {z} Chinesisch. Alle Stimmen auf {link}.',
+  'voice.fillStep': 'Klicke auf {button}. Das füllt die Felder oben aus.',
+  'voice.fillIn': 'Für mich ausfüllen',
+  'voice.kokoroVoices':
+    'Stimmennamen beginnen mit der Sprache: {a}/{b} Englisch, {e} Spanisch, {f} Französisch, {i} Italienisch, {p} Portugiesisch, {j} Japanisch, {z} Chinesisch. Alle Stimmen auf {link}.',
   'voice.kokoroGpu': 'Mit einer NVIDIA-GPU: {image} mit {flag}. Mehr in der {link}.',
   'voice.kokoroGuide': 'Kokoro-FastAPI-Anleitung',
   'voice.piperSetup': 'Speaches mit Piper einrichten (Deutsch und mehr)',
   'voice.piperStep2': 'Lade eine Stimme herunter: {cmd}',
-  'voice.piperStep3':
-    'Klicke oben auf {name}. Für eine andere Sprache such eine Stimme in der {link} und lade sie wie in Schritt 2 herunter. Der Modellname ist {prefix} + die Stimme, z. B. {model}. Der Stimmenname ist der mittlere Teil, z. B. {voice}.',
+  'voice.piperOther':
+    'Für eine andere Sprache such eine Stimme in der {link} und lade sie wie in Schritt 3 herunter. Der Modellname ist {prefix} + die Stimme, z. B. {model}. Der Stimmenname ist der mittlere Teil, z. B. {voice}.',
   'voice.piperList': 'Piper-Stimmenliste',
   'voice.moreIn': 'Mehr in der {link}.',
   'voice.speachesGuide': 'Speaches-Anleitung',

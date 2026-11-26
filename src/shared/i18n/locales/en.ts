@@ -320,14 +320,16 @@ const en = {
   'voice.kokoroSetup': 'Set up Kokoro-FastAPI',
   'voice.kokoroStep1': 'Install {link}.',
   'voice.startServer': 'Start the server: {cmd}',
-  'voice.kokoroStep3':
-    'Click {name} above. Voice names start with the language: {a}/{b} English, {e} Spanish, {f} French, {i} Italian, {p} Portuguese, {j} Japanese, {z} Chinese. See all voices on {link}.',
+  'voice.fillStep': 'Click {button}. It fills in the fields above.',
+  'voice.fillIn': 'Fill in for me',
+  'voice.kokoroVoices':
+    'Voice names start with the language: {a}/{b} English, {e} Spanish, {f} French, {i} Italian, {p} Portuguese, {j} Japanese, {z} Chinese. See all voices on {link}.',
   'voice.kokoroGpu': 'With an NVIDIA GPU: {image} with {flag}. More in the {link}.',
   'voice.kokoroGuide': 'Kokoro-FastAPI guide',
   'voice.piperSetup': 'Set up Speaches with Piper (German and more)',
   'voice.piperStep2': 'Download a voice: {cmd}',
-  'voice.piperStep3':
-    'Click {name} above. For another language, find a voice on the {link}, and download it as in step 2. The model name is {prefix} + the voice, like {model}. The voice name is its middle part, like {voice}.',
+  'voice.piperOther':
+    'For another language, find a voice on the {link}, and download it as in step 3. The model name is {prefix} + the voice, like {model}. The voice name is its middle part, like {voice}.',
   'voice.piperList': 'Piper voice list',
   'voice.moreIn': 'More in the {link}.',
   'voice.speachesGuide': 'Speaches guide',

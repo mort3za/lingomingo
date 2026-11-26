@@ -287,14 +287,16 @@ export default {
   'voice.kokoroSetup': '设置 Kokoro-FastAPI',
   'voice.kokoroStep1': '安装 {link}。',
   'voice.startServer': '启动服务器：{cmd}',
-  'voice.kokoroStep3':
-    '点击上方的 {name}。语音名称以语言开头：{a}/{b} 英语，{e} 西班牙语，{f} 法语，{i} 意大利语，{p} 葡萄牙语，{j} 日语，{z} 中文。在 {link} 查看所有语音。',
+  'voice.fillStep': '点击 {button}，即可自动填好上方的字段。',
+  'voice.fillIn': '帮我填写',
+  'voice.kokoroVoices':
+    '语音名称以语言开头：{a}/{b} 英语，{e} 西班牙语，{f} 法语，{i} 意大利语，{p} 葡萄牙语，{j} 日语，{z} 中文。在 {link} 查看所有语音。',
   'voice.kokoroGpu': '使用 NVIDIA GPU：{image} 加 {flag}。更多内容见 {link}。',
   'voice.kokoroGuide': 'Kokoro-FastAPI 指南',
   'voice.piperSetup': '设置 Speaches + Piper（德语等）',
   'voice.piperStep2': '下载语音：{cmd}',
-  'voice.piperStep3':
-    '点击上方的 {name}。其他语言请在 {link} 中找一个语音，并按第 2 步下载。模型名称是 {prefix} + 语音，例如 {model}。语音名称是中间部分，例如 {voice}。',
+  'voice.piperOther':
+    '其他语言请在 {link} 中找一个语音，并按第 3 步下载。模型名称是 {prefix} + 语音，例如 {model}。语音名称是中间部分，例如 {voice}。',
   'voice.piperList': 'Piper 语音列表',
   'voice.moreIn': '更多内容见 {link}。',
   'voice.speachesGuide': 'Speaches 指南',

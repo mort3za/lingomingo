@@ -4,6 +4,7 @@ import { T, t, type Key } from '@/shared/i18n'
 import { send } from '@/shared/messages'
 import { play, speaking, stop } from '@/shared/speech'
 import type { Voice } from '@/shared/types'
+import CopyCode from './CopyCode.vue'
 import SecretInput from './SecretInput.vue'
 import { INPUT as input, LABEL as label, saveNow, useSettings } from './settings'
 import { VOCAB_SAMPLES } from './vocab-samples'
@@ -46,11 +47,20 @@ const SERVERS = [
   {
     name: 'voice.speaches',
     langs: 'voice.piperLangs',
-    baseUrl: 'http://localhost:8000/v1',
+    // Not 8000, the Speaches default: other dev servers often use that port.
+    baseUrl: 'http://localhost:8808/v1',
     model: 'speaches-ai/piper-de_DE-thorsten-medium',
     voice: 'thorsten',
   },
 ] as const
+// Setup commands in the help. Speaches restarts with Docker; the curl waits until it is ready.
+const CMD = {
+  kokoro: 'docker run -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-cpu:latest',
+  speaches:
+    'docker run --detach --restart unless-stopped --name speaches -p 8808:8000 -v hf-hub-cache:/home/ubuntu/.cache/huggingface/hub ghcr.io/speaches-ai/speaches:latest-cpu',
+  piperVoice:
+    'curl --retry 10 --retry-all-errors -X POST http://localhost:8808/v1/models/speaches-ai/piper-de_DE-thorsten-medium',
+}
 function useServer(s: (typeof SERVERS)[number]) {
   settings.value.voiceBaseUrl = s.baseUrl
   settings.value.voiceModel = s.model
@@ -98,6 +108,7 @@ const stopIcon = 'M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0
 const example = 'ms-1 font-mono text-neutral-400 underline hover:text-fg'
 const code = 'font-mono break-all text-neutral-300'
 const link = 'underline hover:text-fg'
+const fill = 'rounded bg-accent px-2 py-0.5 font-medium text-white hover:brightness-110'
 // The server name of a row, as the user sees it.
 const serverName = (name: string) => (name.startsWith('voice.') ? t(name as Key) : name)
 </script>
@@ -269,29 +280,35 @@ const serverName = (name: string) => (name.startsWith('voice.') ? t(name as Key)
           <li>
             <T k="voice.startServer">
               <template #cmd>
-                <code :class="code"
-                  >docker run -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-cpu:latest</code
-                >
+                <CopyCode :text="CMD.kokoro" />
               </template>
             </T>
           </li>
           <li>
-            <T k="voice.kokoroStep3">
-              <template #name><span class="text-neutral-300">Kokoro-FastAPI</span></template>
-              <template v-for="c in ['a', 'b', 'e', 'f', 'i', 'p', 'j', 'z']" :key="c" #[c]>
-                <code :class="code">{{ c }}</code>
-              </template>
-              <template #link>
-                <a
-                  href="https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md"
-                  target="_blank"
-                  :class="link"
-                  >Hugging Face</a
-                >
+            <T k="voice.fillStep">
+              <template #button>
+                <button type="button" :class="fill" @click="useServer(SERVERS[0])">
+                  {{ t('voice.fillIn') }}
+                </button>
               </template>
             </T>
           </li>
         </ol>
+        <p class="mt-2 text-neutral-500">
+          <T k="voice.kokoroVoices">
+            <template v-for="c in ['a', 'b', 'e', 'f', 'i', 'p', 'j', 'z']" :key="c" #[c]>
+              <code :class="code">{{ c }}</code>
+            </template>
+            <template #link>
+              <a
+                href="https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md"
+                target="_blank"
+                :class="link"
+                >Hugging Face</a
+              >
+            </template>
+          </T>
+        </p>
         <p class="mt-2 text-neutral-500">
           <T k="voice.kokoroGpu">
             <template #image>
@@ -310,45 +327,56 @@ const serverName = (name: string) => (name.startsWith('voice.') ? t(name as Key)
         <p class="font-medium text-neutral-300">{{ t('voice.piperSetup') }}</p>
         <ol class="mt-2 list-decimal space-y-1 ps-4">
           <li>
+            <T k="voice.kokoroStep1">
+              <template #link>
+                <a
+                  href="https://www.docker.com/products/docker-desktop/"
+                  target="_blank"
+                  :class="link"
+                  >Docker Desktop</a
+                >
+              </template>
+            </T>
+          </li>
+          <li>
             <T k="voice.startServer">
               <template #cmd>
-                <code :class="code"
-                  >docker run --detach -p 8000:8000 -v
-                  hf-hub-cache:/home/ubuntu/.cache/huggingface/hub
-                  ghcr.io/speaches-ai/speaches:latest-cpu</code
-                >
+                <CopyCode :text="CMD.speaches" />
               </template>
             </T>
           </li>
           <li>
             <T k="voice.piperStep2">
               <template #cmd>
-                <code :class="code"
-                  >curl -X POST
-                  http://localhost:8000/v1/models/speaches-ai/piper-de_DE-thorsten-medium</code
-                >
+                <CopyCode :text="CMD.piperVoice" />
               </template>
             </T>
           </li>
           <li>
-            <T k="voice.piperStep3">
-              <template #name>
-                <span class="text-neutral-300">{{ t('voice.speaches') }}</span>
+            <T k="voice.fillStep">
+              <template #button>
+                <button type="button" :class="fill" @click="useServer(SERVERS[1])">
+                  {{ t('voice.fillIn') }}
+                </button>
               </template>
-              <template #link>
-                <a
-                  href="https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md"
-                  target="_blank"
-                  :class="link"
-                  >{{ t('voice.piperList') }}</a
-                >
-              </template>
-              <template #prefix><code :class="code">speaches-ai/piper-</code></template>
-              <template #model><code :class="code">de_DE-thorsten-medium</code></template>
-              <template #voice><code :class="code">thorsten</code></template>
             </T>
           </li>
         </ol>
+        <p class="mt-2 text-neutral-500">
+          <T k="voice.piperOther">
+            <template #link>
+              <a
+                href="https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md"
+                target="_blank"
+                :class="link"
+                >{{ t('voice.piperList') }}</a
+              >
+            </template>
+            <template #prefix><code :class="code">speaches-ai/piper-</code></template>
+            <template #model><code :class="code">de_DE-thorsten-medium</code></template>
+            <template #voice><code :class="code">thorsten</code></template>
+          </T>
+        </p>
         <p class="mt-2 text-neutral-500">
           <T k="voice.moreIn">
             <template #link>

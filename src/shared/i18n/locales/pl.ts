@@ -317,14 +317,16 @@ export default {
   'voice.kokoroSetup': 'Konfiguracja Kokoro-FastAPI',
   'voice.kokoroStep1': 'Zainstaluj {link}.',
   'voice.startServer': 'Uruchom serwer: {cmd}',
-  'voice.kokoroStep3':
-    'Kliknij {name} powyżej. Nazwy głosów zaczynają się od języka: {a}/{b} angielski, {e} hiszpański, {f} francuski, {i} włoski, {p} portugalski, {j} japoński, {z} chiński. Wszystkie głosy na {link}.',
+  'voice.fillStep': 'Kliknij {button}. To wypełni pola powyżej.',
+  'voice.fillIn': 'Wypełnij za mnie',
+  'voice.kokoroVoices':
+    'Nazwy głosów zaczynają się od języka: {a}/{b} angielski, {e} hiszpański, {f} francuski, {i} włoski, {p} portugalski, {j} japoński, {z} chiński. Wszystkie głosy na {link}.',
   'voice.kokoroGpu': 'Z kartą NVIDIA: {image} z {flag}. Więcej w {link}.',
   'voice.kokoroGuide': 'przewodniku Kokoro-FastAPI',
   'voice.piperSetup': 'Konfiguracja Speaches z Piper (niemiecki i więcej)',
   'voice.piperStep2': 'Pobierz głos: {cmd}',
-  'voice.piperStep3':
-    'Kliknij {name} powyżej. Dla innego języka znajdź głos na {link} i pobierz go jak w kroku 2. Nazwa modelu to {prefix} + głos, np. {model}. Nazwa głosu to jego środkowa część, np. {voice}.',
+  'voice.piperOther':
+    'Dla innego języka znajdź głos na {link} i pobierz go jak w kroku 3. Nazwa modelu to {prefix} + głos, np. {model}. Nazwa głosu to jego środkowa część, np. {voice}.',
   'voice.piperList': 'liście głosów Piper',
   'voice.moreIn': 'Więcej w {link}.',
   'voice.speachesGuide': 'przewodniku Speaches',

@@ -301,14 +301,16 @@ export default {
   'voice.kokoroSetup': 'Ställ in Kokoro-FastAPI',
   'voice.kokoroStep1': 'Installera {link}.',
   'voice.startServer': 'Starta servern: {cmd}',
-  'voice.kokoroStep3':
-    'Klicka på {name} ovan. Röstnamn börjar med språket: {a}/{b} engelska, {e} spanska, {f} franska, {i} italienska, {p} portugisiska, {j} japanska, {z} kinesiska. Se alla röster på {link}.',
+  'voice.fillStep': 'Klicka på {button}. Det fyller i fälten ovan.',
+  'voice.fillIn': 'Fyll i åt mig',
+  'voice.kokoroVoices':
+    'Röstnamn börjar med språket: {a}/{b} engelska, {e} spanska, {f} franska, {i} italienska, {p} portugisiska, {j} japanska, {z} kinesiska. Se alla röster på {link}.',
   'voice.kokoroGpu': 'Med ett NVIDIA-grafikkort: {image} med {flag}. Mer i {link}.',
   'voice.kokoroGuide': 'Kokoro-FastAPI-guiden',
   'voice.piperSetup': 'Ställ in Speaches med Piper (tyska och mer)',
   'voice.piperStep2': 'Ladda ner en röst: {cmd}',
-  'voice.piperStep3':
-    'Klicka på {name} ovan. För ett annat språk, hitta en röst i {link} och ladda ner den som i steg 2. Modellnamnet är {prefix} + rösten, som {model}. Röstnamnet är mittendelen, som {voice}.',
+  'voice.piperOther':
+    'För ett annat språk, hitta en röst i {link} och ladda ner den som i steg 3. Modellnamnet är {prefix} + rösten, som {model}. Röstnamnet är mittendelen, som {voice}.',
   'voice.piperList': 'Pipers röstlista',
   'voice.moreIn': 'Mer i {link}.',
   'voice.speachesGuide': 'Speaches-guiden',

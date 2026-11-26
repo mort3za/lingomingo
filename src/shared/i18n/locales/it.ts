@@ -309,14 +309,16 @@ export default {
   'voice.kokoroSetup': 'Configura Kokoro-FastAPI',
   'voice.kokoroStep1': 'Installa {link}.',
   'voice.startServer': 'Avvia il server: {cmd}',
-  'voice.kokoroStep3':
-    'Fai clic su {name} qui sopra. I nomi delle voci iniziano con la lingua: {a}/{b} inglese, {e} spagnolo, {f} francese, {i} italiano, {p} portoghese, {j} giapponese, {z} cinese. Tutte le voci su {link}.',
+  'voice.fillStep': 'Fai clic su {button}. Compila i campi qui sopra.',
+  'voice.fillIn': 'Compila per me',
+  'voice.kokoroVoices':
+    'I nomi delle voci iniziano con la lingua: {a}/{b} inglese, {e} spagnolo, {f} francese, {i} italiano, {p} portoghese, {j} giapponese, {z} cinese. Tutte le voci su {link}.',
   'voice.kokoroGpu': 'Con una GPU NVIDIA: {image} con {flag}. Altro nella {link}.',
   'voice.kokoroGuide': 'guida di Kokoro-FastAPI',
   'voice.piperSetup': 'Configura Speaches con Piper (tedesco e altro)',
   'voice.piperStep2': 'Scarica una voce: {cmd}',
-  'voice.piperStep3':
-    "Fai clic su {name} qui sopra. Per un'altra lingua, trova una voce nell'{link} e scaricala come al passo 2. Il nome del modello è {prefix} + la voce, ad esempio {model}. Il nome della voce è la parte centrale, ad esempio {voice}.",
+  'voice.piperOther':
+    "Per un'altra lingua, trova una voce nell'{link} e scaricala come al passo 3. Il nome del modello è {prefix} + la voce, ad esempio {model}. Il nome della voce è la parte centrale, ad esempio {voice}.",
   'voice.piperList': 'elenco delle voci Piper',
   'voice.moreIn': 'Altro nella {link}.',
   'voice.speachesGuide': 'guida di Speaches',

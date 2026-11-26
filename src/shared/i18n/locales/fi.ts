@@ -304,14 +304,16 @@ export default {
   'voice.kokoroSetup': 'Kokoro-FastAPI:n määritys',
   'voice.kokoroStep1': 'Asenna {link}.',
   'voice.startServer': 'Käynnistä palvelin: {cmd}',
-  'voice.kokoroStep3':
-    'Napsauta yllä {name}. Äänten nimet alkavat kielellä: {a}/{b} englanti, {e} espanja, {f} ranska, {i} italia, {p} portugali, {j} japani, {z} kiina. Kaikki äänet: {link}.',
+  'voice.fillStep': 'Napsauta {button}. Se täyttää yllä olevat kentät.',
+  'voice.fillIn': 'Täytä puolestani',
+  'voice.kokoroVoices':
+    'Äänten nimet alkavat kielellä: {a}/{b} englanti, {e} espanja, {f} ranska, {i} italia, {p} portugali, {j} japani, {z} kiina. Kaikki äänet: {link}.',
   'voice.kokoroGpu': 'NVIDIA-näytönohjaimella: {image} ja {flag}. Lisää: {link}.',
   'voice.kokoroGuide': 'Kokoro-FastAPI-opas',
   'voice.piperSetup': 'Speachesin ja Piperin määritys (saksa ja muut)',
   'voice.piperStep2': 'Lataa ääni: {cmd}',
-  'voice.piperStep3':
-    'Napsauta yllä {name}. Toiselle kielelle etsi ääni täältä: {link}, ja lataa se kuten vaiheessa 2. Mallin nimi on {prefix} + ääni, esimerkiksi {model}. Äänen nimi on sen keskiosa, esimerkiksi {voice}.',
+  'voice.piperOther':
+    'Toiselle kielelle etsi ääni täältä: {link}, ja lataa se kuten vaiheessa 3. Mallin nimi on {prefix} + ääni, esimerkiksi {model}. Äänen nimi on sen keskiosa, esimerkiksi {voice}.',
   'voice.piperList': 'Piperin äänilista',
   'voice.moreIn': 'Lisää: {link}.',
   'voice.speachesGuide': 'Speaches-opas',

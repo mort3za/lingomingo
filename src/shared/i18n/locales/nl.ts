@@ -309,14 +309,16 @@ export default {
   'voice.kokoroSetup': 'Kokoro-FastAPI instellen',
   'voice.kokoroStep1': 'Installeer {link}.',
   'voice.startServer': 'Start de server: {cmd}',
-  'voice.kokoroStep3':
-    'Klik hierboven op {name}. Stemnamen beginnen met de taal: {a}/{b} Engels, {e} Spaans, {f} Frans, {i} Italiaans, {p} Portugees, {j} Japans, {z} Chinees. Zie alle stemmen op {link}.',
+  'voice.fillStep': 'Klik op {button}. Dat vult de velden hierboven in.',
+  'voice.fillIn': 'Vul voor mij in',
+  'voice.kokoroVoices':
+    'Stemnamen beginnen met de taal: {a}/{b} Engels, {e} Spaans, {f} Frans, {i} Italiaans, {p} Portugees, {j} Japans, {z} Chinees. Zie alle stemmen op {link}.',
   'voice.kokoroGpu': 'Met een NVIDIA-GPU: {image} met {flag}. Meer in de {link}.',
   'voice.kokoroGuide': 'Kokoro-FastAPI-handleiding',
   'voice.piperSetup': 'Speaches met Piper instellen (Duits en meer)',
   'voice.piperStep2': 'Download een stem: {cmd}',
-  'voice.piperStep3':
-    'Klik hierboven op {name}. Zoek voor een andere taal een stem in de {link} en download die zoals in stap 2. De modelnaam is {prefix} + de stem, zoals {model}. De stemnaam is het middelste deel, zoals {voice}.',
+  'voice.piperOther':
+    'Zoek voor een andere taal een stem in de {link} en download die zoals in stap 3. De modelnaam is {prefix} + de stem, zoals {model}. De stemnaam is het middelste deel, zoals {voice}.',
   'voice.piperList': 'Piper-stemmenlijst',
   'voice.moreIn': 'Meer in de {link}.',
   'voice.speachesGuide': 'Speaches-handleiding',

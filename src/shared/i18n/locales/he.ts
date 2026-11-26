@@ -305,14 +305,16 @@ export default {
   'voice.kokoroSetup': 'הגדרת Kokoro-FastAPI',
   'voice.kokoroStep1': 'התקינו את {link}.',
   'voice.startServer': 'הפעילו את השרת: {cmd}',
-  'voice.kokoroStep3':
-    'לחצו על {name} למעלה. שמות הקולות מתחילים בשפה: {a}/{b} אנגלית, {e} ספרדית, {f} צרפתית, {i} איטלקית, {p} פורטוגזית, {j} יפנית, {z} סינית. ראו את כל הקולות ב-{link}.',
+  'voice.fillStep': 'לחצו על {button}. זה ימלא את השדות למעלה.',
+  'voice.fillIn': 'מלאו בשבילי',
+  'voice.kokoroVoices':
+    'שמות הקולות מתחילים בשפה: {a}/{b} אנגלית, {e} ספרדית, {f} צרפתית, {i} איטלקית, {p} פורטוגזית, {j} יפנית, {z} סינית. ראו את כל הקולות ב-{link}.',
   'voice.kokoroGpu': 'עם כרטיס NVIDIA: {image} עם {flag}. עוד ב-{link}.',
   'voice.kokoroGuide': 'מדריך Kokoro-FastAPI',
   'voice.piperSetup': 'הגדרת Speaches עם Piper (גרמנית ועוד)',
   'voice.piperStep2': 'הורידו קול: {cmd}',
-  'voice.piperStep3':
-    'לחצו על {name} למעלה. לשפה אחרת, מצאו קול ב-{link}, והורידו אותו כמו בשלב 2. שם המודל הוא {prefix} + הקול, כמו {model}. שם הקול הוא החלק האמצעי, כמו {voice}.',
+  'voice.piperOther':
+    'לשפה אחרת, מצאו קול ב-{link}, והורידו אותו כמו בשלב 3. שם המודל הוא {prefix} + הקול, כמו {model}. שם הקול הוא החלק האמצעי, כמו {voice}.',
   'voice.piperList': 'רשימת הקולות של Piper',
   'voice.moreIn': 'עוד ב-{link}.',
   'voice.speachesGuide': 'מדריך Speaches',

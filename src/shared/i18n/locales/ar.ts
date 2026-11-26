@@ -315,14 +315,16 @@ export default {
   'voice.kokoroSetup': 'إعداد Kokoro-FastAPI',
   'voice.kokoroStep1': 'ثبّت {link}.',
   'voice.startServer': 'شغّل الخادم: {cmd}',
-  'voice.kokoroStep3':
-    'انقر على {name} أعلاه. تبدأ أسماء الأصوات باللغة: {a}/{b} الإنجليزية، {e} الإسبانية، {f} الفرنسية، {i} الإيطالية، {p} البرتغالية، {j} اليابانية، {z} الصينية. اطّلع على كل الأصوات في {link}.',
+  'voice.fillStep': 'انقر على {button}. سيملأ الحقول أعلاه.',
+  'voice.fillIn': 'املأ عنّي',
+  'voice.kokoroVoices':
+    'تبدأ أسماء الأصوات باللغة: {a}/{b} الإنجليزية، {e} الإسبانية، {f} الفرنسية، {i} الإيطالية، {p} البرتغالية، {j} اليابانية، {z} الصينية. اطّلع على كل الأصوات في {link}.',
   'voice.kokoroGpu': 'مع بطاقة NVIDIA: {image} مع {flag}. المزيد في {link}.',
   'voice.kokoroGuide': 'دليل Kokoro-FastAPI',
   'voice.piperSetup': 'إعداد Speaches مع Piper (الألمانية وغيرها)',
   'voice.piperStep2': 'نزّل صوتًا: {cmd}',
-  'voice.piperStep3':
-    'انقر على {name} أعلاه. للغة أخرى، ابحث عن صوت في {link}، ونزّله كما في الخطوة 2. اسم النموذج هو {prefix} + الصوت، مثل {model}. اسم الصوت هو جزؤه الأوسط، مثل {voice}.',
+  'voice.piperOther':
+    'للغة أخرى، ابحث عن صوت في {link}، ونزّله كما في الخطوة 3. اسم النموذج هو {prefix} + الصوت، مثل {model}. اسم الصوت هو جزؤه الأوسط، مثل {voice}.',
   'voice.piperList': 'قائمة أصوات Piper',
   'voice.moreIn': 'المزيد في {link}.',
   'voice.speachesGuide': 'دليل Speaches',
