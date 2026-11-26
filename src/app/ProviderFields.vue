@@ -3,8 +3,9 @@ import { computed, ref } from 'vue'
 import { T, t, type Key } from '@/shared/i18n'
 import { send } from '@/shared/messages'
 import type { Provider } from '@/shared/types'
+import CopyCode from './CopyCode.vue'
 import SecretInput from './SecretInput.vue'
-import { INPUT as input, LABEL as label, saveNow, useSettings } from './settings'
+import { FILL as fill, INPUT as input, LABEL as label, saveNow, useSettings } from './settings'
 import { VOCAB_SAMPLES } from './vocab-samples'
 
 const { settings } = useSettings()
@@ -70,8 +71,18 @@ const NOTES: Partial<Record<Provider, { text: Key; warn?: boolean }[]>> = {
   ],
 }
 
+// The settings that the setup steps of each local server give, for "Fill in for me".
+const SETUP = {
+  ollama: { ollamaBaseUrl: 'http://localhost:11434/v1', ollamaModel: 'translategemma:12b' },
+  lmstudio: {
+    lmstudioBaseUrl: 'http://localhost:1234/v1',
+    lmstudioModel: 'google/gemma-4-26b-a4b',
+  },
+  local: { localBaseUrl: 'http://localhost:8818/v1', localModel: 'gemma4' },
+} as const
+const fillIn = (p: keyof typeof SETUP) => Object.assign(settings.value, SETUP[p])
+
 const example = 'ms-1 font-mono text-neutral-400 underline hover:text-fg'
-const code = 'font-mono text-neutral-300'
 const link = 'underline hover:text-fg'
 </script>
 
@@ -96,7 +107,15 @@ const link = 'underline hover:text-fg'
       <div>
         <label :class="label" for="key">{{ t('ai.apiKey') }}</label>
         <SecretInput id="key" v-model="settings.claudeKey" placeholder="sk-ant-..." />
-        <p class="mt-1 text-xs text-neutral-500">{{ t('ai.stored') }}</p>
+        <p class="mt-1 text-xs text-neutral-500">
+          <T k="ai.keyHint">
+            <template #link>
+              <a href="https://platform.claude.com/settings/keys" target="_blank" :class="link"
+                >platform.claude.com</a
+              >
+            </template>
+          </T>
+        </p>
       </div>
       <div>
         <label :class="label" for="cmodel">{{ t('ai.model') }}</label>
@@ -121,7 +140,15 @@ const link = 'underline hover:text-fg'
       <div>
         <label :class="label" for="okey">{{ t('ai.apiKey') }}</label>
         <SecretInput id="okey" v-model="settings.openaiKey" placeholder="sk-..." />
-        <p class="mt-1 text-xs text-neutral-500">{{ t('ai.stored') }}</p>
+        <p class="mt-1 text-xs text-neutral-500">
+          <T k="ai.keyHint">
+            <template #link>
+              <a href="https://platform.openai.com/api-keys" target="_blank" :class="link"
+                >platform.openai.com</a
+              >
+            </template>
+          </T>
+        </p>
       </div>
       <div>
         <label :class="label" for="omodel">{{ t('ai.model') }}</label>
@@ -146,7 +173,13 @@ const link = 'underline hover:text-fg'
       <div>
         <label :class="label" for="gkey">{{ t('ai.apiKey') }}</label>
         <SecretInput id="gkey" v-model="settings.grokKey" placeholder="xai-..." />
-        <p class="mt-1 text-xs text-neutral-500">{{ t('ai.stored') }}</p>
+        <p class="mt-1 text-xs text-neutral-500">
+          <T k="ai.keyHint">
+            <template #link>
+              <a href="https://console.x.ai" target="_blank" :class="link">console.x.ai</a>
+            </template>
+          </T>
+        </p>
       </div>
       <div>
         <label :class="label" for="gmodel">{{ t('ai.model') }}</label>
@@ -171,7 +204,15 @@ const link = 'underline hover:text-fg'
       <div>
         <label :class="label" for="dkey">{{ t('ai.apiKey') }}</label>
         <SecretInput id="dkey" v-model="settings.deepseekKey" placeholder="sk-..." />
-        <p class="mt-1 text-xs text-neutral-500">{{ t('ai.stored') }}</p>
+        <p class="mt-1 text-xs text-neutral-500">
+          <T k="ai.keyHint">
+            <template #link>
+              <a href="https://platform.deepseek.com/api_keys" target="_blank" :class="link"
+                >platform.deepseek.com</a
+              >
+            </template>
+          </T>
+        </p>
       </div>
       <div>
         <label :class="label" for="dmodel">{{ t('ai.model') }}</label>
@@ -230,7 +271,7 @@ const link = 'underline hover:text-fg'
         <label :class="label" for="orkey">{{ t('ai.apiKey') }}</label>
         <SecretInput id="orkey" v-model="settings.openrouterKey" placeholder="sk-or-..." />
         <p class="mt-1 text-xs text-neutral-500">
-          <T k="ai.openrouterKeyHint">
+          <T k="ai.keyHint">
             <template #link>
               <a href="https://openrouter.ai/keys" target="_blank" :class="link">openrouter.ai</a>
             </template>
@@ -322,20 +363,27 @@ const link = 'underline hover:text-fg'
           </li>
           <li>
             <T k="ai.ollamaStep2">
-              <template #cmd><code :class="code">ollama pull translategemma:12b</code></template>
+              <template #cmd><CopyCode text="ollama pull translategemma:12b" /></template>
             </T>
           </li>
           <li>
             <T k="ai.ollamaStep3">
               <template #cmd>
-                <code :class="code + ' break-all'"
-                  >OLLAMA_ORIGINS="chrome-extension://*" ollama serve</code
-                >
+                <CopyCode text='OLLAMA_ORIGINS="chrome-extension://*" ollama serve' />
               </template>
             </T>
           </li>
-          <li>{{ t('ai.ollamaStep4') }}</li>
+          <li>
+            <T k="common.fillStep">
+              <template #button>
+                <button type="button" :class="fill" @click="fillIn('ollama')">
+                  {{ t('common.fillIn') }}
+                </button>
+              </template>
+            </T>
+          </li>
         </ol>
+        <p class="mt-2 text-neutral-500">{{ t('ai.ollamaStep4') }}</p>
         <p class="mt-2 text-neutral-500">
           <T k="ai.ollama403">
             <template #env><code class="font-mono">OLLAMA_ORIGINS</code></template>
@@ -394,16 +442,25 @@ const link = 'underline hover:text-fg'
           </li>
           <li>
             <T k="ai.lmstudioStep2">
-              <template #cmd><code :class="code">lms get google/gemma-4-26b-a4b</code></template>
+              <template #cmd><CopyCode text="lms get google/gemma-4-26b-a4b" /></template>
             </T>
           </li>
           <li>
             <T k="ai.lmstudioStep3">
-              <template #cmd><code :class="code">lms server start</code></template>
+              <template #cmd><CopyCode text="lms server start" /></template>
             </T>
           </li>
-          <li>{{ t('ai.lmstudioStep4') }}</li>
+          <li>
+            <T k="common.fillStep">
+              <template #button>
+                <button type="button" :class="fill" @click="fillIn('lmstudio')">
+                  {{ t('common.fillIn') }}
+                </button>
+              </template>
+            </T>
+          </li>
         </ol>
+        <p class="mt-2 text-neutral-500">{{ t('ai.lmstudioOther') }}</p>
         <p class="mt-2 text-neutral-500">{{ t('ai.lmstudioCors') }}</p>
       </div>
     </template>
@@ -415,7 +472,7 @@ const link = 'underline hover:text-fg'
         <p class="mt-1 text-xs text-neutral-500">
           <span
             v-for="[name, url] in [
-              ['llama.cpp', 'http://localhost:8080/v1'],
+              ['llama.cpp', 'http://localhost:8818/v1'],
               ['vLLM', 'http://localhost:8000/v1'],
             ]"
             :key="url"
@@ -457,7 +514,7 @@ const link = 'underline hover:text-fg'
         <ol class="mt-2 list-decimal space-y-1 ps-4">
           <li>
             <T k="ai.llamaStep1">
-              <template #cmd><code :class="code">brew install llama.cpp</code></template>
+              <template #cmd><CopyCode text="brew install llama.cpp" /></template>
               <template #link>
                 <a
                   href="https://github.com/ggml-org/llama.cpp/releases"
@@ -471,19 +528,27 @@ const link = 'underline hover:text-fg'
           <li>
             <T k="ai.llamaStep2">
               <template #cmd>
-                <code :class="code + ' break-all'"
-                  >llama-server -hf ggml-org/gemma-4-26B-A4B-it-GGUF:Q4_0 --alias gemma4 --port
-                  8080</code
-                >
+                <CopyCode
+                  text="llama-server -hf ggml-org/gemma-4-26B-A4B-it-GGUF:Q4_0 --alias gemma4 --port 8818"
+                />
               </template>
             </T>
           </li>
           <li>
-            <T k="ai.llamaStep3">
-              <template #alias><code class="font-mono">--alias</code></template>
+            <T k="common.fillStep">
+              <template #button>
+                <button type="button" :class="fill" @click="fillIn('local')">
+                  {{ t('common.fillIn') }}
+                </button>
+              </template>
             </T>
           </li>
         </ol>
+        <p class="mt-2 text-neutral-500">
+          <T k="ai.llamaAlias">
+            <template #alias><code class="font-mono">--alias</code></template>
+          </T>
+        </p>
         <p class="mt-2 text-neutral-500">{{ t('ai.llamaOther') }}</p>
       </div>
     </template>

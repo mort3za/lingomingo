@@ -15,7 +15,8 @@ async function copy() {
 
 <template>
   <span class="group">
-    <code class="font-mono break-all text-neutral-300">{{ text }}</code>
+    <!-- ltr: a command must not be reordered in a right-to-left interface. -->
+    <code dir="ltr" class="font-mono break-all text-neutral-300">{{ text }}</code>
     <!-- Fixed size: the check mark must not move the text. -->
     <button
       type="button"

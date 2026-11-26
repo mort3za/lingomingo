@@ -10,6 +10,8 @@ export default {
   'common.saved': 'Enregistré',
   'common.examples': 'Exemples :',
   'common.default': 'Par défaut :',
+  'common.fillStep': 'Cliquez sur {button}. Cela remplit les champs ci-dessus.',
+  'common.fillIn': 'Remplir pour moi',
   'common.expression': 'Expression',
   'stage.KNOWN': 'Connu',
   'stage.LEARNING': 'En cours',
@@ -219,7 +221,6 @@ export default {
   'ai.modelName': 'Nom du modèle',
   'ai.baseUrl': 'URL de base',
   'ai.baseUrlCompat': 'URL de base (compatible OpenAI)',
-  'ai.stored': 'Stockée uniquement dans ce navigateur.',
   'ai.claudeTip': 'Haiku est le moins cher et le plus rapide.',
   'ai.openaiTip': 'Luna est le moins cher et le plus rapide.',
   'ai.grokTip': 'Non-reasoning est le plus rapide.',
@@ -227,7 +228,7 @@ export default {
   'ai.geminiKeyHint':
     'Stockée uniquement dans ce navigateur. Obtenez une clé gratuite dans {link}.',
   'ai.geminiTip': 'Flash-Lite est le plus rapide et a les limites gratuites les plus hautes.',
-  'ai.openrouterKeyHint': 'Stockée uniquement dans ce navigateur. Obtenez une clé sur {link}.',
+  'ai.keyHint': 'Stockée uniquement dans ce navigateur. Obtenez une clé sur {link}.',
   'ai.openrouterTip':
     '{model} choisit un modèle gratuit au hasard. Tous les modèles gratuits sur {link}.',
   'ai.fastest': 'Le plus rapide',
@@ -252,13 +253,14 @@ export default {
   'ai.lmstudioStep1': 'Installez LM Studio depuis {link}.',
   'ai.lmstudioStep2': "Téléchargez un modèle dans l'onglet Discover, ou lancez {cmd}",
   'ai.lmstudioStep3': "Démarrez le serveur dans l'onglet Developer, ou lancez {cmd}",
-  'ai.lmstudioStep4': "Utilisez le nom de modèle affiché dans l'onglet Developer.",
+  'ai.lmstudioOther':
+    "Un autre modèle ? Utilisez le nom de modèle affiché dans l'onglet Developer.",
   'ai.lmstudioCors': 'Si les requêtes échouent, activez Enable CORS dans les réglages du serveur.',
   'ai.localTip': 'llama.cpp : la valeur de {alias}. vLLM : le nom Hugging Face.',
   'ai.llamaSetup': 'Configurer llama.cpp',
   'ai.llamaStep1': 'Installez llama.cpp : {cmd}, ou téléchargez-le sur {link}.',
   'ai.llamaStep2': 'Démarrez le serveur. Il télécharge le modèle la première fois : {cmd}',
-  'ai.llamaStep3': 'Utilisez la valeur de {alias} comme nom de modèle.',
+  'ai.llamaAlias': 'Un autre modèle ? Utilisez la valeur de {alias} comme nom de modèle.',
   'ai.llamaOther': "D'autres serveurs fonctionnent aussi, s'ils ont une API compatible OpenAI.",
   'ai.perRequest':
     'Une requête traduit environ 40 lignes de sous-titres. Chaque mot ouvert dans la fenêtre de mot est une requête de plus.',
@@ -315,8 +317,6 @@ export default {
   'voice.kokoroSetup': 'Configurer Kokoro-FastAPI',
   'voice.kokoroStep1': 'Installez {link}.',
   'voice.startServer': 'Démarrez le serveur : {cmd}',
-  'voice.fillStep': 'Cliquez sur {button}. Cela remplit les champs ci-dessus.',
-  'voice.fillIn': 'Remplir pour moi',
   'voice.kokoroVoices':
     'Les noms de voix commencent par la langue : {a}/{b} anglais, {e} espagnol, {f} français, {i} italien, {p} portugais, {j} japonais, {z} chinois. Toutes les voix sur {link}.',
   'voice.kokoroGpu': 'Avec un GPU NVIDIA : {image} avec {flag}. Plus dans le {link}.',

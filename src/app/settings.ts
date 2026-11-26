@@ -56,3 +56,5 @@ export function useSettings() {
 export const INPUT =
   'w-full rounded border border-fg/10 bg-surface-deep px-3 py-2 text-sm text-fg outline-none focus:border-accent'
 export const LABEL = 'mb-1 block text-xs font-medium tracking-wide text-neutral-400 uppercase'
+/** The "Fill in for me" button in a setup help. */
+export const FILL = 'rounded bg-accent px-2 py-0.5 font-medium text-white hover:brightness-110'

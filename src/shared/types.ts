@@ -188,7 +188,7 @@ export const DEFAULT_SETTINGS: Settings = {
   ollamaModel: '',
   lmstudioBaseUrl: 'http://localhost:1234/v1',
   lmstudioModel: '',
-  localBaseUrl: 'http://localhost:8080/v1',
+  localBaseUrl: 'http://localhost:8818/v1',
   localModel: '',
   voice: 'browser',
   openaiVoiceModel: 'gpt-4o-mini-tts',

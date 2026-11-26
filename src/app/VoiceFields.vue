@@ -6,7 +6,7 @@ import { play, speaking, stop } from '@/shared/speech'
 import type { Voice } from '@/shared/types'
 import CopyCode from './CopyCode.vue'
 import SecretInput from './SecretInput.vue'
-import { INPUT as input, LABEL as label, saveNow, useSettings } from './settings'
+import { FILL as fill, INPUT as input, LABEL as label, saveNow, useSettings } from './settings'
 import { VOCAB_SAMPLES } from './vocab-samples'
 
 const { settings } = useSettings()
@@ -109,7 +109,6 @@ const stopIcon = 'M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0
 const example = 'ms-1 font-mono text-neutral-400 underline hover:text-fg'
 const code = 'font-mono break-all text-neutral-300'
 const link = 'underline hover:text-fg'
-const fill = 'rounded bg-accent px-2 py-0.5 font-medium text-white hover:brightness-110'
 // The server name of a row, as the user sees it.
 const serverName = (name: string) => (name.startsWith('voice.') ? t(name as Key) : name)
 </script>
@@ -286,10 +285,10 @@ const serverName = (name: string) => (name.startsWith('voice.') ? t(name as Key)
             </T>
           </li>
           <li>
-            <T k="voice.fillStep">
+            <T k="common.fillStep">
               <template #button>
                 <button type="button" :class="fill" @click="useServer(SERVERS[0])">
-                  {{ t('voice.fillIn') }}
+                  {{ t('common.fillIn') }}
                 </button>
               </template>
             </T>
@@ -354,10 +353,10 @@ const serverName = (name: string) => (name.startsWith('voice.') ? t(name as Key)
             </T>
           </li>
           <li>
-            <T k="voice.fillStep">
+            <T k="common.fillStep">
               <template #button>
                 <button type="button" :class="fill" @click="useServer(SERVERS[1])">
-                  {{ t('voice.fillIn') }}
+                  {{ t('common.fillIn') }}
                 </button>
               </template>
             </T>
